@@ -13,6 +13,7 @@
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <vector>
+#include <map>
 
 #define BACKLOG 5					/* Max. client pending connections  */
 
@@ -25,12 +26,17 @@ class Server {
 		std::vector<Client> clients;
 		int 	nbrClients;
 
+		std::map<std::string, std::vector<std::string> > channels;
+
 	public:
 		Server(std::string network, std::string port, std::string passw);
 		~Server();
 
 		int		start();
 		void	addClient(std::string name, std::string nick, int socket);
+
+		// Commands
+		void	handleJoin(std::string channel, std::string user);
 };
 
 int cout_msg(std::string msg);

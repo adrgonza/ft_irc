@@ -138,11 +138,30 @@ int Server::start(void)
 				{
 					std::string a = buff_rx;
 					cout_msg("[SERVER] (recived): " + a);
-					bool isCommand = false;
 					if (isIrcCommand(a))
-						isCommand = true;
-					if (isCommand)
-						doIrcCommand(a);
+					{
+						std::string command = getCommand(a);
+						if (command == "JOIN")
+						{
+							std::string channel;
+							std::size_t spacePos = a.find(' ');
+							if (spacePos != std::string::npos)
+							{
+								channel = a.substr(spacePos + 1);
+								std::size_t userPos = channel.find(' ');
+								if (userPos != std::string::npos)
+									channel = channel.substr(0, userPos);
+							}
+							for (size_t k = 0; k < clients.size(); k++)
+							{
+								if (clients[k].getSocketFd() == fds[i].fd)
+								{
+									handleJoin(channel, clients[k].getNickname());
+									break;
+								}
+							}
+						}
+					}
 					else
 					{
 						for (std::string::size_type i = 0; i < a.length(); ++i)

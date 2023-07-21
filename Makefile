@@ -1,11 +1,11 @@
 NAME = ircserv
 
-SRCS = ./src/main.cpp ./src/server/Server.cpp ./src/gnrl/utils.cpp ./src/gnrl/Client.cpp ./src/commands/commands.cpp
+SRCS = ./src/main.cpp ./src/server/Server.cpp ./src/gnrl/utils.cpp ./src/gnrl/Client.cpp ./src/commands/commands.cpp ./src/commands/joinCommand.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 
 CXX = g++ -std=c++98
-CXXFLAGS = -Wall -Wextra -Werror
+CXXFLAGS = -Wall -Wextra -Werror -g3 -fsanitize=address
 
 all: $(NAME)
 
