@@ -1,7 +1,9 @@
 #include "Server.hpp"
 
-#define SERV_HOST_ADDR "10.11.14.6" /* IP, only IPV4 support  */
+#define SERV_HOST_ADDR "10.11.14.4" /* IP, only IPV4 support  */
 #define BACKLOG 5					/* Max. client pending connections  */
+
+#include <sys/socket.h>
 
 Server::~Server() {}
 
@@ -14,7 +16,7 @@ int Server::start(void)
 	struct sockaddr_in servaddr, client;
 
 	int len_rx = 0; /* received and sent length, in bytes */
-	char buff_tx[100] = "Hello client, I am the server";
+	char buff_tx[100] = "Hello client, I am the server\r\n";
 	char buff_rx[100]; /* buffers for reception  */
 
 	/* socket creation */
@@ -50,7 +52,7 @@ int Server::start(void)
 		return -1;
 	}
 	else
-		cout_msg("[SERVER]: Listening on SERV_PORT " + std::to_string(ntohs(servaddr.sin_port)) + "\n");
+        std::cout << "[SERVER]: Listening on socket: " << SERV_HOST_ADDR << ":" << std::to_string(ntohs(servaddr.sin_port)) << std::endl;
 
 	len = sizeof(client);
 
@@ -117,7 +119,18 @@ int Server::start(void)
 				else
 				{
 					std::string a = buff_rx;
-					cout_msg("[SERVER]: " + a);
+					cout_msg("[SERVER] (recived): " + a);
+
+					std::string sendMessage = "PRIVMSG test :" + a + "\r\n";
+
+					cout_msg("[SERVER] (broadcasted): '" + sendMessage + "'");
+
+                    for (unsigned long j = 1; j <= clientSockets.size(); j++)
+    				{
+					    int retValue = send(fds[j].fd, sendMessage.c_str(), sendMessage.size(), 0);
+					    std::cout << " · (" << i << ") -> (" << j <<  ") :: (status: " << retValue << ") " << std::endl;
+                    }
+
 					write(connfd, buff_tx, strlen(buff_tx));
 
 					// Handle IRC Commands
@@ -126,5 +139,5 @@ int Server::start(void)
 			}
 		}
 	}
-	return 0;
+	return 1;
 }
