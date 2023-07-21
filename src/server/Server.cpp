@@ -109,6 +109,7 @@ int Server::start(void)
 				}
 			}
 		}
+		// to another function
 		for (unsigned long i = 1; i <= clients.size(); ++i)
 		{
 			if (fds[i].revents & POLLIN)
@@ -138,6 +139,7 @@ int Server::start(void)
 				{
 					std::string a = buff_rx;
 					cout_msg("[SERVER] (recived): " + a);
+					// clearly another function to handle irc commands
 					if (isIrcCommand(a))
 					{
 						std::string command = getCommand(a);
@@ -162,6 +164,7 @@ int Server::start(void)
 							}
 						}
 					}
+					// priv msg function
 					else
 					{
 						for (std::string::size_type i = 0; i < a.length(); ++i)
@@ -204,11 +207,12 @@ void Server::addClient(std::string name, std::string nick, int socket)
 {
 	std::size_t newlinePos = nick.find('\n');
 	std::string extractedNickname = nick.substr(0, newlinePos);
+	if (!extractedNickname.empty() && extractedNickname.back() == '\r')
+		extractedNickname.erase(extractedNickname.size() - 1);
 	const std::string NICK_PREFIX = "NICK ";
 	if (nick.substr(0, NICK_PREFIX.size()) == NICK_PREFIX)
 		extractedNickname = extractedNickname.substr(NICK_PREFIX.size());
 	Client toAdd(name, extractedNickname, socket);
 	clients.push_back(toAdd);
-	cout_msg(extractedNickname);
-	cout_msg("client successfully added");
+	std::cout << "[SERVER] client successfully added: " << extractedNickname << std::endl;
 }
