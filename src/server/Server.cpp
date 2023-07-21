@@ -1,13 +1,12 @@
 #include "Server.hpp"
 
-#define SERV_HOST_ADDR "10.11.14.4" /* IP, only IPV4 support  */
-#define BACKLOG 5					/* Max. client pending connections  */
+#define SERV_HOST_ADDR "10.11.14.6" /* IP, only IPV4 support  */
 
 #include <sys/socket.h>
 
 Server::~Server() {}
 
-Server::Server(std::string network, std::string port, std::string passw) : network(network), port(port), passw(passw) {}
+Server::Server(std::string network, std::string port, std::string passw) : network(network), port(port), passw(passw), nbrClients(0) {}
 
 int Server::start(void)
 {
@@ -52,11 +51,10 @@ int Server::start(void)
 		return -1;
 	}
 	else
-        std::cout << "[SERVER]: Listening on socket: " << SERV_HOST_ADDR << ":" << std::to_string(ntohs(servaddr.sin_port)) << std::endl;
+		std::cout << "[SERVER]: Listening on socket: " << SERV_HOST_ADDR << ":" << std::to_string(ntohs(servaddr.sin_port)) << std::endl;
 
 	len = sizeof(client);
 
-	std::vector<int> clientSockets;
 	struct pollfd fds[BACKLOG + 1];
 	fds[0].fd = sockfd;
 	fds[0].events = POLLIN;
@@ -68,7 +66,7 @@ int Server::start(void)
 	/* Accept the data from incoming sockets in a iterative way */
 	while (1)
 	{
-		int readySockets = poll(fds, clientSockets.size() + 1, -1);
+		int readySockets = poll(fds, clients.size() + 1, -1);
 		if (readySockets == -1)
 		{
 			cout_msg("[SERVER-error]: poll() failed");
@@ -86,19 +84,32 @@ int Server::start(void)
 			else
 			{
 				cout_msg("[SERVER]: a connection has been made");
-				clientSockets.push_back(connfd);
-				for (unsigned long i = 1; i <= clientSockets.size(); ++i)
+				char nicknameBuffer[256]; // Adjust the buffer size as needed
+				ssize_t receivedBytes = recv(connfd, nicknameBuffer, sizeof(nicknameBuffer) - 1, 0);
+				if (receivedBytes > 0)
 				{
-					if (fds[i].fd == -1)
+					nicknameBuffer[receivedBytes] = '\0';
+					std::string nickname(nicknameBuffer);
+					addClient("", nickname, connfd);
+					nbrClients += 1;
+					for (unsigned long i = 1; i <= clients.size(); ++i)
 					{
-						fds[i].fd = connfd;
-						fds[i].events = POLLIN;
-						break;
+						if (fds[i].fd == -1)
+						{
+							fds[i].fd = connfd;
+							fds[i].events = POLLIN;
+							break;
+						}
 					}
+				}
+				else
+				{
+					cout_msg("Error receiving Nickname");
+					return -1;
 				}
 			}
 		}
-		for (unsigned long i = 1; i <= clientSockets.size(); ++i)
+		for (unsigned long i = 1; i <= clients.size(); ++i)
 		{
 			if (fds[i].revents & POLLIN)
 			{
@@ -113,31 +124,72 @@ int Server::start(void)
 				{
 					cout_msg("[SERVER]: client socket closed \n\n");
 					close(fds[i].fd);
-					clientSockets.erase(std::remove(clientSockets.begin(), clientSockets.end(), fds[i].fd), clientSockets.end());
+					for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
+					{
+						if (it->getSocketFd() == fds[i].fd)
+						{
+							clients.erase(it);
+							break;
+						}
+					}
 					fds[i].fd = -1;
 				}
 				else
 				{
 					std::string a = buff_rx;
 					cout_msg("[SERVER] (recived): " + a);
-
-					std::string sendMessage = "PRIVMSG test :" + a + "\r\n";
-
-					cout_msg("[SERVER] (broadcasted): '" + sendMessage + "'");
-
-                    for (unsigned long j = 1; j <= clientSockets.size(); j++)
-    				{
-					    int retValue = send(fds[j].fd, sendMessage.c_str(), sendMessage.size(), 0);
-					    std::cout << " · (" << i << ") -> (" << j <<  ") :: (status: " << retValue << ") " << std::endl;
-                    }
-
+					bool isCommand = false;
+					if (isIrcCommand(a))
+						isCommand = true;
+					if (isCommand)
+						doIrcCommand(a);
+					else
+					{
+						for (std::string::size_type i = 0; i < a.length(); ++i)
+							a[i] = std::tolower(a[i]);
+						for (unsigned long j = 1; j <= clients.size(); j++)
+						{
+							std::string sendMessage;
+							bool clientFound = false;
+							for (size_t k = 0; k < clients.size(); k++)
+							{
+								if (clients[k].getSocketFd() == fds[i].fd)
+								{
+									const std::string &nickname = clients[k].getNickname();
+									std::size_t newlinePos = a.find('\n');
+									a = a.substr(0, newlinePos);
+									sendMessage = "PRIVMSG test :" + a + " " + nickname + "\r\n";
+									clientFound = true;
+									break;
+								}
+							}
+							if (!clientFound)
+							{
+								cout_msg("Client not found");
+								continue;
+							}
+							int retValue = send(fds[j].fd, sendMessage.c_str(), sendMessage.size(), 0);
+							retValue += 0;
+							// std::cout << " · (" << i << ") -> (" << j << ") :: (status: " << retValue << ") " << std::endl;
+						}
+					}
 					write(connfd, buff_tx, strlen(buff_tx));
-
-					// Handle IRC Commands
-					doIrcCommand(a);
 				}
 			}
 		}
 	}
 	return 1;
+}
+
+void Server::addClient(std::string name, std::string nick, int socket)
+{
+	std::size_t newlinePos = nick.find('\n');
+	std::string extractedNickname = nick.substr(0, newlinePos);
+	const std::string NICK_PREFIX = "NICK ";
+	if (nick.substr(0, NICK_PREFIX.size()) == NICK_PREFIX)
+		extractedNickname = extractedNickname.substr(NICK_PREFIX.size());
+	Client toAdd(name, extractedNickname, socket);
+	clients.push_back(toAdd);
+	cout_msg(extractedNickname);
+	cout_msg("client successfully added");
 }

@@ -2,26 +2,35 @@
 
 std::string commands[4] = {"JOIN", "INVITE", "LIST", "ME"};
 
-void welcomeClient() {
-
+void welcomeClient()
+{
 }
 
-void doIrcCommand(std::string buffer) {
+std::string getCommand(std::string buffer) {
 	std::string command = "";
-	std::string param;
-	bool possibleCommand = false;
-
 	int i = -1;
 	while (buffer[++i] && buffer[i] != ' ')
 		command += buffer[i];
-	for (int i = 0; i < 4; i++) {
-		if (command == commands[i]) {
+	return command;
+}
+
+bool isIrcCommand(std::string buffer)
+{
+	std::string command = getCommand(buffer);
+	bool possibleCommand = false;
+	for (int i = 0; i < 4; i++)
+	{
+		if (command == commands[i])
+		{
 			possibleCommand = true;
 			break;
 		}
 	}
-	if (possibleCommand) {
-		std::cout << "command found: " << command << std::endl;
-	} else
-		std::cout << "command NOT found" << std::endl;
+	return (possibleCommand);
+}
+
+void doIrcCommand(std::string buffer)
+{
+	std::string command = getCommand(buffer);
+	std::cout << " Executing command: " << command << std::endl;
 }

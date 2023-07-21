@@ -1,6 +1,6 @@
 NAME = ircserv
 
-SRCS = ./src/main.cpp ./src/server/Server.cpp ./src/gnrl/utils.cpp ./src/commands/commands.cpp
+SRCS = ./src/main.cpp ./src/server/Server.cpp ./src/gnrl/utils.cpp ./src/gnrl/Client.cpp ./src/commands/commands.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 
