@@ -19,8 +19,8 @@
 
 class Server {
 	private:
-		std::string network;
-		std::string port;
+		std::string	network;
+		int			 port;
 		std::string passw;
 
 		struct pollfd	fds[BACKLOG + 1];
@@ -31,7 +31,7 @@ class Server {
 		std::map<std::string, std::vector<std::string> > channels;
 
 	public:
-		Server(std::string network, std::string port, std::string passw);
+		Server(std::string network, int port, std::string passw);
 		~Server();
 
 		int		start();

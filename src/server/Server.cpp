@@ -1,12 +1,8 @@
 #include "Server.hpp"
 
-#define SERV_HOST_ADDR "10.11.14.6" /* IP, only IPV4 support  */
-
-#include <sys/socket.h>
-
 Server::~Server() {}
 
-Server::Server(std::string network, std::string port, std::string passw) : network(network), port(port), passw(passw), nbrClients(0) {}
+Server::Server(std::string network, int port, std::string passw) : network(network), port(port), passw(passw), nbrClients(0) {}
 
 void Server::handleReceivedData(std::string buff_rx, int fd)
 {
@@ -45,7 +41,7 @@ void Server::processClientData(int connfd)
 			len_rx = read(fds[i].fd, buff_rx, sizeof(buff_rx));
 			buff_rx[len_rx] = '\0';
 			if (len_rx == -1)
-				std::cout << "[SERVER-error]: connfd cannot be read. " << errno << strerror(errno) << std::endl;
+				std::cerr << "[SERVER-error]: connfd cannot be read. " << errno << strerror(errno) << std::endl;
 			else if (len_rx == 0)
 				closingClientSocket(i);
 			else
@@ -69,7 +65,7 @@ int	Server::handleClientConnection(int sockfd)
 		int readySockets = poll(fds, clients.size() + 1, -1);
 		if (readySockets == -1)
 		{
-			cout_msg("[SERVER-error]: poll() failed");
+			std::cerr << "[SERVER-error]: poll() failed" << std::endl;
 			return -1;
 		}
 		if (fds[0].revents & POLLIN)
@@ -77,7 +73,7 @@ int	Server::handleClientConnection(int sockfd)
 			connfd = accept(sockfd, (struct sockaddr *)&client, &len);
 			if (connfd < 0)
 			{
-				std::cout << "[SERVER-error]: connection not accepted" << errno << strerror(errno) << std::endl;
+				std::cerr << "[SERVER-error]: connection not accepted" << errno << strerror(errno) << std::endl;
 				return -1;
 			}
 			else
@@ -103,7 +99,7 @@ int	Server::handleClientConnection(int sockfd)
 				}
 				else
 				{
-					cout_msg("Error receiving Nickname");
+					std::cerr << "Error receiving Nickname" << std::endl;
 					return -1;
 				}
 			}
@@ -122,7 +118,7 @@ int Server::start(void)
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd == -1)
 	{
-		cout_msg("[SERVER-error]: socket creation failed.");
+		std::cerr << "[SERVER-error]: socket creation failed." << std::endl;
 		return -1;
 	}
 	else
@@ -132,13 +128,13 @@ int Server::start(void)
 	memset(&servaddr, 0, sizeof(servaddr));
 	/* assign IP, SERV_PORT, IPV4 */
 	servaddr.sin_family = AF_INET;
-	servaddr.sin_addr.s_addr = inet_addr(SERV_HOST_ADDR);
-	servaddr.sin_port = htons(atoi(this->port.c_str()));
+	servaddr.sin_addr.s_addr = inet_addr(network.c_str());
+	servaddr.sin_port = htons(port);
 
 	/* Bind socket */
 	if ((bind(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr))) != 0)
 	{
-		std::cout << "[SERVER-error]: socket bind failed. " << errno << strerror(errno) << std::endl;
+		std::cerr << "[SERVER-error]: socket bind failed. " << errno << strerror(errno) << std::endl;
 		return -1;
 	}
 	else
@@ -147,11 +143,11 @@ int Server::start(void)
 	/* Listen */
 	if ((listen(sockfd, BACKLOG)) != 0)
 	{
-		std::cout << "[SERVER-error]: socket listen failed. " << errno << strerror(errno) << std::endl;
+		std::cerr << "[SERVER-error]: socket listen failed. " << errno << strerror(errno) << std::endl;
 		return -1;
 	}
 	else
-		std::cout << "[SERVER]: Listening on socket: " << SERV_HOST_ADDR << ":" << std::to_string(ntohs(servaddr.sin_port)) << std::endl;
+		std::cout << "[SERVER]: Listening on socket: " << network << ":" << std::to_string(ntohs(servaddr.sin_port)) << std::endl;
 
 	fds[0].fd = sockfd;
 	fds[0].events = POLLIN;
