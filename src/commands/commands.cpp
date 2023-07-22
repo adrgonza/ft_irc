@@ -57,50 +57,25 @@ void Server::doIrcCommand(std::string buffer, int fd)
 	std::size_t newlinePos = buffer.find('\n');
 	buffer = buffer.substr(0, newlinePos);
 	if (!buffer.empty() && buffer.back() == '\r')
+	{
 		buffer.erase(buffer.size() - 1);
+	}
+
 	std::string command = getCommand(buffer);
-	std::cout << " Executing command: " << command << std::endl;
-	std::string firstWord = getWord(buffer, 1);
-	// Creo que seria mejor pasarle la clase del cliente que hacerlo con estos fors feos,
-	// minimamente hacer una funcion para que no se repitan
+	std::cout << "Executing command: " << command << "." << std::endl;
 
-	// crear fucnion de iterator the qevlueva el objeto del cliente qque uiero dependiendo el fd o nickname
-
-	if (command == "JOIN")
+	std::vector<Client>::iterator it = findClientByFd(fd);
+	if (it != clients.end())
 	{
-		for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
-		{
-			if (it->getSocketFd() == fd)
-			{
-				handleJoin(getWord(buffer, 2), it->getNickname(), fd);
-				break;
-			}
-		}
+		if (command == "JOIN")
+			handleJoin(getWord(buffer, 2), it->getNickname(), fd);
+		else if (command == "NICK")
+			changeNickName(getWord(buffer, 2), it->getNickname());
+		else if (command == "INVITE")
+			inviteNick(it->getNickname(), getWord(buffer, 2), getWord(buffer, 3));
+		else if (command == "LIST")
+			listChannels(it->getNickname(), fd);
+		else if (command == "PART")
+			partChannel(it->getNickname(), getWord(buffer, 2), fd);
 	}
-	else if (command == "NICK")
-	{
-		for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
-		{
-			if (it->getSocketFd() == fd)
-			{
-				changeNickName(getWord(buffer, 2), it->getNickname());
-				break;
-			}
-		}
-	}
-	else if (command == "INVITE")
-	{
-		for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
-		{
-			if (it->getSocketFd() == fd)
-			{
-				inviteNick(it->getNickname(), getWord(buffer, 2), getWord(buffer, 3));
-				break;
-			}
-		}
-	}
-	else if (command == "LIST")
-		listChannels();
-	else if (command == "PART")
-		partChannel(firstWord);
 }

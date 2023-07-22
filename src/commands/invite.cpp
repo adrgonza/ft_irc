@@ -2,18 +2,21 @@
 
 // :invitingUser!user@host INVITE targetUser :#channelName
 
+// Habria  que checkquear si el usuario esta en el canal para poder invitar a otro?
+
 void Server::inviteNick(std::string invitingUser, std::string targetUser, std::string channel)
 {
 	std::string inviteMessage = ":" + invitingUser + "!user@host INVITE " + targetUser + " :" + channel + "\r\n";
 	int clientFd = 0;
 	if (!userExists(targetUser))
 	{
-		std::cout << targetUser << " does not exist" << std::endl;
+		std::cout << targetUser << " user does not exist" << std::endl;
 		return ;
 	}
-	if (channelExists(channel))
+	std::string lookChannel = "#" + channel;
+	if (!channelExists(lookChannel))
 	{
-		std::cout << channel << " does not exist" << std::endl;
+		std::cout << channel << " channel does not exist" << std::endl;
 		return ;
 	}
 	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)

@@ -6,22 +6,65 @@
 // example:        /list -min 5 -max 20
 // example:        /list #mirc
 // example:        /list *mirc*
+// :server.example.com 321 * Channel :Users Name
+// :server.example.com 322 * #channelName numUsers :user1 user2 user3 ...
+// ...
+// :server.example.com 323 * :End of channel list
 
-void Server::listChannels()
+void Server::listChannels(std::string user, int clientFd)
 {
+	std::string channelListMsg = "Channel List:\r\n";
+
 	if (channels.empty())
-		cout_msg("No channels");
+		channelListMsg = "There are no channels\r\n";
 	else
 	{
+		channelListMsg = ":" + user + "!user@host 321 * Channel :Users Name\r\n";
 		for (std::map<std::string, std::vector<std::string> >::iterator it = channels.begin(); it != channels.end(); ++it)
-			cout_msg(it->first);
+		{
+			std::string channelName = it->first;
+			channelListMsg += ":" + user + "!user@host 322 * " + channelName + " " + std::to_string(it->second.size()) + " :";
+			for (size_t i = 0; i < it->second.size(); ++i)
+			{
+				channelListMsg += it->second[i];
+				if (i < it->second.size() - 1)
+					channelListMsg += " ";
+			}
+			channelListMsg += "\r\n";
+		}
+		channelListMsg += ":" + user + "!user@host 323 * :End of channel list\r\n";
 	}
+	int retValue = send(clientFd, channelListMsg.c_str(), channelListMsg.size(), 0);
+	if (retValue == -1)
+		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
 }
 
-void Server::partChannel(std::string channel)
+// :leavingUser!user@host PART #channelName
+void Server::partChannel(std::string user, std::string channel, int clientFd)
 {
-	channel += "";
-	// leaves channel
+	clientFd += 0;
+	std::string leavingChannelMsg = ":" + user + "!user@host PART #" + channel + "\r\n";
+	channel = "#" + channel;
+	std::map<std::string, std::vector<std::string> >::iterator channelIt = channels.find(channel);
+	if (channelIt != channels.end())
+	{
+		std::vector<std::string> clientsInChannel = channelIt->second;
+		for (size_t i = 0; i < clientsInChannel.size(); ++i)
+		{
+			const std::string &nickname = clientsInChannel[i];
+			int clientSocketFd = getClientSocketFdByNickname(nickname);
+			std::vector<Client>::iterator it = findClientByFd(clientSocketFd);
+			it->changeChannel("test");
+			if (clientSocketFd != -1)
+			{
+				int retValue = send(clientSocketFd, leavingChannelMsg.c_str(), leavingChannelMsg.size(), 0);
+				if (retValue == -1)
+					std::cerr << "[SERVER-error]: send failed for " << nickname << ": " << errno << strerror(errno) << std::endl;
+			}
+
+		}
+		clientsInChannel.erase(std::remove(clientsInChannel.begin(), clientsInChannel.end(), user), clientsInChannel.end());
+	}
 }
 
 void Server::handleJoin(std::string channel, std::string user, int clientFd)
