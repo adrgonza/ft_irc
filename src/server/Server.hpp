@@ -42,11 +42,14 @@ class Server {
 		void	doIrcCommand(std::string buffer, int fd);
 		void	closingClientSocket(int i);
 
+		bool	userExists(std::string nickname);
+		bool	channelExists(std::string channelName);
+
 		// Commands
 		void	handleJoin(std::string channel, std::string user, int fd);
 		void	privMessage(std::string buffer, int fd);
 		void	changeNickName(std::string newNick, std::string oldNick);
-		void	inviteNick(std::string nickname, std::string channel);
+		void	inviteNick(std::string invitingUser, std::string targetUser, std::string channel);
 		void	listChannels();
 		void	partChannel(std::string channel);
 };

@@ -176,3 +176,22 @@ void Server::addClient(std::string name, std::string nick, int socket)
 	clients.push_back(toAdd);
 	std::cout << "[SERVER] client successfully added: " << extractedNickname << std::endl;
 }
+
+bool Server::userExists(std::string nickname)
+{
+	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
+	{
+		if (it->getNickname() == nickname)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+bool Server::channelExists(std::string channelName)
+{
+	if (channels.find(channelName) != channels.end())
+		return true;
+	return false;
+
+}

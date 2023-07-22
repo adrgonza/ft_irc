@@ -44,8 +44,7 @@ void Server::privMessage(std::string buff_rx, int fd)
 			int retValue = send(it->getSocketFd(), sendMessage.c_str(), sendMessage.size(), 0);
 			if (retValue == -1)
 			{
-				// Handle the send error here
-				// Example: perror("send");
+				std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
 			}
 		}
 	}

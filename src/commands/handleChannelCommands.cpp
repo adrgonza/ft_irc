@@ -46,7 +46,7 @@ void Server::handleJoin(std::string channel, std::string user, int clientFd)
 		}
 	}
 	std::string sendMessage = "JOIN " + channel + "\r\n";
-	std::cout << "message send: " << sendMessage << std::endl;
 	int retValue = send(clientFd, sendMessage.c_str(), sendMessage.size(), 0);
-	retValue += 0;
+	if (retValue == -1)
+		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
 }

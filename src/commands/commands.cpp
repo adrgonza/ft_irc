@@ -29,19 +29,27 @@ bool isIrcCommand(std::string buffer)
 	}
 	return (possibleCommand);
 }
-
-std::string getFirstWord(std::string str)
+std::string getWord(const std::string &str, int wordNumber)
 {
-	std::string res;
-	std::size_t spacePos = str.find(' ');
-	if (spacePos != std::string::npos)
+	if (str.empty())
+		return "";
+
+	std::string::size_type startPos = 0;
+	std::string::size_type endPos = 0;
+	int currentWord = 0;
+
+	while (currentWord < wordNumber)
 	{
-		res = str.substr(spacePos + 1);
-		std::size_t userPos = res.find(' ');
-		if (userPos != std::string::npos)
-			res = res.substr(0, userPos);
+		startPos = str.find_first_not_of(' ', endPos);
+		if (startPos == std::string::npos)
+			return "";
+		endPos = str.find(' ', startPos);
+		if (endPos == std::string::npos)
+			endPos = str.length();
+		currentWord++;
 	}
-	return res;
+
+	return str.substr(startPos, endPos - startPos);
 }
 
 void Server::doIrcCommand(std::string buffer, int fd)
@@ -52,7 +60,7 @@ void Server::doIrcCommand(std::string buffer, int fd)
 		buffer.erase(buffer.size() - 1);
 	std::string command = getCommand(buffer);
 	std::cout << " Executing command: " << command << std::endl;
-	std::string firstWord = getFirstWord(buffer);
+	std::string firstWord = getWord(buffer, 1);
 	// Creo que seria mejor pasarle la clase del cliente que hacerlo con estos fors feos,
 	// minimamente hacer una funcion para que no se repitan
 
@@ -64,7 +72,7 @@ void Server::doIrcCommand(std::string buffer, int fd)
 		{
 			if (it->getSocketFd() == fd)
 			{
-				handleJoin(firstWord, it->getNickname(), fd);
+				handleJoin(getWord(buffer, 2), it->getNickname(), fd);
 				break;
 			}
 		}
@@ -75,15 +83,21 @@ void Server::doIrcCommand(std::string buffer, int fd)
 		{
 			if (it->getSocketFd() == fd)
 			{
-				changeNickName(firstWord, it->getNickname());
+				changeNickName(getWord(buffer, 2), it->getNickname());
 				break;
 			}
 		}
 	}
 	else if (command == "INVITE")
 	{
-		std::string secondWord = "";
-		inviteNick(firstWord, secondWord);
+		for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
+		{
+			if (it->getSocketFd() == fd)
+			{
+				inviteNick(it->getNickname(), getWord(buffer, 2), getWord(buffer, 3));
+				break;
+			}
+		}
 	}
 	else if (command == "LIST")
 		listChannels();
