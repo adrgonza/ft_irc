@@ -23,6 +23,8 @@ class Server {
 		std::string port;
 		std::string passw;
 
+		struct pollfd	fds[BACKLOG + 1];
+
 		std::vector<Client> clients;
 		int 	nbrClients;
 
@@ -33,14 +35,18 @@ class Server {
 		~Server();
 
 		int		start();
+		void	serverListeningPoll(int connfd);
+		void	handleReceives(std::string buff_rx, int fd);
 		void	addClient(std::string name, std::string nick, int socket);
+		void	doIrcCommand(std::string buffer, int fd);
 
 		// Commands
 		void	handleJoin(std::string channel, std::string user);
+		void	privMessage(std::string buffer, int fd);
 };
 
 int cout_msg(std::string msg);
-void doIrcCommand(std::string buffer);
+void doIrcCommand(std::string buffer, int fd);
 bool isIrcCommand(std::string buffer);
 std::string getCommand(std::string buffer);
 

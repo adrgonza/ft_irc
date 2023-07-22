@@ -6,7 +6,8 @@ void welcomeClient()
 {
 }
 
-std::string getCommand(std::string buffer) {
+std::string getCommand(std::string buffer)
+{
 	std::string command = "";
 	int i = -1;
 	while (buffer[++i] && buffer[i] != ' ')
@@ -29,8 +30,28 @@ bool isIrcCommand(std::string buffer)
 	return (possibleCommand);
 }
 
-void doIrcCommand(std::string buffer)
+void Server::doIrcCommand(std::string buffer, int fd)
 {
 	std::string command = getCommand(buffer);
 	std::cout << " Executing command: " << command << std::endl;
+	if (command == "JOIN")
+	{
+		std::string channel;
+		std::size_t spacePos = buffer.find(' ');
+		if (spacePos != std::string::npos)
+		{
+			channel = buffer.substr(spacePos + 1);
+			std::size_t userPos = channel.find(' ');
+			if (userPos != std::string::npos)
+				channel = channel.substr(0, userPos);
+		}
+		for (size_t k = 0; k < clients.size(); k++)
+		{
+			if (clients[k].getSocketFd() == fd)
+			{
+				handleJoin(channel, clients[k].getNickname());
+				break;
+			}
+		}
+	}
 }

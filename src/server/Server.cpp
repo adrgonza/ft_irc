@@ -8,15 +8,59 @@ Server::~Server() {}
 
 Server::Server(std::string network, std::string port, std::string passw) : network(network), port(port), passw(passw), nbrClients(0) {}
 
+void Server::handleReceives(std::string buff_rx, int fd)
+{
+	cout_msg("[SERVER] (recived): " + buff_rx);
+	if (isIrcCommand(buff_rx))
+		doIrcCommand(buff_rx, fd);
+	else
+		privMessage(buff_rx, fd);
+}
+
+void Server::serverListeningPoll(int connfd)
+{
+	int len_rx = 0; /* received and sent length, in bytes */
+	char buff_tx[100] = "Hello client, I am the server\r\n";
+	char buff_rx[100]; /* buffers for reception  */
+
+	for (unsigned long i = 1; i <= clients.size(); ++i)
+	{
+		if (fds[i].revents & POLLIN)
+		{
+			len_rx = read(fds[i].fd, buff_rx, sizeof(buff_rx));
+			buff_rx[len_rx] = '\0';
+			if (len_rx == -1)
+			{
+				std::string a = strerror(errno);
+				cout_msg("[SERVER-error]: connfd cannot be read. " + std::to_string(errno) + a);
+			}
+			else if (len_rx == 0)
+			{
+				cout_msg("[SERVER]: client socket closed \n\n");
+				close(fds[i].fd);
+				for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
+				{
+					if (it->getSocketFd() == fds[i].fd)
+					{
+						clients.erase(it);
+						break;
+					}
+				}
+				fds[i].fd = -1;
+			}
+			else
+			{
+				handleReceives(buff_rx, fds[i].fd);
+				write(connfd, buff_tx, strlen(buff_tx));
+			}
+		}
+	}
+}
 int Server::start(void)
 {
 	int sockfd, connfd; /* listening socket and connection socket file descriptors */
 	unsigned int len;	/* length of client address */
 	struct sockaddr_in servaddr, client;
-
-	int len_rx = 0; /* received and sent length, in bytes */
-	char buff_tx[100] = "Hello client, I am the server\r\n";
-	char buff_rx[100]; /* buffers for reception  */
 
 	/* socket creation */
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -38,16 +82,16 @@ int Server::start(void)
 	/* Bind socket */
 	if ((bind(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr))) != 0)
 	{
-		fprintf(stderr, "[SERVER-error]: socket bind failed. %d: %s \n", errno, strerror(errno));
+		std::cout << "[SERVER-error]: socket bind failed. " << errno <<  strerror(errno) << std::endl;
 		return -1;
 	}
 	else
-		printf("[SERVER]: Socket successfully binded \n");
+		cout_msg("[SERVER]: Socket successfully binded \n");
 
 	/* Listen */
 	if ((listen(sockfd, BACKLOG)) != 0)
 	{
-		fprintf(stderr, "[SERVER-error]: socket listen failed. %d: %s \n", errno, strerror(errno));
+		std::cout << "[SERVER-error]: socket listen failed. " << errno << strerror(errno) << std::endl;
 		return -1;
 	}
 	else
@@ -55,7 +99,6 @@ int Server::start(void)
 
 	len = sizeof(client);
 
-	struct pollfd fds[BACKLOG + 1];
 	fds[0].fd = sockfd;
 	fds[0].events = POLLIN;
 	fds[0].revents = 0;
@@ -109,96 +152,7 @@ int Server::start(void)
 				}
 			}
 		}
-		// to another function
-		for (unsigned long i = 1; i <= clients.size(); ++i)
-		{
-			if (fds[i].revents & POLLIN)
-			{
-				len_rx = read(fds[i].fd, buff_rx, sizeof(buff_rx));
-				buff_rx[len_rx] = '\0';
-				if (len_rx == -1)
-				{
-					std::string a = strerror(errno);
-					cout_msg("[SERVER-error]: connfd cannot be read. " + std::to_string(errno) + a);
-				}
-				else if (len_rx == 0)
-				{
-					cout_msg("[SERVER]: client socket closed \n\n");
-					close(fds[i].fd);
-					for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
-					{
-						if (it->getSocketFd() == fds[i].fd)
-						{
-							clients.erase(it);
-							break;
-						}
-					}
-					fds[i].fd = -1;
-				}
-				else
-				{
-					std::string a = buff_rx;
-					cout_msg("[SERVER] (recived): " + a);
-					// clearly another function to handle irc commands
-					if (isIrcCommand(a))
-					{
-						std::string command = getCommand(a);
-						if (command == "JOIN")
-						{
-							std::string channel;
-							std::size_t spacePos = a.find(' ');
-							if (spacePos != std::string::npos)
-							{
-								channel = a.substr(spacePos + 1);
-								std::size_t userPos = channel.find(' ');
-								if (userPos != std::string::npos)
-									channel = channel.substr(0, userPos);
-							}
-							for (size_t k = 0; k < clients.size(); k++)
-							{
-								if (clients[k].getSocketFd() == fds[i].fd)
-								{
-									handleJoin(channel, clients[k].getNickname());
-									break;
-								}
-							}
-						}
-					}
-					// priv msg function
-					else
-					{
-						for (std::string::size_type i = 0; i < a.length(); ++i)
-							a[i] = std::tolower(a[i]);
-						for (unsigned long j = 1; j <= clients.size(); j++)
-						{
-							std::string sendMessage;
-							bool clientFound = false;
-							for (size_t k = 0; k < clients.size(); k++)
-							{
-								if (clients[k].getSocketFd() == fds[i].fd)
-								{
-									const std::string &nickname = clients[k].getNickname();
-									std::size_t newlinePos = a.find('\n');
-									a = a.substr(0, newlinePos);
-									sendMessage = "PRIVMSG test :" + a + " " + nickname + "\r\n";
-									clientFound = true;
-									break;
-								}
-							}
-							if (!clientFound)
-							{
-								cout_msg("Client not found");
-								continue;
-							}
-							int retValue = send(fds[j].fd, sendMessage.c_str(), sendMessage.size(), 0);
-							retValue += 0;
-							// std::cout << " · (" << i << ") -> (" << j << ") :: (status: " << retValue << ") " << std::endl;
-						}
-					}
-					write(connfd, buff_tx, strlen(buff_tx));
-				}
-			}
-		}
+		serverListeningPoll(connfd);
 	}
 	return 1;
 }
