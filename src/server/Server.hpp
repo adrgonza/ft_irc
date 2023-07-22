@@ -35,9 +35,9 @@ class Server {
 		~Server();
 
 		int		start();
-		void	serverListeningPoll(int connfd);
+		void	processClientData(int connfd);
 		int		handleClientConnection(int sockfd);
-		void	handleReceives(std::string buff_rx, int fd);
+		void	handleReceivedData(std::string buff_rx, int fd);
 		void	addClient(std::string name, std::string nick, int socket);
 		void	doIrcCommand(std::string buffer, int fd);
 		void	closingClientSocket(int i);

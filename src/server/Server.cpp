@@ -8,7 +8,7 @@ Server::~Server() {}
 
 Server::Server(std::string network, std::string port, std::string passw) : network(network), port(port), passw(passw), nbrClients(0) {}
 
-void Server::handleReceives(std::string buff_rx, int fd)
+void Server::handleReceivedData(std::string buff_rx, int fd)
 {
 	cout_msg("[SERVER] (recived): " + buff_rx);
 	if (isIrcCommand(buff_rx))
@@ -32,7 +32,7 @@ void Server::closingClientSocket(int i)
 	fds[i].fd = -1;
 }
 
-void Server::serverListeningPoll(int connfd)
+void Server::processClientData(int connfd)
 {
 	int len_rx = 0; /* received and sent length, in bytes */
 	char buff_tx[100] = "Hello client, I am the server\r\n";
@@ -50,7 +50,7 @@ void Server::serverListeningPoll(int connfd)
 				closingClientSocket(i);
 			else
 			{
-				handleReceives(buff_rx, fds[i].fd);
+				handleReceivedData(buff_rx, fds[i].fd);
 				// connfd or socketfd ?
 				write(connfd, buff_tx, strlen(buff_tx));
 			}
@@ -108,7 +108,7 @@ int	Server::handleClientConnection(int sockfd)
 				}
 			}
 		}
-		serverListeningPoll(connfd);
+		processClientData(connfd);
 	}
 	return (0);
 }
