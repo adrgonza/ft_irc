@@ -36,9 +36,11 @@ class Server {
 
 		int		start();
 		void	serverListeningPoll(int connfd);
+		int		handleClientConnection(int sockfd);
 		void	handleReceives(std::string buff_rx, int fd);
 		void	addClient(std::string name, std::string nick, int socket);
 		void	doIrcCommand(std::string buffer, int fd);
+		void	closingClientSocket(int i);
 
 		// Commands
 		void	handleJoin(std::string channel, std::string user);

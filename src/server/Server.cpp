@@ -17,6 +17,21 @@ void Server::handleReceives(std::string buff_rx, int fd)
 		privMessage(buff_rx, fd);
 }
 
+void Server::closingClientSocket(int i)
+{
+	cout_msg("[SERVER]: client socket closed \n\n");
+	close(fds[i].fd);
+	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
+	{
+		if (it->getSocketFd() == fds[i].fd)
+		{
+			clients.erase(it);
+			break;
+		}
+	}
+	fds[i].fd = -1;
+}
+
 void Server::serverListeningPoll(int connfd)
 {
 	int len_rx = 0; /* received and sent length, in bytes */
@@ -30,83 +45,25 @@ void Server::serverListeningPoll(int connfd)
 			len_rx = read(fds[i].fd, buff_rx, sizeof(buff_rx));
 			buff_rx[len_rx] = '\0';
 			if (len_rx == -1)
-			{
-				std::string a = strerror(errno);
-				cout_msg("[SERVER-error]: connfd cannot be read. " + std::to_string(errno) + a);
-			}
+				std::cout << "[SERVER-error]: connfd cannot be read. " << errno << strerror(errno) << std::endl;
 			else if (len_rx == 0)
-			{
-				cout_msg("[SERVER]: client socket closed \n\n");
-				close(fds[i].fd);
-				for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
-				{
-					if (it->getSocketFd() == fds[i].fd)
-					{
-						clients.erase(it);
-						break;
-					}
-				}
-				fds[i].fd = -1;
-			}
+				closingClientSocket(i);
 			else
 			{
 				handleReceives(buff_rx, fds[i].fd);
+				// connfd or socketfd ?
 				write(connfd, buff_tx, strlen(buff_tx));
 			}
 		}
 	}
 }
-int Server::start(void)
+
+int	Server::handleClientConnection(int sockfd)
 {
-	int sockfd, connfd; /* listening socket and connection socket file descriptors */
-	unsigned int len;	/* length of client address */
-	struct sockaddr_in servaddr, client;
+	int connfd; /* listening socket and connection socket file descriptors */
+	struct sockaddr_in client;
+	unsigned int len = sizeof(client);	/* length of client address */
 
-	/* socket creation */
-	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if (sockfd == -1)
-	{
-		cout_msg("[SERVER-error]: socket creation failed.");
-		return -1;
-	}
-	else
-		cout_msg("[SERVER]: socket succesfully created");
-
-	/* clear structure */
-	memset(&servaddr, 0, sizeof(servaddr));
-	/* assign IP, SERV_PORT, IPV4 */
-	servaddr.sin_family = AF_INET;
-	servaddr.sin_addr.s_addr = inet_addr(SERV_HOST_ADDR);
-	servaddr.sin_port = htons(atoi(this->port.c_str()));
-
-	/* Bind socket */
-	if ((bind(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr))) != 0)
-	{
-		std::cout << "[SERVER-error]: socket bind failed. " << errno <<  strerror(errno) << std::endl;
-		return -1;
-	}
-	else
-		cout_msg("[SERVER]: Socket successfully binded \n");
-
-	/* Listen */
-	if ((listen(sockfd, BACKLOG)) != 0)
-	{
-		std::cout << "[SERVER-error]: socket listen failed. " << errno << strerror(errno) << std::endl;
-		return -1;
-	}
-	else
-		std::cout << "[SERVER]: Listening on socket: " << SERV_HOST_ADDR << ":" << std::to_string(ntohs(servaddr.sin_port)) << std::endl;
-
-	len = sizeof(client);
-
-	fds[0].fd = sockfd;
-	fds[0].events = POLLIN;
-	fds[0].revents = 0;
-
-	for (int i = 1; i <= BACKLOG; ++i)
-		fds[i].fd = -1; // Set -1 to indicate an unused entry
-
-	/* Accept the data from incoming sockets in a iterative way */
 	while (1)
 	{
 		int readySockets = poll(fds, clients.size() + 1, -1);
@@ -120,8 +77,7 @@ int Server::start(void)
 			connfd = accept(sockfd, (struct sockaddr *)&client, &len);
 			if (connfd < 0)
 			{
-				cout_msg("[SERVER-error]: connection not accepted");
-				// fprintf(stderr, "[SERVER-error]: connection not accepted. %d: %s \n", errno, strerror(errno));
+				std::cout << "[SERVER-error]: connection not accepted" << errno << strerror(errno) << std::endl;
 				return -1;
 			}
 			else
@@ -154,7 +110,61 @@ int Server::start(void)
 		}
 		serverListeningPoll(connfd);
 	}
-	return 1;
+	return (0);
+}
+
+int Server::start(void)
+{
+	int sockfd;
+	struct sockaddr_in servaddr;
+
+	/* socket creation */
+	sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	if (sockfd == -1)
+	{
+		cout_msg("[SERVER-error]: socket creation failed.");
+		return -1;
+	}
+	else
+		cout_msg("[SERVER]: socket succesfully created");
+
+	/* clear structure */
+	memset(&servaddr, 0, sizeof(servaddr));
+	/* assign IP, SERV_PORT, IPV4 */
+	servaddr.sin_family = AF_INET;
+	servaddr.sin_addr.s_addr = inet_addr(SERV_HOST_ADDR);
+	servaddr.sin_port = htons(atoi(this->port.c_str()));
+
+	/* Bind socket */
+	if ((bind(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr))) != 0)
+	{
+		std::cout << "[SERVER-error]: socket bind failed. " << errno << strerror(errno) << std::endl;
+		return -1;
+	}
+	else
+		cout_msg("[SERVER]: Socket successfully binded \n");
+
+	/* Listen */
+	if ((listen(sockfd, BACKLOG)) != 0)
+	{
+		std::cout << "[SERVER-error]: socket listen failed. " << errno << strerror(errno) << std::endl;
+		return -1;
+	}
+	else
+		std::cout << "[SERVER]: Listening on socket: " << SERV_HOST_ADDR << ":" << std::to_string(ntohs(servaddr.sin_port)) << std::endl;
+
+	fds[0].fd = sockfd;
+	fds[0].events = POLLIN;
+	fds[0].revents = 0;
+
+	for (int i = 1; i <= BACKLOG; ++i)
+		fds[i].fd = -1; // Set -1 to indicate an unused entry
+
+	/* Accept the data from incoming sockets in a iterative way */
+	if (handleClientConnection(sockfd))
+		return 1;
+	else
+		return -1;
 }
 
 void Server::addClient(std::string name, std::string nick, int socket)
