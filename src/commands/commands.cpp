@@ -46,18 +46,25 @@ std::string getFirstWord(std::string str)
 
 void Server::doIrcCommand(std::string buffer, int fd)
 {
+	std::size_t newlinePos = buffer.find('\n');
+	buffer = buffer.substr(0, newlinePos);
+	if (!buffer.empty() && buffer.back() == '\r')
+		buffer.erase(buffer.size() - 1);
 	std::string command = getCommand(buffer);
 	std::cout << " Executing command: " << command << std::endl;
 	std::string firstWord = getFirstWord(buffer);
 	// Creo que seria mejor pasarle la clase del cliente que hacerlo con estos fors feos,
 	// minimamente hacer una funcion para que no se repitan
+
+	// crear fucnion de iterator the qevlueva el objeto del cliente qque uiero dependiendo el fd o nickname
+
 	if (command == "JOIN")
 	{
 		for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
 		{
 			if (it->getSocketFd() == fd)
 			{
-				handleJoin(firstWord, it->getNickname());
+				handleJoin(firstWord, it->getNickname(), fd);
 				break;
 			}
 		}

@@ -43,7 +43,7 @@ class Server {
 		void	closingClientSocket(int i);
 
 		// Commands
-		void	handleJoin(std::string channel, std::string user);
+		void	handleJoin(std::string channel, std::string user, int fd);
 		void	privMessage(std::string buffer, int fd);
 		void	changeNickName(std::string newNick, std::string oldNick);
 		void	inviteNick(std::string nickname, std::string channel);

@@ -4,29 +4,49 @@ void Server::privMessage(std::string buff_rx, int fd)
 {
 	for (std::string::size_type i = 0; i < buff_rx.length(); ++i)
 		buff_rx[i] = std::tolower(buff_rx[i]);
-	for (unsigned long j = 1; j <= clients.size(); j++)
+
+	std::string toChannel;
+	std::string sendMessage;
+	std::string nickname;
+
+	// Find the sender's nickname and the message content
+	std::size_t newlinePos = buff_rx.find('\n');
+	buff_rx = buff_rx.substr(0, newlinePos);
+	if (!buff_rx.empty() && buff_rx.back() == '\r')
+		buff_rx.erase(buff_rx.size() - 1);
+
+	bool clientFound = false;
+	std::vector<Client>::iterator it;
+	for (it = clients.begin(); it != clients.end(); ++it)
 	{
-		std::string sendMessage;
-		bool clientFound = false;
-		for (size_t k = 0; k < clients.size(); k++)
+		if (it->getSocketFd() == fd)
 		{
-			if (clients[k].getSocketFd() == fd)
+			nickname = it->getNickname();
+			toChannel = it->getChannel();
+			sendMessage = "PRIVMSG " + toChannel + " :" + buff_rx + " " + nickname + "\r\n";
+			clientFound = true;
+			break;
+		}
+	}
+
+	if (!clientFound)
+	{
+		cout_msg("Client not found");
+		return;
+	}
+
+	// Send the message to other clients in the same channel
+	for (it = clients.begin(); it != clients.end(); ++it)
+	{
+		if (it->getChannel() == toChannel)
+		{
+			std::cout << "sending msg: " << sendMessage.c_str() << std::endl;
+			int retValue = send(it->getSocketFd(), sendMessage.c_str(), sendMessage.size(), 0);
+			if (retValue == -1)
 			{
-				const std::string &nickname = clients[k].getNickname();
-				std::size_t newlinePos = buff_rx.find('\n');
-				buff_rx = buff_rx.substr(0, newlinePos);
-				sendMessage = "PRIVMSG test :" + buff_rx + " " + nickname + "\r\n";
-				clientFound = true;
-				break;
+				// Handle the send error here
+				// Example: perror("send");
 			}
 		}
-		if (!clientFound)
-		{
-			cout_msg("Client not found");
-			continue;
-		}
-		int retValue = send(fds[j].fd, sendMessage.c_str(), sendMessage.size(), 0);
-		retValue += 0;
-		// std::cout << " · (" << i << ") -> (" << j << ") :: (status: " << retValue << ") " << std::endl;
 	}
 }

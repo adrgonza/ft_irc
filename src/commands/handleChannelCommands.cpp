@@ -24,7 +24,7 @@ void Server::partChannel(std::string channel)
 	// leaves channel
 }
 
-void Server::handleJoin(std::string channel, std::string user)
+void Server::handleJoin(std::string channel, std::string user, int clientFd)
 {
 	if (channels.find(channel) != channels.end())
 	{
@@ -36,4 +36,17 @@ void Server::handleJoin(std::string channel, std::string user)
 		channels[channel] = std::vector<std::string>(1, user);
 		std::cout << "User " << user << " created and joined channel " << channel << std::endl;
 	}
+	std::vector<Client>::iterator it;
+	for (it = clients.begin(); it != clients.end(); ++it)
+	{
+		if (it->getSocketFd() == clientFd)
+		{
+			it->changeChannel(channel);
+			break;
+		}
+	}
+	std::string sendMessage = "JOIN " + channel + "\r\n";
+	std::cout << "message send: " << sendMessage << std::endl;
+	int retValue = send(clientFd, sendMessage.c_str(), sendMessage.size(), 0);
+	retValue += 0;
 }
