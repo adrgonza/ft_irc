@@ -1,6 +1,6 @@
 #include "../server/Server.hpp"
 
-std::string commands[4] = {"JOIN", "INVITE", "LIST", "ME"};
+std::string commands[6] = {"JOIN", "INVITE", "LIST", "ME", "NICK", "PART"};
 
 void welcomeClient()
 {
@@ -19,7 +19,7 @@ bool isIrcCommand(std::string buffer)
 {
 	std::string command = getCommand(buffer);
 	bool possibleCommand = false;
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 6; i++)
 	{
 		if (command == commands[i])
 		{
@@ -30,28 +30,56 @@ bool isIrcCommand(std::string buffer)
 	return (possibleCommand);
 }
 
+std::string getFirstWord(std::string str)
+{
+	std::string res;
+	std::size_t spacePos = str.find(' ');
+	if (spacePos != std::string::npos)
+	{
+		res = str.substr(spacePos + 1);
+		std::size_t userPos = res.find(' ');
+		if (userPos != std::string::npos)
+			res = res.substr(0, userPos);
+	}
+	return res;
+}
+
 void Server::doIrcCommand(std::string buffer, int fd)
 {
 	std::string command = getCommand(buffer);
 	std::cout << " Executing command: " << command << std::endl;
+	std::string firstWord = getFirstWord(buffer);
+	// Creo que seria mejor pasarle la clase del cliente que hacerlo con estos fors feos,
+	// minimamente hacer una funcion para que no se repitan
 	if (command == "JOIN")
 	{
-		std::string channel;
-		std::size_t spacePos = buffer.find(' ');
-		if (spacePos != std::string::npos)
+		for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
 		{
-			channel = buffer.substr(spacePos + 1);
-			std::size_t userPos = channel.find(' ');
-			if (userPos != std::string::npos)
-				channel = channel.substr(0, userPos);
-		}
-		for (size_t k = 0; k < clients.size(); k++)
-		{
-			if (clients[k].getSocketFd() == fd)
+			if (it->getSocketFd() == fd)
 			{
-				handleJoin(channel, clients[k].getNickname());
+				handleJoin(firstWord, it->getNickname());
 				break;
 			}
 		}
 	}
+	else if (command == "NICK")
+	{
+		for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
+		{
+			if (it->getSocketFd() == fd)
+			{
+				changeNickName(firstWord, it->getNickname());
+				break;
+			}
+		}
+	}
+	else if (command == "INVITE")
+	{
+		std::string secondWord = "";
+		inviteNick(firstWord, secondWord);
+	}
+	else if (command == "LIST")
+		listChannels();
+	else if (command == "PART")
+		partChannel(firstWord);
 }

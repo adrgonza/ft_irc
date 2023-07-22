@@ -45,10 +45,13 @@ class Server {
 		// Commands
 		void	handleJoin(std::string channel, std::string user);
 		void	privMessage(std::string buffer, int fd);
+		void	changeNickName(std::string newNick, std::string oldNick);
+		void	inviteNick(std::string nickname, std::string channel);
+		void	listChannels();
+		void	partChannel(std::string channel);
 };
 
 int cout_msg(std::string msg);
-void doIrcCommand(std::string buffer, int fd);
 bool isIrcCommand(std::string buffer);
 std::string getCommand(std::string buffer);
 

@@ -15,6 +15,8 @@ class Client {
 
 		int getSocketFd() const;
 		std::string getNickname() const;
+
+		void changeNickname(std::string newNick);
 };
 
 #endif

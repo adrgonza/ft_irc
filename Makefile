@@ -2,7 +2,8 @@ NAME = ircserv
 
 SRCS = ./src/main.cpp ./src/server/Server.cpp \
 		./src/gnrl/utils.cpp ./src/gnrl/Client.cpp \
-		./src/commands/commands.cpp ./src/commands/joinCommand.cpp ./src/commands/privMessage.cpp
+		./src/commands/commands.cpp ./src/commands/privMessage.cpp ./src/commands/changeNickname.cpp \
+		./src/commands/handleChannelCommands.cpp ./src/commands/invite.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 
