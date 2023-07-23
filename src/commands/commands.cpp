@@ -57,9 +57,7 @@ void Server::doIrcCommand(std::string buffer, int fd)
 	std::size_t newlinePos = buffer.find('\n');
 	buffer = buffer.substr(0, newlinePos);
 	if (!buffer.empty() && buffer.back() == '\r')
-	{
 		buffer.erase(buffer.size() - 1);
-	}
 
 	std::string command = getCommand(buffer);
 	std::cout << "Executing command: " << command << "." << std::endl;
@@ -77,5 +75,14 @@ void Server::doIrcCommand(std::string buffer, int fd)
 			listChannels(it->getNickname(), fd);
 		else if (command == "PART")
 			partChannel(it->getNickname(), getWord(buffer, 2), fd);
+		// else if (command == "MSG")
+			//
+		// else if (command == "AWAY")
+		// else if (command == "ME")
+		// else if (command == "PRIVMSG")
+		// /query nickname message
+		// else if (command == "QUERY")
+		// else if (command == "TOPIC")
+		// else if (command == "WHOIS")
 	}
 }
