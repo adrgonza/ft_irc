@@ -40,7 +40,7 @@ void Server::privMessage(std::string buff_rx, int fd)
 	{
 		if (it->getChannel() == toChannel)
 		{
-			std::cout << "sending msg: " << sendMessage.c_str() << std::endl;
+			// std::cout << "sending msg: " << sendMessage.c_str() << std::endl;
 			int retValue = send(it->getSocketFd(), sendMessage.c_str(), sendMessage.size(), 0);
 			if (retValue == -1)
 			{

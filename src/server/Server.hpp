@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <poll.h>
 #include "../gnrl/Client.hpp"
+#include "../gnrl/Channel.hpp"
 
 /* sockets */
 #include <netdb.h>
@@ -15,7 +16,7 @@
 #include <vector>
 #include <map>
 
-#define BACKLOG 5					/* Max. client pending connections  */
+#define BACKLOG 5	/* Max. client pending connections  */
 
 class Server {
 	private:
@@ -28,8 +29,7 @@ class Server {
 		std::vector<Client> clients;
 		int 	nbrClients;
 
-		// Falta agregar el topic al channel
-		std::map<std::string, std::vector<std::string> > channels;
+		std::map<std::string, Channel> channels;
 
 	public:
 		Server(std::string network, int port, std::string passw);
@@ -52,7 +52,7 @@ class Server {
 		void	privMessage(std::string buffer, int fd);
 		void	changeNickName(std::string newNick, std::string oldNick);
 		void	handleJoin(std::string channel, std::string user, int fd);
-		void	inviteNick(std::string invitingUser, std::string targetUser, std::string channel);
+		void	inviteNick(std::string invitingUser, std::string targetUser, std::string channel, int invitingUserFd);
 		void	listChannels(std::string user, int clientFd);
 		void	partChannel(std::string user, std::string channel, int clientFd);
 		void	topicChannel(std::string channel, int clientFd, std::string newTopic);

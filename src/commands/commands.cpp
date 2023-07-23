@@ -54,7 +54,7 @@ void Server::doIrcCommand(std::string buffer, int fd)
 		buffer.erase(buffer.size() - 1);
 
 	std::string command = getWord(buffer, 1);
-	std::cout << "Executing command: " << command << "." << std::endl;
+	// std::cout << "Executing command: " << command << "." << std::endl;
 
 	std::vector<Client>::iterator it = findClientByFd(fd);
 	if (it != clients.end())
@@ -64,7 +64,7 @@ void Server::doIrcCommand(std::string buffer, int fd)
 		else if (command == "NICK")
 			changeNickName(getWord(buffer, 2), it->getNickname());
 		else if (command == "INVITE")
-			inviteNick(it->getNickname(), getWord(buffer, 2), getWord(buffer, 3));
+			inviteNick(it->getNickname(), getWord(buffer, 2), getWord(buffer, 3), fd);
 		else if (command == "LIST")
 			listChannels(it->getNickname(), fd);
 		else if (command == "PART")
