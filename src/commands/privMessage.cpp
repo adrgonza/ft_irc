@@ -9,7 +9,6 @@ void Server::privMessage(std::string buff_rx, int fd)
 	std::string sendMessage;
 	std::string nickname;
 
-	// Find the sender's nickname and the message content
 	std::size_t newlinePos = buff_rx.find('\n');
 	buff_rx = buff_rx.substr(0, newlinePos);
 	if (!buff_rx.empty() && buff_rx.back() == '\r')
@@ -23,7 +22,11 @@ void Server::privMessage(std::string buff_rx, int fd)
 		{
 			nickname = it->getNickname();
 			toChannel = it->getChannel();
-			sendMessage = "PRIVMSG " + toChannel + " :" + buff_rx + " " + nickname + "\r\n";
+			Channel* channelObj = getChannelByName(toChannel);
+			if (channelObj != NULL && !channelObj->getTopic().empty())
+				sendMessage = "PRIVMSG " + toChannel + ":" + channelObj->getTopic() + " :" + buff_rx + " " + nickname + "\r\n";
+			else
+				sendMessage = "PRIVMSG " + toChannel + " :" + buff_rx + " " + nickname + "\r\n";
 			clientFound = true;
 			break;
 		}
@@ -35,12 +38,10 @@ void Server::privMessage(std::string buff_rx, int fd)
 		return;
 	}
 
-	// Send the message to other clients in the same channel
 	for (it = clients.begin(); it != clients.end(); ++it)
 	{
 		if (it->getChannel() == toChannel)
 		{
-			// std::cout << "sending msg: " << sendMessage.c_str() << std::endl;
 			int retValue = send(it->getSocketFd(), sendMessage.c_str(), sendMessage.size(), 0);
 			if (retValue == -1)
 			{

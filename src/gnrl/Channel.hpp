@@ -16,6 +16,8 @@ class Channel {
 		std::vector<std::string> getParticipants() const;
 		std::string getTopic() const;
 
+		void setTopic(std::string newTopic);
+
 		void addParticipant(std::string newParticipant);
 		void removeParticipant(std::string participant);
 };

@@ -49,3 +49,13 @@ int Server::getClientSocketFdByNickname(const std::string &nickname)
 	}
 	return -1;
 }
+
+Channel* Server::getChannelByName(std::string channelName)
+{
+	std::map<std::string, Channel>::iterator it = channels.find(channelName);
+	if (it != channels.end())
+		return &(it->second);
+	else
+		return NULL;
+}
+

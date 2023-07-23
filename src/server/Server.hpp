@@ -47,6 +47,7 @@ class Server {
 		bool	channelExists(std::string channelName);
 		std::vector<Client>::iterator findClientByFd(int fd);
 		int		getClientSocketFdByNickname(const std::string &nickname);
+		Channel* getChannelByName(std::string channelName);
 
 		// Commands
 		void	privMessage(std::string buffer, int fd);

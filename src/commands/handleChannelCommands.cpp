@@ -101,7 +101,12 @@ void Server::handleJoin(std::string channel, std::string user, int clientFd)
 			break;
 		}
 	}
-	std::string sendMessage = "JOIN " + channel + "\r\n";
+	Channel* channelObj = getChannelByName(channel);
+	std::string sendMessage;
+	if (channelObj != NULL && !channelObj->getTopic().empty())
+		sendMessage = "JOIN " + channel + ":" + channelObj->getTopic() + "\r\n";
+	else
+		sendMessage = "JOIN " + channel + "\r\n";
 	int retValue = send(clientFd, sendMessage.c_str(), sendMessage.size(), 0);
 	if (retValue == -1)
 		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
@@ -131,6 +136,9 @@ void Server::topicChannel(std::string channel, int clientFd, std::string newTopi
 	}
 	else
 	{
+		Channel *channelObj = getChannelByName(channel);
+		if (channelObj != NULL)
+			channelObj->setTopic(newTopic);
 		std::string sendMessage = "TOPIC " + channel + ":" + newTopic + "\r\n";
 		int retValue = send(clientFd, sendMessage.c_str(), sendMessage.size(), 0);
 		if (retValue == -1)

@@ -13,6 +13,12 @@ std::string Channel::getTopic() const
 	return this->topic;
 }
 
+void Channel::setTopic(std::string newTopic)
+{
+	this->topic = newTopic;
+}
+
+
 void Channel::addParticipant(std::string newParticipant)
 {
 	participants.push_back(newParticipant);
