@@ -1,8 +1,8 @@
 #include "../server/Server.hpp"
 
-#define NBR_COMMANDS 8
+#define NBR_COMMANDS 10
 
-std::string commands[NBR_COMMANDS] = {"JOIN", "INVITE", "LIST", "ME", "NICK", "PART", "PRIVMSG", "TOPIC"};
+std::string commands[NBR_COMMANDS] = {"JOIN", "INVITE", "LIST", "ME", "NICK", "PART", "PRIVMSG", "TOPIC", "NAMES", "WHO"};
 
 void welcomeClient()
 {
@@ -71,17 +71,14 @@ void Server::doIrcCommand(std::string buffer, int fd)
 			partChannel(it->getNickname(), getWord(buffer, 2), fd);
 		else if (command == "TOPIC")
 			topicChannel(getWord(buffer, 2), fd, getWord(buffer, 3));
+		else if (command == "NAMES")
+			getNamesInChannel(getWord(buffer, 2), fd);
+		else if (command == "WHO")
+			usersOnNetwork(getWord(buffer, 2), fd);
 		else if (command == "PRIVMSG")
 		{
 			// no funciona correctamente, tiene por default a un canal, test
 			privMessage(buffer, fd);
 		}
-		// else if (command == "AWAY")
-		// else if (command == "ME")
-		// /query nickname message
-		// else if (command == "QUERY")
-		// else if (command == "TOPIC")
-		// else if (command == "WHOIS")
-		// else if (command == "MSG")
 	}
 }

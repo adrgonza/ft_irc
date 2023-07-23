@@ -44,7 +44,6 @@ void Server::listChannels(std::string user, int clientFd)
 // sudo for one user in channel? as if to kick somebody?
 void Server::partChannel(std::string user, std::string channel, int clientFd)
 {
-	clientFd += 0;
 	std::string leavingChannelMsg = ":" + user + "!user@host PART #" + channel + "\r\n";
 	channel = "#" + channel;
 	std::map<std::string, std::vector<std::string> >::iterator channelIt = channels.find(channel);
@@ -97,21 +96,22 @@ void Server::handleJoin(std::string channel, std::string user, int clientFd)
 }
 
 // TOPIC <channel> :<topic>
+// Falta agregar el topic a la variable de la clase server que lleva los topics de cada canal, sino solo aparece el topic una vez
 void Server::topicChannel(std::string channel, int clientFd, std::string newTopic)
 {
-	std::cout << "on channel: " << channel << " to new topic" << newTopic << std::endl;
 	std::vector<Client>::iterator it = findClientByFd(clientFd);
+	channel = "#" + channel;
 	if (it->getChannel() != channel)
 	{
-		// :server.example.com 442 nickname #general :You're not on that channel
 		std::string sendMessage = ":" + network + " 442 " + it->getNickname() + "#" + channel + ":You're not on that channel" + "\r\n";
 		int retValue = send(clientFd, sendMessage.c_str(), sendMessage.size(), 0);
 		if (retValue == -1)
 			std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
 		return ;
 	}
-	if (newTopic == "")
+	if (newTopic.empty())
 	{
+		// Always tries to set topic and not returns the current topic
 		std::string sendMessage = "TOPIC " + channel + "\r\n";
 		int retValue = send(clientFd, sendMessage.c_str(), sendMessage.size(), 0);
 		if (retValue == -1)
@@ -124,4 +124,36 @@ void Server::topicChannel(std::string channel, int clientFd, std::string newTopi
 		if (retValue == -1)
 			std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
 	}
+}
+
+// :<server> 353 <user> <channel> :<user1> <user2> ... <userN>
+// :<server> 366 <user> <channel> :End of NAMES list
+// No se esta enviando correctamente el mensaje
+void Server::getNamesInChannel(std::string channel, int clientFd)
+{
+	std::vector<Client>::iterator it = findClientByFd(clientFd);
+	channel = "#" + channel;
+	if (it->getChannel() != channel)
+	{
+		std::string sendMessage = ":" + network + " 442 " + it->getNickname() + "#" + channel + ":You're not on that channel" + "\r\n";
+		int retValue = send(clientFd, sendMessage.c_str(), sendMessage.size(), 0);
+		if (retValue == -1)
+			std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+		return ;
+	}
+	std::string namesInChannelMessage = ":" + network + " 353 " + it->getNickname() + " " + channel + " :";
+	std::map<std::string, std::vector<std::string> >::iterator channelIt = channels.find(channel);
+	if (channelIt != channels.end())
+	{
+		std::vector<std::string> clientsInChannel = channelIt->second;
+		for (size_t i = 0; i < clientsInChannel.size(); ++i)
+			namesInChannelMessage += clientsInChannel[i] + " ";
+		int retValue = send(clientFd, namesInChannelMessage.c_str(), namesInChannelMessage.size(), 0);
+		if (retValue == -1)
+			std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+	}
+	namesInChannelMessage = ":" + network + " 366 " + it->getNickname() + " " + channel + " :End of NAMES list";
+	int retValue = send(clientFd, namesInChannelMessage.c_str(), namesInChannelMessage.size(), 0);
+	if (retValue == -1)
+		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
 }

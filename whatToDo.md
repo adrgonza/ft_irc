@@ -26,7 +26,7 @@ The IRC (Internet Relay Chat) protocol is defined in RFC 1459, and later updated
 - `INVITE`: Invite a user to a channel <span style="color:green">(CD)</span>
 - `PART`: Leave a channel. <span style="color:green">(CD)</span>
 - `TOPIC`: Set or get the topic of a channel. <span style="color:green">(CD)</span>
-- `NAMES`: Retrieve the list of users in a channel.
+- `NAMES`: Retrieve the list of users in a channel. <span style="color:green">(CD)</span>
 - `LIST`: List all channels or specific channels. <span style="color:green">(CD)</span>
 
 ## Messaging
@@ -49,7 +49,7 @@ Include any additional operator-specific actions or commands that your server su
 
 ## User Information and Tracking
 
-- `WHO`: Get information about users on the network.
+- `WHO`: Get information about users on the network. <span style="color:green">(CD)</span>
 - `WHOIS`: Get detailed information about a specific user.
 - `WHOWAS`: Get information about previously connected users.
 - `ISON`: Check if a list of users is online. ?

@@ -28,6 +28,7 @@ class Server {
 		std::vector<Client> clients;
 		int 	nbrClients;
 
+		// Falta agregar el topic al channel
 		std::map<std::string, std::vector<std::string> > channels;
 
 	public:
@@ -48,14 +49,15 @@ class Server {
 		int		getClientSocketFdByNickname(const std::string &nickname);
 
 		// Commands
-		void	handleJoin(std::string channel, std::string user, int fd);
 		void	privMessage(std::string buffer, int fd);
 		void	changeNickName(std::string newNick, std::string oldNick);
+		void	handleJoin(std::string channel, std::string user, int fd);
 		void	inviteNick(std::string invitingUser, std::string targetUser, std::string channel);
 		void	listChannels(std::string user, int clientFd);
 		void	partChannel(std::string user, std::string channel, int clientFd);
 		void	topicChannel(std::string channel, int clientFd, std::string newTopic);
-
+		void	getNamesInChannel(std::string channel, int clientFd);
+		void	usersOnNetwork(std::string param, int clientFd);
 };
 
 int cout_msg(std::string msg);
