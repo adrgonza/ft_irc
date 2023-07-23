@@ -36,7 +36,7 @@ The IRC (Internet Relay Chat) protocol is defined in RFC 1459, and later updated
 
 ## Server Commands
 
-- `PING`: Ping a server to check if it is alive.
+- `PING`: Ping a server to check if it is alive. (client)
 - `PONG`: Respond to a PING message. <span style="color:green">(CD)</span>
 
 ## Operator and Administrative Commands
@@ -52,7 +52,7 @@ Include any additional operator-specific actions or commands that your server su
 - `WHO`: Get information about users on the network. <span style="color:green">(CD)</span>
 - `WHOIS`: Get detailed information about a specific user. <span style="color:green">(CD)</span>
 - `WHOWAS`: Get information about previously connected users.
-- `ISON`: Check if a list of users is online. 
+- `ISON`: Check if a list of users is online. <span style="color:green">(CD)</span>
 
 ## Miscellaneous
 
