@@ -40,6 +40,8 @@ void Server::listChannels(std::string user, int clientFd)
 }
 
 // :leavingUser!user@host PART #channelName
+// If it is the last user in channel, should it erase the channel to?
+// sudo for one user in channel? as if to kick somebody?
 void Server::partChannel(std::string user, std::string channel, int clientFd)
 {
 	clientFd += 0;

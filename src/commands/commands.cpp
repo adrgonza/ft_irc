@@ -1,6 +1,6 @@
 #include "../server/Server.hpp"
 
-std::string commands[6] = {"JOIN", "INVITE", "LIST", "ME", "NICK", "PART"};
+std::string commands[7] = {"JOIN", "INVITE", "LIST", "ME", "NICK", "PART", "PRIVMSG"};
 
 void welcomeClient()
 {
@@ -19,7 +19,7 @@ bool isIrcCommand(std::string buffer)
 {
 	std::string command = getCommand(buffer);
 	bool possibleCommand = false;
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 7; i++)
 	{
 		if (command == commands[i])
 		{
@@ -75,14 +75,17 @@ void Server::doIrcCommand(std::string buffer, int fd)
 			listChannels(it->getNickname(), fd);
 		else if (command == "PART")
 			partChannel(it->getNickname(), getWord(buffer, 2), fd);
-		// else if (command == "MSG")
-			//
+		else if (command == "PRIVMSG")
+		{
+			// no funciona correctamente, tiene por default a un canal, test
+			privMessage(buffer, fd);
+		}
 		// else if (command == "AWAY")
 		// else if (command == "ME")
-		// else if (command == "PRIVMSG")
 		// /query nickname message
 		// else if (command == "QUERY")
 		// else if (command == "TOPIC")
 		// else if (command == "WHOIS")
+		// else if (command == "MSG")
 	}
 }
