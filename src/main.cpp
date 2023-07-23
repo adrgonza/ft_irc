@@ -1,8 +1,6 @@
 #include "server/Server.hpp"
 #include <iomanip>
 
-// ./ircserv [host:port_network:password_network] <port> <password>
-
 bool checkArgs(char* argv[], std::string& host, int& port_network, std::string& password_network, int& port, std::string& password)
 {
 	std::string network_args(argv[1]);
@@ -32,7 +30,7 @@ bool checkArgs(char* argv[], std::string& host, int& port_network, std::string& 
 	password_network = password_network_str;
 	port = std::stoi(argv[2]);
 	password = argv[3];
-	
+
 	std::cout << std::left << std::setw(15) << "Host" << "|     " << host << '\n';
     std::cout << std::setw(15) << "Network pass" << "|     " << password_network << '\n';
     std::cout << std::setw(15) << "Network port" << "|     " << port_network << '\n';

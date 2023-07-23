@@ -7,7 +7,6 @@ void Server::usersOnNetwork(std::string param, int clientFd)
 	param = "";
 	std::string serverName = "server_name";
 
-	// Get the iterator for the client who sent the /who command
 	std::vector<Client>::iterator it = findClientByFd(clientFd);
 	if (it == clients.end())
 	{

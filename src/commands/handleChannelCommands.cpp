@@ -112,8 +112,6 @@ void Server::handleJoin(std::string channel, std::string user, int clientFd)
 		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
 }
 
-// TOPIC <channel> :<topic>
-// Falta agregar el topic a la variable de la clase server que lleva los topics de cada canal, sino solo aparece el topic una vez
 void Server::topicChannel(std::string channel, int clientFd, std::string newTopic)
 {
 	std::vector<Client>::iterator it = findClientByFd(clientFd);

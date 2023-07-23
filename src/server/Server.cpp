@@ -62,7 +62,6 @@ int	Server::handleClientConnection(int sockfd)
 
 	while (1)
 	{
-		// poll has to be outside while loop
 		int readySockets = poll(fds, clients.size() + 1, -1);
 		if (readySockets == -1)
 		{

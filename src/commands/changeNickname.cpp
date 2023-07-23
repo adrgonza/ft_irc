@@ -11,5 +11,4 @@ void Server::changeNickName(std::string newNick, std::string oldNick)
 			break;
 		}
 	}
-	// std::cout << oldNick << " changed its nickname to " << newNick << std::endl;
 }

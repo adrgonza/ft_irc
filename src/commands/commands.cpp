@@ -54,8 +54,6 @@ void Server::doIrcCommand(std::string buffer, int fd)
 		buffer.erase(buffer.size() - 1);
 
 	std::string command = getWord(buffer, 1);
-	// std::cout << "Executing command: " << command << "." << std::endl;
-
 	std::vector<Client>::iterator it = findClientByFd(fd);
 	if (it != clients.end())
 	{

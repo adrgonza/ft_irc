@@ -27,7 +27,7 @@ The IRC (Internet Relay Chat) protocol is defined in RFC 1459, and later updated
 - `PART`: Leave a channel. ✅
 - `TOPIC`: Set or get the topic of a channel. ✅
 - `NAMES`: Retrieve the list of users in a channel. ✅
-- `LIST`: List all channels or specific channels. ✅
+- `LIST`: List all channels or specific channels. <span style="color:green">(CD)</span>
 
 ## Messaging
 
