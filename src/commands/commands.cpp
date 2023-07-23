@@ -1,8 +1,8 @@
 #include "../server/Server.hpp"
 
-#define NBR_COMMANDS 10
+#define NBR_COMMANDS 11
 
-std::string commands[NBR_COMMANDS] = {"JOIN", "INVITE", "LIST", "ME", "NICK", "PART", "PRIVMSG", "TOPIC", "NAMES", "WHO"};
+std::string commands[NBR_COMMANDS] = {"JOIN", "INVITE", "LIST", "ME", "NICK", "PART", "PRIVMSG", "TOPIC", "NAMES", "WHO", "PING"};
 
 void welcomeClient()
 {
@@ -75,6 +75,8 @@ void Server::doIrcCommand(std::string buffer, int fd)
 			getNamesInChannel(getWord(buffer, 2), fd);
 		else if (command == "WHO")
 			usersOnNetwork(getWord(buffer, 2), fd);
+		else if (command == "PING")
+			respondWithPong(fd);
 		else if (command == "PRIVMSG")
 		{
 			// no funciona correctamente, tiene por default a un canal, test

@@ -58,6 +58,7 @@ class Server {
 		void	topicChannel(std::string channel, int clientFd, std::string newTopic);
 		void	getNamesInChannel(std::string channel, int clientFd);
 		void	usersOnNetwork(std::string param, int clientFd);
+		void	respondWithPong(int clientFd);
 };
 
 int cout_msg(std::string msg);
