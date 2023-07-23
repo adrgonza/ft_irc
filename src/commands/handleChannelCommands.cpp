@@ -53,8 +53,6 @@ void Server::partChannel(std::string user, std::string channel, int clientFd)
 		{
 			const std::string &nickname = clientsInChannel[i];
 			int clientSocketFd = getClientSocketFdByNickname(nickname);
-			std::vector<Client>::iterator it = findClientByFd(clientSocketFd);
-			it->changeChannel("test");
 			if (clientSocketFd != -1)
 			{
 				int retValue = send(clientSocketFd, leavingChannelMsg.c_str(), leavingChannelMsg.size(), 0);
@@ -63,6 +61,8 @@ void Server::partChannel(std::string user, std::string channel, int clientFd)
 			}
 
 		}
+		std::vector<Client>::iterator it = findClientByFd(clientFd);
+		it->changeChannel("test");
 		clientsInChannel.erase(std::remove(clientsInChannel.begin(), clientsInChannel.end(), user), clientsInChannel.end());
 	}
 }
