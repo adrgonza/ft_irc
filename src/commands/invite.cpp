@@ -3,6 +3,7 @@
 // :invitingUser!user@host INVITE targetUser :#channelName
 
 // Habria  que checkquear si el usuario esta en el canal para poder invitar a otro?
+// mensajes de error al cliente ! EJ: std::string sendMessage = ":" + network + " 442 " + it->getNickname() + "#" + channel + ":You're not on that channel" + "\r\n";
 
 void Server::inviteNick(std::string invitingUser, std::string targetUser, std::string channel)
 {

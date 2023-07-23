@@ -54,6 +54,8 @@ class Server {
 		void	inviteNick(std::string invitingUser, std::string targetUser, std::string channel);
 		void	listChannels(std::string user, int clientFd);
 		void	partChannel(std::string user, std::string channel, int clientFd);
+		void	topicChannel(std::string channel, int clientFd, std::string newTopic);
+
 };
 
 int cout_msg(std::string msg);

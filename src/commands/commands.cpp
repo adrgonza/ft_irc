@@ -1,34 +1,13 @@
 #include "../server/Server.hpp"
 
-std::string commands[7] = {"JOIN", "INVITE", "LIST", "ME", "NICK", "PART", "PRIVMSG"};
+#define NBR_COMMANDS 8
+
+std::string commands[NBR_COMMANDS] = {"JOIN", "INVITE", "LIST", "ME", "NICK", "PART", "PRIVMSG", "TOPIC"};
 
 void welcomeClient()
 {
 }
 
-std::string getCommand(std::string buffer)
-{
-	std::string command = "";
-	int i = -1;
-	while (buffer[++i] && buffer[i] != ' ')
-		command += buffer[i];
-	return command;
-}
-
-bool isIrcCommand(std::string buffer)
-{
-	std::string command = getCommand(buffer);
-	bool possibleCommand = false;
-	for (int i = 0; i < 7; i++)
-	{
-		if (command == commands[i])
-		{
-			possibleCommand = true;
-			break;
-		}
-	}
-	return (possibleCommand);
-}
 std::string getWord(const std::string &str, int wordNumber)
 {
 	if (str.empty())
@@ -52,6 +31,21 @@ std::string getWord(const std::string &str, int wordNumber)
 	return str.substr(startPos, endPos - startPos);
 }
 
+bool isIrcCommand(std::string buffer)
+{
+	std::string command = getWord(buffer, 1);
+	bool possibleCommand = false;
+	for (int i = 0; i < NBR_COMMANDS; i++)
+	{
+		if (command == commands[i])
+		{
+			possibleCommand = true;
+			break;
+		}
+	}
+	return (possibleCommand);
+}
+
 void Server::doIrcCommand(std::string buffer, int fd)
 {
 	std::size_t newlinePos = buffer.find('\n');
@@ -59,7 +53,7 @@ void Server::doIrcCommand(std::string buffer, int fd)
 	if (!buffer.empty() && buffer.back() == '\r')
 		buffer.erase(buffer.size() - 1);
 
-	std::string command = getCommand(buffer);
+	std::string command = getWord(buffer, 1);
 	std::cout << "Executing command: " << command << "." << std::endl;
 
 	std::vector<Client>::iterator it = findClientByFd(fd);
@@ -75,6 +69,8 @@ void Server::doIrcCommand(std::string buffer, int fd)
 			listChannels(it->getNickname(), fd);
 		else if (command == "PART")
 			partChannel(it->getNickname(), getWord(buffer, 2), fd);
+		else if (command == "TOPIC")
+			topicChannel(getWord(buffer, 2), fd, getWord(buffer, 3));
 		else if (command == "PRIVMSG")
 		{
 			// no funciona correctamente, tiene por default a un canal, test

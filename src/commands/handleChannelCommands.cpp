@@ -95,3 +95,33 @@ void Server::handleJoin(std::string channel, std::string user, int clientFd)
 	if (retValue == -1)
 		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
 }
+
+// TOPIC <channel> :<topic>
+void Server::topicChannel(std::string channel, int clientFd, std::string newTopic)
+{
+	std::cout << "on channel: " << channel << " to new topic" << newTopic << std::endl;
+	std::vector<Client>::iterator it = findClientByFd(clientFd);
+	if (it->getChannel() != channel)
+	{
+		// :server.example.com 442 nickname #general :You're not on that channel
+		std::string sendMessage = ":" + network + " 442 " + it->getNickname() + "#" + channel + ":You're not on that channel" + "\r\n";
+		int retValue = send(clientFd, sendMessage.c_str(), sendMessage.size(), 0);
+		if (retValue == -1)
+			std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+		return ;
+	}
+	if (newTopic == "")
+	{
+		std::string sendMessage = "TOPIC " + channel + "\r\n";
+		int retValue = send(clientFd, sendMessage.c_str(), sendMessage.size(), 0);
+		if (retValue == -1)
+			std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+	}
+	else
+	{
+		std::string sendMessage = "TOPIC " + channel + ":" + newTopic + "\r\n";
+		int retValue = send(clientFd, sendMessage.c_str(), sendMessage.size(), 0);
+		if (retValue == -1)
+			std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+	}
+}
