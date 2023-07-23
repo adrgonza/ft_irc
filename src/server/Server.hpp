@@ -43,11 +43,13 @@ class Server {
 		void	doIrcCommand(std::string buffer, int fd);
 		void	closingClientSocket(int i);
 
+		// Utils
 		bool	userExists(std::string nickname);
 		bool	channelExists(std::string channelName);
 		std::vector<Client>::iterator findClientByFd(int fd);
 		int		getClientSocketFdByNickname(const std::string &nickname);
 		Channel* getChannelByName(std::string channelName);
+		Client* findClientByNickname(std::string targetNickname);
 
 		// Commands
 		void	privMessage(std::string buffer, int fd);
@@ -59,7 +61,9 @@ class Server {
 		void	topicChannel(std::string channel, int clientFd, std::string newTopic);
 		void	getNamesInChannel(std::string channel, int clientFd);
 		void	usersOnNetwork(std::string param, int clientFd);
+		void	getUserInfo(std::string targetNickname, int clientFd);
 		void	respondWithPong(int clientFd);
+		void	checkUsersOnline(std::vector<std::string> clinetList, int clientFd);
 };
 
 int cout_msg(std::string msg);

@@ -37,3 +37,34 @@ void Server::usersOnNetwork(std::string param, int clientFd)
 	if (retValue == -1)
 		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
 }
+
+void Server::getUserInfo(std::string targetNickname, int clientFd)
+{
+	Client* targetClient = findClientByNickname(targetNickname);
+	if (targetClient != NULL)
+	{
+		std::string errorMessage = ":server_name 401 " + targetNickname + " :No such nick/channel\r\n";
+		int retValue = send(clientFd, errorMessage.c_str(), errorMessage.size(), 0);
+		if (retValue == -1)
+			std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+		return;
+	}
+
+	std::string username = targetClient->getNickname();
+	std::string hostname = "pepe";
+	// std::string hostname = targetClient.getHostname();
+	std::string realname = "pepe";
+	// std::string realname = targetClient.getRealname();
+
+	// Send the WHOIS response to the client
+	std::string whoisMessage = ":server_name 311 " + targetNickname + " " + targetNickname + " " + username + " " + hostname + " * :" + realname + "\r\n";
+	int retValue = send(clientFd, whoisMessage.c_str(), whoisMessage.size(), 0);
+	if (retValue == -1)
+		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+
+	std::string endOfWhoisMessage = ":server_name 318 " + targetNickname + " " + targetNickname + " :End of WHOIS list\r\n";
+	retValue = send(clientFd, endOfWhoisMessage.c_str(), endOfWhoisMessage.size(), 0);
+	if (retValue == -1)
+		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+}
+

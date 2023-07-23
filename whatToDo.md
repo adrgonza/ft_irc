@@ -50,9 +50,9 @@ Include any additional operator-specific actions or commands that your server su
 ## User Information and Tracking
 
 - `WHO`: Get information about users on the network. <span style="color:green">(CD)</span>
-- `WHOIS`: Get detailed information about a specific user.
+- `WHOIS`: Get detailed information about a specific user. <span style="color:green">(CD)</span>
 - `WHOWAS`: Get information about previously connected users.
-- `ISON`: Check if a list of users is online. ?
+- `ISON`: Check if a list of users is online. 
 
 ## Miscellaneous
 

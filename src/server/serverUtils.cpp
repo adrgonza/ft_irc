@@ -59,3 +59,12 @@ Channel* Server::getChannelByName(std::string channelName)
 		return NULL;
 }
 
+Client* Server::findClientByNickname(std::string targetNickname)
+{
+	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
+	{
+		if (it->getNickname() == targetNickname)
+			return &(*it);
+	}
+	return NULL;
+}
