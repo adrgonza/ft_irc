@@ -32,9 +32,9 @@ FILES = $(DSRVER) $(DCMDS) $(DGNRL) $(SRC)
 DSRCS = $(addprefix src/, $(FILES))
 SRCS = $(addsuffix .cpp, $(DSRCS))
 
-OBJS = $(SRCS:.cpp=.o)
+OBJS = $(SRCS:%.cpp=bin/%.o)
 
-CXX = g++ -std=c++98 -Iinc
+CXX = g++ -std=c++98 -I inc
 CXXFLAGS = -Wall -Wextra -Werror -I inc
 
 all: $(NAME)
@@ -42,7 +42,8 @@ all: $(NAME)
 $(NAME): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS)
 
-%.o: %.cpp
+bin/%.o: %.cpp
+	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
