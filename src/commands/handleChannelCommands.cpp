@@ -78,6 +78,7 @@ void Server::partChannel(std::string user, std::string channel, int clientFd)
 	}
 }
 
+// When the last user of a channels parts from it, should the channel be deleted ?
 void Server::handleJoin(std::string channel, std::string user, int clientFd)
 {
 	if (channels.find(channel) != channels.end())
@@ -87,6 +88,7 @@ void Server::handleJoin(std::string channel, std::string user, int clientFd)
 	}
 	else
 	{
+		// When a user creates a channel, should it be the admin ?
 		Channel newChannel;
 		newChannel.addParticipant(user);
 		channels[channel] = newChannel;
@@ -137,7 +139,7 @@ void Server::topicChannel(std::string channel, int clientFd, std::string newTopi
 		Channel *channelObj = getChannelByName(channel);
 		if (channelObj != NULL)
 			channelObj->setTopic(newTopic);
-		std::string sendMessage = "TOPIC " + channel + ":" + newTopic + "\r\n";
+		std::string sendMessage = "TOPIC " + channel + " :" + newTopic + "\r\n";
 		int retValue = send(clientFd, sendMessage.c_str(), sendMessage.size(), 0);
 		if (retValue == -1)
 			std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;

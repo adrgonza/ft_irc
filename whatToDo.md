@@ -16,9 +16,9 @@ The IRC (Internet Relay Chat) protocol is defined in RFC 1459, and later updated
 
 ## User Authentication and Connection
 
-- `PASS`: Set a connection password. ?
+- `PASS`: Set a connection password.
 - `NICK`: Set the user's nickname. ✅
-- `USER`: Specify the user's username, hostname, servername, and real name. ?
+- `USER`: Specify the user's username, hostname, servername, and real name.
 
 ## Channel Operations
 
@@ -32,11 +32,11 @@ The IRC (Internet Relay Chat) protocol is defined in RFC 1459, and later updated
 ## Messaging
 
 - `PRIVMSG`: Send a private message to a user or a channel. <span style="color:green">(CD)</span>
-- `NOTICE`: Send a notice message to a user or a channel.
+- `NOTICE`: Send a notice message to a user or a channel. <span style="color:green">(CD)</span>
 
 ## Server Commands
 
-- `PING`: Ping a server to check if it is alive. (client)
+- `PING`: PING triggers when a server sends a client aPING message to see if its still connected <span style="color:green">(CD)</span>
 - `PONG`: Respond to a PING message. <span style="color:green">(CD)</span>
 
 ## Operator and Administrative Commands
@@ -58,4 +58,3 @@ Include any additional operator-specific actions or commands that your server su
 
 - `VERSION`: Get the version of the server or a user's client. ?
 - `TIME`: Get the local time of the server or a user. ?
-- `MOTD`: Get the Message of the Day from the server. ?

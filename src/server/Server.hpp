@@ -53,6 +53,7 @@ class Server {
 
 		// Commands
 		void	privMessage(std::string buffer, int fd);
+		void	sendNotice(std::string message, std::string target, std::string sender, int clientFd);
 		void	changeNickName(std::string newNick, std::string oldNick);
 		void	handleJoin(std::string channel, std::string user, int fd);
 		void	inviteNick(std::string invitingUser, std::string targetUser, std::string channel, int invitingUserFd);
@@ -62,12 +63,15 @@ class Server {
 		void	getNamesInChannel(std::string channel, int clientFd);
 		void	usersOnNetwork(std::string param, int clientFd);
 		void	getUserInfo(std::string targetNickname, int clientFd);
-		void	respondWithPong(int clientFd);
+		void	getSpecificUsersInfo(std::string buffer, int clientFd);
+		void	pongCheck(int clientFd, std::string networkToCheck);
+		void	pingCheck(int clientFd);
 		void	checkUsersOnline(std::vector<std::string> clinetList, int clientFd);
 };
 
 int cout_msg(std::string msg);
 bool isIrcCommand(std::string buffer);
 std::string getCommand(std::string buffer);
+std::string getWord(const std::string &str, int wordNumber);
 
 #endif

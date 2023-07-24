@@ -4,7 +4,7 @@ SRCS = ./src/main.cpp ./src/server/Server.cpp ./src/server/serverUtils.cpp \
 		./src/gnrl/utils.cpp ./src/gnrl/Client.cpp ./src/gnrl/Channel.cpp \
 		./src/commands/commands.cpp ./src/commands/privMessage.cpp ./src/commands/changeNickname.cpp \
 		./src/commands/handleChannelCommands.cpp ./src/commands/invite.cpp ./src/commands/userInformation.cpp \
-		./src/commands/pong.cpp
+		./src/commands/pingpong.cpp ./src/commands/sendNotice.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 
