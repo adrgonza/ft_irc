@@ -94,7 +94,7 @@ void Server::partChannel(std::string user, std::string channelName, int clientFd
 			std::cout << "CHANNEL ERASED :: "<< channels.erase(channelName) << std::endl;
 		std::vector<Client>::iterator it = findClientByFd(clientFd);
 		if (it->getChannel() == channelName)
-			it->changeChannel("test");
+			it->changeChannel(LIMBO_CHANNEL);
 	}
 }
 
@@ -242,5 +242,5 @@ void Server::kickUser(std::string buffer, int clientFd)
 		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
 	channelObj->removeParticipant(userToKick);
 	Client* clientObj = findClientByNickname(userToKick);
-	clientObj->changeChannel("test");
+	clientObj->changeChannel(LIMBO_CHANNEL);
 }

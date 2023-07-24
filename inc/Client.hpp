@@ -2,6 +2,7 @@
 #define CLIENT_HPP
 
 #include <iostream>
+#include "defines.hpp"
 
 class Client {
 	private:
