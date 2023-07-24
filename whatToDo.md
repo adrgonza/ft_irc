@@ -22,12 +22,12 @@ The IRC (Internet Relay Chat) protocol is defined in RFC 1459, and later updated
 
 ## Channel Operations
 
-- `JOIN`: Join a channel or a group of channels. <span style="color:green">(CD)</span>
+- `JOIN`: Join a channel or a group of channels. ✅
 - `INVITE`: Invite a user to a channel ✅
 - `PART`: Leave a channel. ✅
 - `TOPIC`: Set or get the topic of a channel. ✅
 - `NAMES`: Retrieve the list of users in a channel. ✅
-- `LIST`: List all channels or specific channels. <span style="color:green">(CD)</span>
+- `LIST`: List all channels or specific channels. ✅
 
 ## Messaging
 
@@ -43,7 +43,7 @@ The IRC (Internet Relay Chat) protocol is defined in RFC 1459, and later updated
 
 Include any additional operator-specific actions or commands that your server supports here.
 - `MODE`: Set channel or user modes, including user privileges.
-- `KICK`: Kick a user from a channel.
+- `KICK`: Kick a user from a channel. <span style="color:green">(CD)</span>
 - `KILL`: Remove a user from the network.
 - `OPER`: Authenticate as an IRC operator.
 

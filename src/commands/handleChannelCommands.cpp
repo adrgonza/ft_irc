@@ -16,7 +16,13 @@ void Server::listChannels(std::string user, int clientFd)
 	std::string channelListMsg = "Channel List:\r\n";
 
 	if (channels.empty())
-		channelListMsg = "There are no channels\r\n";
+	{
+		std::string errorMessage = ": 442 " + user + " :There are no channels to list\r\n";
+		int retValue = send(clientFd, errorMessage.c_str(), errorMessage.size(), 0);
+		if (retValue == -1)
+			std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+		return ;
+	}
 	else
 	{
 		channelListMsg = ":" + user + "!user@host 321 * Channel :Users Name\r\n";
@@ -41,27 +47,35 @@ void Server::listChannels(std::string user, int clientFd)
 }
 
 // :leavingUser!user@host PART #channelName
-// If it is the last user in channel, should it erase the channel to?
+// If it is the last user in channel, should it erase the channel too?
 // sudo for one user in channel? as if to kick somebody?
-void Server::partChannel(std::string user, std::string channel, int clientFd)
+void Server::partChannel(std::string user, std::string channelName, int clientFd)
 {
-	channel = "#" + channel;
-	std::string leavingChannelMsg = ":" + user + "!user@host PART " + channel + "\r\n";
-	std::vector<Client>::iterator it = findClientByFd(clientFd);
-	if (it->getChannel() != channel)
+	channelName = "#" + channelName;
+
+	std::vector<Client>::iterator clientIterator = findClientByFd(clientFd);
+	if (clientIterator == clients.end())
+		return ; // TODO: Client not found error <??>
+
+	std::string leavingChannelMsg = ":" + user + "!user@host PART " + channelName + "\r\n";
+
+	std::map<std::string, Channel>::iterator channelIterator = channels.find(channelName);
+	if (channelIterator == channels.end())
+		return; // Todo: Channel does not exist error
+
+	Channel &channel = channelIterator->second;
+	bool userInChannel = channel.hasUser(user);
+	if (!userInChannel && clientIterator->getChannel() != channelName)
 	{
-		std::string errorMessage = ":" + network + " 442 " + user + " " + user + channel + " :You are not in that channel" + "\r\n";
+		std::string errorMessage = ":" + network + " 442 " + user + " " + user + channelName + " :You are not in that channel" + "\r\n";
 		int retValue = send(clientFd, errorMessage.c_str(), errorMessage.size(), 0);
 		if (retValue == -1)
 			std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
 		return;
 	}
-	std::map<std::string, Channel>::iterator channelIt = channels.find(channel);
-	if (channelIt != channels.end())
+	if (channelIterator != channels.end())
 	{
-		Channel& channelObj = channelIt->second;
-		std::vector<std::string> clientsInChannel = channelIt->second.getParticipants();
-		channelObj.removeParticipant(user);
+		std::vector<std::string> clientsInChannel = channel.getParticipants();
 		for (size_t i = 0; i < clientsInChannel.size(); ++i)
 		{
 			std::string nickname = clientsInChannel[i];
@@ -73,8 +87,14 @@ void Server::partChannel(std::string user, std::string channel, int clientFd)
 					std::cerr << "[SERVER-error]: send failed for " << nickname << ": " << errno << strerror(errno) << std::endl;
 			}
 		}
+		channel.removeParticipant(user);
+		channel.removeOperator(user); // May do nothing if the user is not operator. Intended behaviour.
+		// If channel size == 0; remove it
+		if (channel.getParticipants().size() == 0)
+			std::cout << "CHANNEL ERASED :: "<< channels.erase(channelName) << std::endl;
 		std::vector<Client>::iterator it = findClientByFd(clientFd);
-		it->changeChannel("test");
+		if (it->getChannel() == channelName)
+			it->changeChannel("test");
 	}
 }
 
@@ -91,6 +111,7 @@ void Server::handleJoin(std::string channel, std::string user, int clientFd)
 		// When a user creates a channel, should it be the admin ?
 		Channel newChannel;
 		newChannel.addParticipant(user);
+		newChannel.addOperator(user);
 		channels[channel] = newChannel;
 		std::cout << "User " << user << " created and joined channel " << channel << std::endl;
 	}
@@ -182,4 +203,44 @@ void Server::getNamesInChannel(std::string channel, int clientFd)
 	retValue = send(clientFd, endOfNamesMessage.c_str(), endOfNamesMessage.size(), 0);
 	if (retValue == -1)
 		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+}
+
+void Server::kickUser(std::string buffer, int clientFd)
+{
+	std::string channelName = getWord(buffer, 2);
+	std::string userToKick = getWord(buffer, 3);
+	std::vector<Client>::iterator it = findClientByFd(clientFd);
+
+	Channel* channelObj = getChannelByName(channelName);
+	if (channelObj == NULL)
+	{
+		std::cout << "Channel not found" << std::endl;
+		return; // Error. Not a valid channel
+	}
+	// Check caller is operator
+	if (!channelObj->hasOperator(it->getNickname()))
+	{
+		std::cout << "Not operator" << std::endl;
+		return; // Error. It not operator
+	}
+
+	// Check if user to kick is in channel
+	if (!channelObj->hasUser(userToKick))
+	{
+		std::cout << "User not in channel" << std::endl;
+		return; // Error. User not in channel.
+	}
+
+	std::string sendMsg = "Kick " + channelName + " " + userToKick + " \r\n";
+	int retValue = send(clientFd, sendMsg.c_str(), sendMsg.size(), 0);
+	if (retValue == -1)
+		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+
+	clientFd = getClientSocketFdByNickname(userToKick);
+	retValue = send(clientFd, sendMsg.c_str(), sendMsg.size(), 0);
+	if (retValue == -1)
+		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+	channelObj->removeParticipant(userToKick);
+	Client* clientObj = findClientByNickname(userToKick);
+	clientObj->changeChannel("test");
 }

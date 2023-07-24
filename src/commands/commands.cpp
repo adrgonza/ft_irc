@@ -1,8 +1,8 @@
 #include "../server/Server.hpp"
 
-#define NBR_COMMANDS 14
+#define NBR_COMMANDS 15
 
-std::string commands[NBR_COMMANDS] = {"JOIN", "INVITE", "LIST", "ME", "NICK", "PART", "PRIVMSG", "TOPIC", "NAMES", "WHO", "PING", "NOTICE", "WHOIS", "ISON"};
+std::string commands[NBR_COMMANDS] = {"JOIN", "INVITE", "LIST", "ME", "NICK", "PART", "PRIVMSG", "TOPIC", "NAMES", "WHO", "PING", "NOTICE", "WHOIS", "ISON", "KICK"};
 
 void welcomeClient()
 {
@@ -83,6 +83,8 @@ void Server::doIrcCommand(std::string buffer, int fd)
 			getUserInfo(getWord(buffer, 2), fd);
 		else if (command == "ISON")
 			getSpecificUsersInfo(buffer, fd);
+		else if (command == "KICK")
+			kickUser(buffer, fd);
 		else if (command == "PRIVMSG")
 		{
 			// no funciona correctamente, tiene por default a un canal, test

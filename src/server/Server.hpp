@@ -67,6 +67,7 @@ class Server {
 		void	pongCheck(int clientFd, std::string networkToCheck);
 		void	pingCheck(int clientFd);
 		void	checkUsersOnline(std::vector<std::string> clinetList, int clientFd);
+		void	kickUser(std::string buffer, int clientFd);
 };
 
 int cout_msg(std::string msg);
