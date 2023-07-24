@@ -1,4 +1,4 @@
-#include "../server/Server.hpp"
+#include <Server.hpp>
 
 // /list [#channel] [-MIN #] [-MAX #]
 // Lists currently available channels. You can also tell mIRC to show only channels with a minimum and a maximum number of people. If you specify a #channel then mIRC will only list information for that channel. If you specify wildcards, eg. *mirc* then mIRC will list all channels that contain the word mirc in them.

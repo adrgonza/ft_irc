@@ -1,4 +1,4 @@
-#include "../server/Server.hpp"
+#include <Server.hpp>
 
 // Dos usuarios con el mismo nick?
 void Server::changeNickName(std::string newNick, std::string oldNick)

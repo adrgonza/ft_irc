@@ -1,4 +1,4 @@
-#include "../server/Server.hpp"
+#include <Server.hpp>
 
 int cout_msg(std::string msg)
 {

@@ -1,4 +1,4 @@
-#include "../server/Server.hpp"
+#include <Server.hpp>
 
 // Habria que ir manteniendo de alguna manera la ultima interaccion del usuario, si falta poco pasar ser hechado porque no interactuo.
 // Mandarle un mensaje para que haga el PING

@@ -1,4 +1,4 @@
-#include "../server/Server.hpp"
+#include <Server.hpp>
 
 // Hay un error que por alguna razon el cliente que usamos interpreta solo el /nootice, debe ser algo que se cambia en el config
 void Server::sendNotice(std::string message, std::string target, std::string sender, int clientFd)

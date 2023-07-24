@@ -1,4 +1,4 @@
-#include "../server/Server.hpp"
+#include <Server.hpp>
 
 void Server::privMessage(std::string buff_rx, int fd)
 {
