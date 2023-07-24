@@ -1,29 +1,124 @@
 #include "Server.hpp"
 
-#define SERV_HOST_ADDR "10.11.14.4" /* IP, only IPV4 support  */
-#define BACKLOG 5					/* Max. client pending connections  */
-
-#include <sys/socket.h>
-
 Server::~Server() {}
 
-Server::Server(std::string network, std::string port, std::string passw) : network(network), port(port), passw(passw) {}
+Server::Server(std::string network, int port, std::string passw) : network(network), port(port), passw(passw), nbrClients(0) {}
 
-int Server::start(void)
+void Server::handleReceivedData(std::string buff_rx, int fd)
 {
-	int sockfd, connfd; /* listening socket and connection socket file descriptors */
-	unsigned int len;	/* length of client address */
-	struct sockaddr_in servaddr, client;
+	cout_msg("[SERVER] (recived): " + buff_rx);
+	if (isIrcCommand(buff_rx))
+		doIrcCommand(buff_rx, fd);
+	else
+		privMessage(buff_rx, fd);
+}
 
+void Server::closingClientSocket(int i)
+{
+	cout_msg("[SERVER]: client socket closed \n\n");
+	close(fds[i].fd);
+	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
+	{
+		if (it->getSocketFd() == fds[i].fd)
+		{
+			clients.erase(it);
+			break;
+		}
+	}
+	fds[i].fd = -1;
+}
+
+void Server::processClientData(int connfd)
+{
 	int len_rx = 0; /* received and sent length, in bytes */
 	char buff_tx[100] = "Hello client, I am the server\r\n";
 	char buff_rx[100]; /* buffers for reception  */
+
+	for (unsigned long i = 1; i <= clients.size(); ++i)
+	{
+		if (fds[i].revents & POLLIN)
+		{
+			len_rx = read(fds[i].fd, buff_rx, sizeof(buff_rx));
+			buff_rx[len_rx] = '\0';
+			if (len_rx == -1)
+				std::cerr << "[SERVER-error]: connfd cannot be read. " << errno << strerror(errno) << std::endl;
+			else if (len_rx == 0)
+				closingClientSocket(i);
+			else
+			{
+				handleReceivedData(buff_rx, fds[i].fd);
+				// connfd or socketfd ?
+				write(connfd, buff_tx, strlen(buff_tx));
+			}
+		}
+	}
+}
+
+int	Server::handleClientConnection(int sockfd)
+{
+	int connfd; /* listening socket and connection socket file descriptors */
+	struct sockaddr_in client;
+	unsigned int len = sizeof(client);	/* length of client address */
+
+	while (1)
+	{
+		int readySockets = poll(fds, clients.size() + 1, -1);
+		if (readySockets == -1)
+		{
+			std::cerr << "[SERVER-error]: poll() failed" << std::endl;
+			return -1;
+		}
+		if (fds[0].revents & POLLIN)
+		{
+			connfd = accept(sockfd, (struct sockaddr *)&client, &len);
+			if (connfd < 0)
+			{
+				std::cerr << "[SERVER-error]: connection not accepted" << errno << strerror(errno) << std::endl;
+				return -1;
+			}
+			else
+			{
+				cout_msg("[SERVER]: a connection has been made");
+				char nicknameBuffer[256]; // Adjust the buffer size as needed
+				ssize_t receivedBytes = recv(connfd, nicknameBuffer, sizeof(nicknameBuffer) - 1, 0);
+				if (receivedBytes > 0)
+				{
+					nicknameBuffer[receivedBytes] = '\0';
+					std::string nickname(nicknameBuffer);
+					addClient("", nickname, connfd);
+					nbrClients += 1;
+					for (unsigned long i = 1; i <= clients.size(); ++i)
+					{
+						if (fds[i].fd == -1)
+						{
+							fds[i].fd = connfd;
+							fds[i].events = POLLIN;
+							break;
+						}
+					}
+				}
+				else
+				{
+					std::cerr << "Error receiving Nickname" << std::endl;
+					return -1;
+				}
+			}
+		}
+		processClientData(connfd);
+	}
+	return (0);
+}
+
+int Server::start(void)
+{
+	int sockfd;
+	struct sockaddr_in servaddr;
 
 	/* socket creation */
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd == -1)
 	{
-		cout_msg("[SERVER-error]: socket creation failed.");
+		std::cerr << "[SERVER-error]: socket creation failed." << std::endl;
 		return -1;
 	}
 	else
@@ -33,31 +128,27 @@ int Server::start(void)
 	memset(&servaddr, 0, sizeof(servaddr));
 	/* assign IP, SERV_PORT, IPV4 */
 	servaddr.sin_family = AF_INET;
-	servaddr.sin_addr.s_addr = inet_addr(SERV_HOST_ADDR);
-	servaddr.sin_port = htons(atoi(this->port.c_str()));
+	servaddr.sin_addr.s_addr = inet_addr(network.c_str());
+	servaddr.sin_port = htons(port);
 
 	/* Bind socket */
 	if ((bind(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr))) != 0)
 	{
-		fprintf(stderr, "[SERVER-error]: socket bind failed. %d: %s \n", errno, strerror(errno));
+		std::cerr << "[SERVER-error]: socket bind failed. " << errno << strerror(errno) << std::endl;
 		return -1;
 	}
 	else
-		printf("[SERVER]: Socket successfully binded \n");
+		cout_msg("[SERVER]: Socket successfully binded \n");
 
 	/* Listen */
 	if ((listen(sockfd, BACKLOG)) != 0)
 	{
-		fprintf(stderr, "[SERVER-error]: socket listen failed. %d: %s \n", errno, strerror(errno));
+		std::cerr << "[SERVER-error]: socket listen failed. " << errno << strerror(errno) << std::endl;
 		return -1;
 	}
 	else
-        std::cout << "[SERVER]: Listening on socket: " << SERV_HOST_ADDR << ":" << std::to_string(ntohs(servaddr.sin_port)) << std::endl;
+		std::cout << "[SERVER]: Listening on socket: " << network << ":" << std::to_string(ntohs(servaddr.sin_port)) << std::endl;
 
-	len = sizeof(client);
-
-	std::vector<int> clientSockets;
-	struct pollfd fds[BACKLOG + 1];
 	fds[0].fd = sockfd;
 	fds[0].events = POLLIN;
 	fds[0].revents = 0;
@@ -66,78 +157,8 @@ int Server::start(void)
 		fds[i].fd = -1; // Set -1 to indicate an unused entry
 
 	/* Accept the data from incoming sockets in a iterative way */
-	while (1)
-	{
-		int readySockets = poll(fds, clientSockets.size() + 1, -1);
-		if (readySockets == -1)
-		{
-			cout_msg("[SERVER-error]: poll() failed");
-			return -1;
-		}
-		if (fds[0].revents & POLLIN)
-		{
-			connfd = accept(sockfd, (struct sockaddr *)&client, &len);
-			if (connfd < 0)
-			{
-				cout_msg("[SERVER-error]: connection not accepted");
-				// fprintf(stderr, "[SERVER-error]: connection not accepted. %d: %s \n", errno, strerror(errno));
-				return -1;
-			}
-			else
-			{
-				cout_msg("[SERVER]: a connection has been made");
-				clientSockets.push_back(connfd);
-				for (unsigned long i = 1; i <= clientSockets.size(); ++i)
-				{
-					if (fds[i].fd == -1)
-					{
-						fds[i].fd = connfd;
-						fds[i].events = POLLIN;
-						break;
-					}
-				}
-			}
-		}
-		for (unsigned long i = 1; i <= clientSockets.size(); ++i)
-		{
-			if (fds[i].revents & POLLIN)
-			{
-				len_rx = read(fds[i].fd, buff_rx, sizeof(buff_rx));
-				buff_rx[len_rx] = '\0';
-				if (len_rx == -1)
-				{
-					std::string a = strerror(errno);
-					cout_msg("[SERVER-error]: connfd cannot be read. " + std::to_string(errno) + a);
-				}
-				else if (len_rx == 0)
-				{
-					cout_msg("[SERVER]: client socket closed \n\n");
-					close(fds[i].fd);
-					clientSockets.erase(std::remove(clientSockets.begin(), clientSockets.end(), fds[i].fd), clientSockets.end());
-					fds[i].fd = -1;
-				}
-				else
-				{
-					std::string a = buff_rx;
-					cout_msg("[SERVER] (recived): " + a);
-
-					std::string sendMessage = "PRIVMSG test :" + a + "\r\n";
-
-					cout_msg("[SERVER] (broadcasted): '" + sendMessage + "'");
-
-                    for (unsigned long j = 1; j <= clientSockets.size(); j++)
-    				{
-					    int retValue = send(fds[j].fd, sendMessage.c_str(), sendMessage.size(), 0);
-					    std::cout << " · (" << i << ") -> (" << j <<  ") :: (status: " << retValue << ") " << std::endl;
-                    }
-
-					write(connfd, buff_tx, strlen(buff_tx));
-
-					// Handle IRC Commands
-					doIrcCommand(a);
-				}
-			}
-		}
-	}
-	return 1;
+	if (handleClientConnection(sockfd))
+		return 1;
+	else
+		return -1;
 }
