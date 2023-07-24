@@ -8,7 +8,7 @@ NAME = ircserv
 SRC = main
 
 SERVER = Server \
-		 serverUtils 
+		 serverUtils
 
 CMDS = commands \
 	   privMessage \
@@ -21,7 +21,7 @@ CMDS = commands \
 
 GNRL = utils \
        Client \
-	   Channel 
+	   Channel
 
 DSRVER = $(addprefix server/, $(SERVER))
 DCMDS  = $(addprefix commands/, $(CMDS))
@@ -35,7 +35,7 @@ SRCS = $(addsuffix .cpp, $(DSRCS))
 OBJS = $(SRCS:.cpp=.o)
 
 CXX = g++ -std=c++98 -Iinc
-CXXFLAGS = -Wall -Wextra -Werror -Iinc
+CXXFLAGS = -Wall -Wextra -Werror -I inc
 
 all: $(NAME)
 

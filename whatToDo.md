@@ -22,37 +22,37 @@ The IRC (Internet Relay Chat) protocol is defined in RFC 1459, and later updated
 
 ## Channel Operations
 
-- `JOIN`: Join a channel or a group of channels. <span style="color:green">(CD)</span>
+- `JOIN`: Join a channel or a group of channels. ✅
 - `INVITE`: Invite a user to a channel ✅
 - `PART`: Leave a channel. ✅
 - `TOPIC`: Set or get the topic of a channel. ✅
 - `NAMES`: Retrieve the list of users in a channel. ✅
-- `LIST`: List all channels or specific channels. <span style="color:green">(CD)</span>
+- `LIST`: List all channels or specific channels. ✅
 
 ## Messaging
 
-- `PRIVMSG`: Send a private message to a user or a channel. <span style="color:green">(CD)</span>
-- `NOTICE`: Send a notice message to a user or a channel. <span style="color:green">(CD)</span>
+- `PRIVMSG`: Send a private message to a user or a channel. <span style="color:green">(CD)</span> (DANGONZA)
+- `NOTICE`: Send a notice message to a user or a channel. <span style="color:green">(CD)</span> (DANGONZA)
 
 ## Server Commands
 
-- `PING`: PING triggers when a server sends a client aPING message to see if its still connected <span style="color:green">(CD)</span>
-- `PONG`: Respond to a PING message. <span style="color:green">(CD)</span>
+- `PING`: PING triggers when a server sends a client aPING message to see if its still connected <span style="color:green">(CD)</span> (MATEO)
+- `PONG`: Respond to a PING message. <span style="color:green">(CD)</span> (MATEO)
 
 ## Operator and Administrative Commands
 
 Include any additional operator-specific actions or commands that your server supports here.
-- `MODE`: Set channel or user modes, including user privileges.
-- `KICK`: Kick a user from a channel.
-- `KILL`: Remove a user from the network.
-- `OPER`: Authenticate as an IRC operator.
+- `MODE`: Set channel or user modes, including user privileges. (DANGONZA)
+- `KICK`: Kick a user from a channel. <span style="color:green">(CD)</span> (DANGONZA)
+- `KILL`: Remove a user from the network. (DONI)
+- `OPER`: Authenticate as an IRC operator.(DONI)
 
 ## User Information and Tracking
 
-- `WHO`: Get information about users on the network. <span style="color:green">(CD)</span>
-- `WHOIS`: Get detailed information about a specific user. <span style="color:green">(CD)</span>
+- `WHO`: Get information about users on the network. <span style="color:green">(CD)</span> (MATEO)
+- `WHOIS`: Get detailed information about a specific user. <span style="color:green">(CD)</span> (MATEO)
 - `WHOWAS`: Get information about previously connected users.
-- `ISON`: Check if a list of users is online. <span style="color:green">(CD)</span>
+- `ISON`: Check if a list of users is online. <span style="color:green">(CD)</span> (MATEO)
 
 ## Miscellaneous
 
