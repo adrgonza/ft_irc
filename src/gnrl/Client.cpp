@@ -2,7 +2,7 @@
 
 Client::~Client() {}
 
-Client::Client(std::string name, std::string nickname, int socketFd) : name(name), nickname(nickname), socketFd(socketFd), channel("test") {}
+Client::Client(std::string name, std::string nickname, int socketFd) : name(name), nickname(nickname), socketFd(socketFd), channel(LIMBO_CHANNEL) {}
 
 int Client::getSocketFd() const
 {

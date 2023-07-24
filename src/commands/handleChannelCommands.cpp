@@ -91,7 +91,7 @@ void Server::partChannel(std::string buffer, std::string user, int clientFd)
 			std::cout << "CHANNEL ERASED :: "<< channels.erase(channelName) << std::endl;
 		std::vector<Client>::iterator it = findClientByFd(clientFd);
 		if (it->getChannel() == channelName)
-			it->changeChannel("test");
+			it->changeChannel(LIMBO_CHANNEL);
 	}
 }
 
@@ -254,5 +254,5 @@ void Server::kickUser(std::string buffer, int clientFd)
 
 	channelObj->removeParticipant(userToKick);
 	Client* clientObj = findClientByNickname(userToKick);
-	clientObj->changeChannel("test");
+	clientObj->changeChannel(LIMBO_CHANNEL);
 }

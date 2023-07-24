@@ -6,6 +6,7 @@
 #include <poll.h>
 #include <Client.hpp>
 #include <Channel.hpp>
+#include "defines.hpp"
 
 /* sockets */
 #include <netdb.h>
