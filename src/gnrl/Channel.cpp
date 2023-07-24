@@ -1,6 +1,7 @@
 #include <Channel.hpp>
 
-Channel::Channel() : topic("") {}
+Channel::Channel() : topic(""), name("") {}
+Channel::Channel(std::string name) : topic(""), name(name) {}
 Channel::~Channel() {}
 
 std::vector<std::string> Channel::getParticipants() const
@@ -13,6 +14,11 @@ std::string Channel::getTopic() const
 	return this->topic;
 }
 
+std::string Channel::getName() const
+{
+	return this->name;
+}
+
 void Channel::setTopic(std::string newTopic)
 {
 	this->topic = newTopic;
@@ -21,7 +27,18 @@ void Channel::setTopic(std::string newTopic)
 
 void Channel::addParticipant(std::string newParticipant)
 {
+	std::cout << "Participant : " << newParticipant << " added to : " << this->name << std::endl;
 	participants.push_back(newParticipant);
+}
+
+void Channel::removeParticipant(Client *clientObject)
+{
+	if (clientObject == NULL)
+		return ;
+
+	this->removeParticipant(clientObject->getNickname());
+	if (clientObject->getChannel() == this->name)
+		clientObject->changeChannel(LIMBO_CHANNEL);
 }
 
 void Channel::removeParticipant(std::string participant)

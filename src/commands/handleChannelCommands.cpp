@@ -84,14 +84,12 @@ void Server::partChannel(std::string buffer, std::string user, int clientFd)
 			if (clientSocketFd != -1)
 				sendMsgToClient(leavingChannelMsg, clientSocketFd);
 		}
-		channel.removeParticipant(user);
+		Client client = *(findClientByFd(clientFd)); // Sends them to LIMBO_CHAT if needed
+		channel.removeParticipant(&client);
 		channel.removeOperator(user); // May do nothing if the user is not operator. Intended behaviour.
 		// If channel size == 0; remove it
 		if (channel.getParticipants().size() == 0)
-			std::cout << "CHANNEL ERASED :: "<< channels.erase(channelName) << std::endl;
-		std::vector<Client>::iterator it = findClientByFd(clientFd);
-		if (it->getChannel() == channelName)
-			it->changeChannel(LIMBO_CHANNEL);
+			channels.erase(channelName);
 	}
 }
 
@@ -112,7 +110,7 @@ void Server::handleJoin(std::string buffer, std::string user, int clientFd)
 	else
 	{
 		// When a user creates a channel, should it be the admin ?
-		Channel newChannel;
+		Channel newChannel = Channel(channel);
 		newChannel.addParticipant(user);
 		newChannel.addOperator(user);
 		channels[channel] = newChannel;
@@ -218,16 +216,19 @@ void Server::kickUser(std::string buffer, int clientFd)
 	std::string userToKick = getWord(buffer, 3);
 	std::vector<Client>::iterator it = findClientByFd(clientFd);
 
-	if (channelName == ":" || userToKick == ":" || userToKick.empty())
+	if (channelName == ":" || userToKick == ":")
 	{
-		sendErrorMsgToClient("KICK <channel> <user> expected.", 442, it->getNickname(), clientFd, "");
-		return;
+		// ERR_NEEDMOREPARAMS (461)
+		std::string clientNickname = it->getNickname();
+		std::string errorMsg = ":" + clientNickname + " 461 : Not enough parameters\r\n";
+		int retValue = send(clientFd, errorMsg.c_str(), errorMsg.size(), 0);
+		if (retValue == -1)
+			std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+		std::cout << "Error code: " << retValue << std::endl << "Error: " << errorMsg << std::endl;
+		//"<client> <command> :Not enough parameters"
+		return ; // Generalize error sending (clientFd is a must. Some commands require the origin command. Maybe FD and Parameter ??)
 	}
-	if (channelName[0] != '#')
-	{
-		sendErrorMsgToClient("Channel has to start with #", 442, it->getNickname(), clientFd, channelName);
-		return ;
-	}
+
 
 	Channel* channelObj = getChannelByName(channelName);
 	if (channelObj == NULL)
@@ -246,9 +247,21 @@ void Server::kickUser(std::string buffer, int clientFd)
 		return;
 	}
 
+	// Send caller a confirmation message
 	std::string sendMsg = "Kick " + channelName + " " + userToKick + " \r\n";
 	sendMsgToClient(sendMsg, clientFd);
 
+	// Send client being kicked an informative message
+	Client* clientObj = findClientByNickname(userToKick);
+	clientFd = clientObj->getSocketFd();
+
+	retValue = send(clientFd, sendMsg.c_str(), sendMsg.size(), 0);
+	if (retValue == -1)
+		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+
+	// Remove 'userToKick' from the server & send them to LIMBO_CHANNEL if needed
+	if (clientObj != NULL)
+		channelObj->removeParticipant(clientObj);
 	clientFd = getClientSocketFdByNickname(userToKick);
 	sendMsgToClient(sendMsg, clientFd);
 
