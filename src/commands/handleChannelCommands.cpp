@@ -87,14 +87,12 @@ void Server::partChannel(std::string user, std::string channelName, int clientFd
 					std::cerr << "[SERVER-error]: send failed for " << nickname << ": " << errno << strerror(errno) << std::endl;
 			}
 		}
-		channel.removeParticipant(user);
+		Client client = *(findClientByFd(clientFd)); // Sends them to LIMBO_CHAT if needed
+		channel.removeParticipant(&client);
 		channel.removeOperator(user); // May do nothing if the user is not operator. Intended behaviour.
 		// If channel size == 0; remove it
 		if (channel.getParticipants().size() == 0)
-			std::cout << "CHANNEL ERASED :: "<< channels.erase(channelName) << std::endl;
-		std::vector<Client>::iterator it = findClientByFd(clientFd);
-		if (it->getChannel() == channelName)
-			it->changeChannel(LIMBO_CHANNEL);
+			channels.erase(channelName);
 	}
 }
 
@@ -109,7 +107,7 @@ void Server::handleJoin(std::string channel, std::string user, int clientFd)
 	else
 	{
 		// When a user creates a channel, should it be the admin ?
-		Channel newChannel;
+		Channel newChannel = Channel(channel);
 		newChannel.addParticipant(user);
 		newChannel.addOperator(user);
 		channels[channel] = newChannel;
@@ -231,16 +229,21 @@ void Server::kickUser(std::string buffer, int clientFd)
 		return; // Error. User not in channel.
 	}
 
+	// Send caller a confirmation message
 	std::string sendMsg = "Kick " + channelName + " " + userToKick + " \r\n";
 	int retValue = send(clientFd, sendMsg.c_str(), sendMsg.size(), 0);
 	if (retValue == -1)
 		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
 
-	clientFd = getClientSocketFdByNickname(userToKick);
+	// Send client being kicked an informative message
+	Client* clientObj = findClientByNickname(userToKick);
+	clientFd = clientObj->getSocketFd();
+
 	retValue = send(clientFd, sendMsg.c_str(), sendMsg.size(), 0);
 	if (retValue == -1)
 		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
-	channelObj->removeParticipant(userToKick);
-	Client* clientObj = findClientByNickname(userToKick);
-	clientObj->changeChannel(LIMBO_CHANNEL);
+
+	// Remove 'userToKick' from the server & send them to LIMBO_CHANNEL if needed
+	if (clientObj != NULL)
+		channelObj->removeParticipant(clientObj);
 }
