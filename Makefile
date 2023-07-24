@@ -35,7 +35,7 @@ SRCS = $(addsuffix .cpp, $(DSRCS))
 OBJS = $(SRCS:.cpp=.o)
 
 CXX = g++ -std=c++98 -Iinc
-CXXFLAGS = -Wall -Wextra -Werror
+CXXFLAGS = -Wall -Wextra -Werror -Iinc
 
 all: $(NAME)
 

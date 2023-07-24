@@ -1,4 +1,4 @@
-#include "../server/Server.hpp"
+#include <Server.hpp>
 
 void Server::inviteNick(std::string invitingUser, std::string targetUser, std::string channel, int invitingUserFd)
 {

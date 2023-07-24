@@ -4,8 +4,8 @@
 #include <iostream>
 #include <unistd.h>
 #include <poll.h>
-#include "../gnrl/Client.hpp"
-#include "../gnrl/Channel.hpp"
+#include <Client.hpp>
+#include <Channel.hpp>
 
 /* sockets */
 #include <netdb.h>

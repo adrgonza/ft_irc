@@ -1,4 +1,4 @@
-#include "Server.hpp"
+#include <Server.hpp>
 
 void Server::addClient(std::string name, std::string nick, int socket)
 {

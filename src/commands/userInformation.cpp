@@ -1,4 +1,4 @@
-#include "../server/Server.hpp"
+#include <Server.hpp>
 
 void Server::usersOnNetwork(std::string param, int clientFd)
 {

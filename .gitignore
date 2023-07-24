@@ -31,5 +31,8 @@
 *.out
 *.app
 
+# Usefull file for vim
+tags
+
 ircserv
 .vscode/
