@@ -47,22 +47,28 @@ void Server::processClientData(int connfd)
 			else
 			{
 				handleReceivedData(buff_rx, fds[i].fd);
-				// connfd or socketfd ?
 				write(connfd, buff_tx, strlen(buff_tx));
 			}
 		}
 	}
 }
 
-int	Server::handleClientConnection(int sockfd)
+int Server::handleClientConnection(int sockfd)
 {
 	int connfd; /* listening socket and connection socket file descriptors */
 	struct sockaddr_in client;
-	unsigned int len = sizeof(client);	/* length of client address */
+	unsigned int len = sizeof(client); /* length of client address */
+	time_t currentTime;
+	time_t lastPingTimerCheck = time(NULL);
 
 	while (1)
 	{
-		int readySockets = poll(fds, clients.size() + 1, -1);
+		currentTime = time(NULL);
+		time_t elapsedTimeSinceLastCheck = currentTime - lastPingTimerCheck;
+		int timeout = (PING_INTERVAL - elapsedTimeSinceLastCheck) * 1000;
+		if (timeout < 0)
+			timeout = 0;
+		int readySockets = poll(fds, clients.size() + 1, timeout);
 		if (readySockets == -1)
 		{
 			std::cerr << "[SERVER-error]: poll() failed" << std::endl;
@@ -85,7 +91,8 @@ int	Server::handleClientConnection(int sockfd)
 				{
 					nicknameBuffer[receivedBytes] = '\0';
 					std::string nickname(nicknameBuffer);
-					addClient("", nickname, connfd);
+					time_t currentTime = time(NULL);
+					addClient("", nickname, connfd, currentTime);
 					nbrClients += 1;
 					for (unsigned long i = 1; i <= clients.size(); ++i)
 					{
@@ -103,6 +110,16 @@ int	Server::handleClientConnection(int sockfd)
 					return -1;
 				}
 			}
+		}
+		currentTime = time(NULL);
+		if (currentTime - lastPingTimerCheck >= PING_INTERVAL) {
+			for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it) {
+				if (currentTime - it->getLastPingTime() >= PING_INTERVAL) {
+					pingCheck(it->getSocketFd());
+					it->changeLastPingTime(currentTime);
+				}
+			}
+			lastPingTimerCheck = currentTime;
 		}
 		processClientData(connfd);
 	}

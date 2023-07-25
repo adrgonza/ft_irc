@@ -1,6 +1,6 @@
 #include <Server.hpp>
 
-void Server::addClient(std::string name, std::string nick, int socket)
+void Server::addClient(std::string name, std::string nick, int socket, time_t currentTime)
 {
 	std::size_t newlinePos = nick.find('\n');
 	std::string extractedNickname = nick.substr(0, newlinePos);
@@ -9,7 +9,7 @@ void Server::addClient(std::string name, std::string nick, int socket)
 	const std::string NICK_PREFIX = "NICK ";
 	if (nick.substr(0, NICK_PREFIX.size()) == NICK_PREFIX)
 		extractedNickname = extractedNickname.substr(NICK_PREFIX.size());
-	Client toAdd(name, extractedNickname, socket);
+	Client toAdd(name, extractedNickname, socket, currentTime);
 	clients.push_back(toAdd);
 	std::cout << "[SERVER] client successfully added: " << extractedNickname << std::endl;
 }

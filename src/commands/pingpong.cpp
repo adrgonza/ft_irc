@@ -7,13 +7,14 @@
 void Server::pongCheck(int clientFd, std::string networkToCheck)
 {
 	if (networkToCheck != network)
-		// kick user from network
+		// Kill clientFd user
 	clientFd = 0;
 }
 
 // El commando ping lo deberiamos mandar cada determinado tiempo, para saber si el usuario esta activo o hay que sacarlo del servidor
 void	Server::pingCheck(int clientFd)
 {
+	std::cout << "sending ping" << std::endl;
 	std::string pongMessage = "PING :" + network + "\r\n";
 	sendMsgToClient(pongMessage, clientFd);
 }

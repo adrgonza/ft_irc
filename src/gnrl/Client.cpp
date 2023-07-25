@@ -2,7 +2,7 @@
 
 Client::~Client() {}
 
-Client::Client(std::string name, std::string nickname, int socketFd) : name(name), nickname(nickname), socketFd(socketFd), channel("test") {}
+Client::Client(std::string name, std::string nickname, int socketFd, time_t pingTime) : name(name), nickname(nickname), socketFd(socketFd), channel("test"), lastPingTime(pingTime) {}
 
 int Client::getSocketFd() const
 {
@@ -19,6 +19,11 @@ std::string Client::getChannel() const
 	return this->channel;
 }
 
+time_t Client::getLastPingTime() const
+{
+	return this->lastPingTime;
+}
+
 void Client::changeNickname(std::string newNick)
 {
 	this->nickname = newNick;
@@ -27,4 +32,9 @@ void Client::changeNickname(std::string newNick)
 void Client::changeChannel(std::string channel)
 {
 	this->channel = channel;
+}
+
+void Client::changeLastPingTime(time_t newPingTime)
+{
+	this->lastPingTime = newPingTime;
 }

@@ -17,6 +17,7 @@
 #include <map>
 
 #define BACKLOG 5	/* Max. client pending connections  */
+#define PING_INTERVAL 30
 
 class Server {
 	private:
@@ -39,7 +40,7 @@ class Server {
 		void	processClientData(int connfd);
 		int		handleClientConnection(int sockfd);
 		void	handleReceivedData(std::string buff_rx, int fd);
-		void	addClient(std::string name, std::string nick, int socket);
+		void	addClient(std::string name, std::string nick, int socket, time_t currentTime);
 		void	doIrcCommand(std::string buffer, int fd);
 		void	closingClientSocket(int i);
 
