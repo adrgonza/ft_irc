@@ -219,12 +219,9 @@ void Server::kickUser(std::string buffer, int clientFd)
 	if (channelName == ":" || userToKick == ":")
 	{
 		// ERR_NEEDMOREPARAMS (461)
-		std::string clientNickname = it->getNickname();
-		std::string errorMsg = ":" + clientNickname + " 461 : Not enough parameters\r\n";
-		int retValue = send(clientFd, errorMsg.c_str(), errorMsg.size(), 0);
-		if (retValue == -1)
-			std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
-		std::cout << "Error code: " << retValue << std::endl << "Error: " << errorMsg << std::endl;
+		sendMessage(clientFd, ": 482 <client> <command> :Not enough parameters", "dangonza", "KICK");
+
+		std::cout << "ERR:NEEDMOREPARAMS sent" << std::endl;
 		//"<client> <command> :Not enough parameters"
 		return ; // Generalize error sending (clientFd is a must. Some commands require the origin command. Maybe FD and Parameter ??)
 	}
