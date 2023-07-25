@@ -2,15 +2,20 @@
 
 void Server::usersOnNetwork(std::string param, int clientFd)
 {
-	param = "";
-	std::string serverName = network;
-
 	std::vector<Client>::iterator it = findClientByFd(clientFd);
 	if (it == clients.end())
 	{
 		std::cerr << "Client not found" << std::endl;
 		return;
 	}
+
+	if (param.empty())
+	{
+		sendErrorMsgToClient("WHO <mask> expected.", 442, it->getNickname(), clientFd, "");
+		return;
+	}
+	std::string serverName = network;
+
 	Client requestingClient = *it;
 	// std::string username = requestingClient.getUsername();
 	std::string username = "pepe";
@@ -39,28 +44,33 @@ void Server::usersOnNetwork(std::string param, int clientFd)
 					  serverName + " " + clientNickname + " " + channelStatus + " :1 ";
 	}
 	whoMessage += "\r\n";
-	int retValue = send(clientFd, whoMessage.c_str(), whoMessage.size(), 0);
-	if (retValue == -1)
-	{
-		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
-		return;
-	}
+	sendMsgToClient(whoMessage, clientFd);
 	// std::string endOfWhoMessage = ":" + serverName + " 315 " + userNickname + " :End of WHO list";
 	// retValue = send(clientFd, endOfWhoMessage.c_str(), endOfWhoMessage.size(), 0);
 	// if (retValue == -1)
 	// 	std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
 }
 
-void Server::getUserInfo(std::string targetNickname, int clientFd)
+// If the <target> parameter is specified, it SHOULD be a server name or the nick of a user.
+// Servers SHOULD send the query to a specific server with that name, or to the server <target> is connected to, respectively
+void Server::getUserInfo(std::string buffer, int clientFd)
 {
+	std::string target = getWord(buffer, 2);
+	std::string targetNickname = getWord(buffer, 3);
 	std::vector<Client>::iterator it = findClientByFd(clientFd);
 	std::string invitingUser = it->getNickname();
+
+	if (target == ":")
+	{
+		sendErrorMsgToClient("WHOIS [<target>] <nick> expected.", 442, it->getNickname(), clientFd, "");
+		return;
+	}
+	if (target == targetNickname)
+		// no server to check on
+	// TODO - Use of target
 	if (!userExists(targetNickname))
 	{
-		std::string errorMessage = ":" + network + " 442 " + invitingUser + " " + invitingUser + "#" + targetNickname + " :User doesn't exist" + "\r\n";
-		int retValue = send(clientFd, errorMessage.c_str(), errorMessage.size(), 0);
-		if (retValue == -1)
-			std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+		sendErrorMsgToClient("User doesn't exist", 442, invitingUser, clientFd, targetNickname);
 		return;
 	}
 
@@ -72,14 +82,9 @@ void Server::getUserInfo(std::string targetNickname, int clientFd)
 	Client *clientObj = findClientByNickname(targetNickname);
 	std::string whoisMessage = ":" + network + " 311 " + targetNickname + " " + targetNickname + " " + invitingUser + " " + hostname + " * :" + realname + "\r\n";
 	whoisMessage += ":" + network + " 319 " + targetNickname + " " + targetNickname + " :" + clientObj->getChannel() + "\r\n";
-	int retValue = send(clientFd, whoisMessage.c_str(), whoisMessage.size(), 0);
-	if (retValue == -1)
-		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
-
+	sendMsgToClient(whoisMessage, clientFd);
 	std::string endOfWhoisMessage = ":" + network + " 318 " + targetNickname + " " + targetNickname + " :End of WHOIS list\r\n";
-	retValue = send(clientFd, endOfWhoisMessage.c_str(), endOfWhoisMessage.size(), 0);
-	if (retValue == -1)
-		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+	sendMsgToClient(endOfWhoisMessage, clientFd);
 }
 
 void Server::getSpecificUsersInfo(std::string buffer, int clientFd)
@@ -99,12 +104,7 @@ void Server::getSpecificUsersInfo(std::string buffer, int clientFd)
 	while (!userNick.empty())
 	{
 		if (!userExists(userNick))
-		{
-			std::string errorMessage = ":" + network + " 442 " + it->getNickname() + " " + it->getNickname() + "#" + userNick + " :User doesn't exist" + "\r\n";
-			int retValue = send(clientFd, errorMessage.c_str(), errorMessage.size(), 0);
-			if (retValue == -1)
-				std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
-		}
+			sendErrorMsgToClient("User doesn't exist", 442, it->getNickname(), clientFd, userNick);
 		else
 			usersToAsk.push_back(userNick);
 		i++;
@@ -142,10 +142,5 @@ void Server::getSpecificUsersInfo(std::string buffer, int clientFd)
 		}
 	}
 	whoMessage += "\r\n";
-	int retValue = send(clientFd, whoMessage.c_str(), whoMessage.size(), 0);
-	if (retValue == -1)
-	{
-		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
-		return;
-	}
+	sendMsgToClient(whoMessage, clientFd);
 }

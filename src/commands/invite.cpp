@@ -1,31 +1,34 @@
 #include <Server.hpp>
 
-void Server::inviteNick(std::string invitingUser, std::string targetUser, std::string channel, int invitingUserFd)
+void Server::inviteNick(std::string buffer, std::string invitingUser, int invitingUserFd)
 {
-	if (!userExists(targetUser))
+	std::string targetUser = getWord(buffer, 2);
+	std::string channel = getWord(buffer, 3);
+
+	if (targetUser == ":" || channel.empty())
 	{
-		std::string errorMessage = ":" + network + " 442 " + invitingUser + " " + invitingUser + "#" + targetUser + " :User doesn't exist" + "\r\n";
-		int retValue = send(invitingUserFd, errorMessage.c_str(), errorMessage.size(), 0);
-		if (retValue == -1)
-			std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+		sendErrorMsgToClient("INVITE <nickname> <channel> expected.", 442, invitingUser, invitingUserFd, "");
 		return;
 	}
-	std::string lookChannel = "#" + channel;
-	if (!channelExists(lookChannel))
+	if (channel[0] != '#')
 	{
-		std::string errorMessage = ":" + network + " 442 " + invitingUser + " " + invitingUser + "#" + channel + " :Channel doesn't exist" + "\r\n";
-		int retValue = send(invitingUserFd, errorMessage.c_str(), errorMessage.size(), 0);
-		if (retValue == -1)
-			std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+		sendErrorMsgToClient("Channel has to start with #", 442, invitingUser, invitingUserFd, channel);
+		return ;
+	}
+	if (!userExists(targetUser))
+	{
+		sendErrorMsgToClient("User doesn't exist", 442, invitingUser, invitingUserFd, targetUser);
+		return;
+	}
+	if (!channelExists(channel))
+	{
+		sendErrorMsgToClient("Channel doesn't exist", 442, invitingUser, invitingUserFd, channel);
 		return;
 	}
 	std::vector<Client>::iterator it = findClientByFd(invitingUserFd);
-	if (it->getChannel() != lookChannel)
+	if (it->getChannel() != channel)
 	{
-		std::string errorMessage = ":" + network + " 442 " + invitingUser + " " + invitingUser + "#" + channel + " :You are not in the channel" + "\r\n";
-		int retValue = send(invitingUserFd, errorMessage.c_str(), errorMessage.size(), 0);
-		if (retValue == -1)
-			std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+		sendErrorMsgToClient("You are not in the channel", 442, invitingUser, invitingUserFd, channel);
 		return;
 	}
 
@@ -34,12 +37,9 @@ void Server::inviteNick(std::string invitingUser, std::string targetUser, std::s
 	{
 		if (it->getNickname() == targetUser)
 		{
-			if (it->getChannel() == lookChannel)
+			if (it->getChannel() == channel)
 			{
-				std::string errorMessage = ":" + network + " 442 " + invitingUser + " " + invitingUser + "#" + targetUser + " :Is already in the channel" + "\r\n";
-				int retValue = send(invitingUserFd, errorMessage.c_str(), errorMessage.size(), 0);
-				if (retValue == -1)
-					std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+				sendErrorMsgToClient("Is already in the channel", 442, invitingUser, invitingUserFd, targetUser);
 				return;
 			}
 			clientFd = it->getSocketFd();
@@ -47,7 +47,5 @@ void Server::inviteNick(std::string invitingUser, std::string targetUser, std::s
 		}
 	}
 	std::string inviteMessage = ":" + invitingUser + "!user@host INVITE " + targetUser + " :" + channel + "\r\n";
-	int retValue = send(clientFd, inviteMessage.c_str(), inviteMessage.size(), 0);
-	if (retValue == -1)
-		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+	sendMsgToClient(inviteMessage, clientFd);
 }

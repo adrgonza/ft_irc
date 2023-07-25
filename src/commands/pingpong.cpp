@@ -15,7 +15,5 @@ void Server::pongCheck(int clientFd, std::string networkToCheck)
 void	Server::pingCheck(int clientFd)
 {
 	std::string pongMessage = "PING :" + network + "\r\n";
-	int retValue = send(clientFd, pongMessage.c_str(), pongMessage.size(), 0);
-	if (retValue == -1)
-		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+	sendMsgToClient(pongMessage, clientFd);
 }
