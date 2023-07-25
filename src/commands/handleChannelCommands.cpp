@@ -255,17 +255,11 @@ void Server::kickUser(std::string buffer, int clientFd)
 	Client* clientObj = findClientByNickname(userToKick);
 	clientFd = clientObj->getSocketFd();
 
-	retValue = send(clientFd, sendMsg.c_str(), sendMsg.size(), 0);
-	if (retValue == -1)
-		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
-
 	// Remove 'userToKick' from the server & send them to LIMBO_CHANNEL if needed
 	if (clientObj != NULL)
 		channelObj->removeParticipant(clientObj);
 	clientFd = getClientSocketFdByNickname(userToKick);
 	sendMsgToClient(sendMsg, clientFd);
 
-	channelObj->removeParticipant(userToKick);
-	Client* clientObj = findClientByNickname(userToKick);
-	clientObj->changeChannel(LIMBO_CHANNEL);
+	channelObj->removeParticipant(clientObj);
 }
