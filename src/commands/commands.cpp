@@ -61,7 +61,7 @@ void Server::doIrcCommand(std::string buffer, int fd)
 			// handleJoin(getWord(buffer, 2), it->getNickname(), fd);
 			handleJoin(buffer, it->getNickname(), fd);
 		else if (command == "NICK")
-			changeNickName(getWord(buffer, 2), it->getNickname());
+			changeNickName(getWord(buffer, 2), it->getNickname(), fd);
 		else if (command == "INVITE")
 			inviteNick(buffer, it->getNickname(), fd);
 		else if (command == "LIST")

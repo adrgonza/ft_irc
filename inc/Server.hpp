@@ -54,7 +54,7 @@ class Server {
 		// Commands
 		void	privMessage(std::string buffer, int fd);
 		void	sendNotice(std::string buffer, std::string sender, int clientFd);
-		void	changeNickName(std::string newNick, std::string oldNick);
+		void	changeNickName(std::string newNick, std::string oldNick, int clientFd);
 		void	handleJoin(std::string buffer, std::string user, int fd);
 		void	inviteNick(std::string buffer, std::string invitingUser, int invitingUserFd);
 		void	listChannels(std::string user, int clientFd);
