@@ -21,6 +21,7 @@ void Server::closingClientSocket(int i)
 	{
 		if (it->getSocketFd() == fds[i].fd)
 		{
+			disconnectedClients.push_back(*it);
 			clients.erase(it);
 			break;
 		}
@@ -112,9 +113,12 @@ int Server::handleClientConnection(int sockfd)
 			}
 		}
 		currentTime = time(NULL);
-		if (currentTime - lastPingTimerCheck >= PING_INTERVAL) {
-			for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it) {
-				if (currentTime - it->getLastPingTime() >= PING_INTERVAL) {
+		if (timeout == 0 || (readySockets > 0 && fds[1].revents & POLLIN))
+		{
+			for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
+			{
+				if (currentTime - it->getLastPingTime() >= PING_INTERVAL)
+				{
 					pingCheck(it->getSocketFd());
 					it->changeLastPingTime(currentTime);
 				}

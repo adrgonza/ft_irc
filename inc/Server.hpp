@@ -28,6 +28,7 @@ class Server {
 		struct pollfd	fds[BACKLOG + 1];
 
 		std::vector<Client> clients;
+		std::vector<Client> disconnectedClients;
 		int 	nbrClients;
 
 		std::map<std::string, Channel> channels;
@@ -65,6 +66,7 @@ class Server {
 		void	usersOnNetwork(std::string param, int clientFd);
 		void	getUserInfo(std::string buffer, int clientFd);
 		void	getSpecificUsersInfo(std::string buffer, int clientFd);
+		void	getPreviouslyUsersInfo(std::string buffer, int clientFd);
 		void	pongCheck(int clientFd, std::string networkToCheck);
 		void	pingCheck(int clientFd);
 		void	checkUsersOnline(std::vector<std::string> clinetList, int clientFd);
