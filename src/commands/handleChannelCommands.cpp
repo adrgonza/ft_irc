@@ -218,19 +218,16 @@ void Server::kickUser(std::string buffer, int clientFd)
 
 	if (channelName == ":" || userToKick == ":")
 	{
-		// ERR_NEEDMOREPARAMS (461)
-		sendMessage(clientFd, ": 482 <client> <command> :Not enough parameters", "dangonza", "KICK");
-
-		std::cout << "ERR:NEEDMOREPARAMS sent" << std::endl;
-		//"<client> <command> :Not enough parameters"
-		return ; // Generalize error sending (clientFd is a must. Some commands require the origin command. Maybe FD and Parameter ??)
+		sendMessage(clientFd, ERR_NEEDMOREPARAMS_461, it->getNickname().c_str(), "KICK");
+		return ;
 	}
 
 
 	Channel* channelObj = getChannelByName(channelName);
 	if (channelObj == NULL)
 	{
-		sendErrorMsgToClient("Channel not found", 442, it->getNickname(), clientFd, channelName);
+		std::cout << "Error 403" << std::endl;
+		sendMessage(clientFd, ERR_NOSUCHCHANNEL_403, it->getNickname().c_str(), channelName.c_str());
 		return;
 	}
 	if (!channelObj->hasOperator(it->getNickname()))

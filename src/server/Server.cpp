@@ -31,7 +31,7 @@ void Server::closingClientSocket(int i)
 void Server::processClientData(int connfd)
 {
 	int len_rx = 0; /* received and sent length, in bytes */
-	char buff_tx[100] = "Hello client, I am the server\r\n";
+	char buff_tx[100] = "Hello client, I am the server\r\n";//IRC_ENDLINE;// Why is this neccesary? => //;
 	char buff_rx[100]; /* buffers for reception  */
 
 	for (unsigned long i = 1; i <= clients.size(); ++i)

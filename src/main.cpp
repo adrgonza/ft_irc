@@ -53,11 +53,10 @@ int getParameterCount(std::string errorMessage)
 std::string buildClientMessage(std::string message, va_list args)
 {
 	int totalParameters = getParameterCount(message);
-	bool messageHasNewline = (message.size() >= 2 && message[message.size() - 2] == '\r' && message[message.size() - 1] == '\n');
-	if (totalParameters == 0) // If there are no tokens in the message, do nothing about it
-		return message + (messageHasNewline ? "" : IRC_ENDLINE);
-
 	std::string finalMessage = "";
+	if (totalParameters == 0) // If there are no tokens in the message, do nothing about it
+		return (message);
+
 	for (size_t i = 0; i < message.size(); i++) // Loop through the string
 	{
 		if (message[i] == '<') // Whenever you find the start of a token (<token>)
@@ -81,7 +80,7 @@ std::string buildClientMessage(std::string message, va_list args)
 		else
 			finalMessage += message[i];
 	}
-	return (finalMessage + (messageHasNewline ? "" : IRC_ENDLINE)); // Returns. Adds the end characters if needed
+	return (finalMessage);
 }
 
 void sendMessage(int fd, std::string message, ...)
@@ -90,6 +89,7 @@ void sendMessage(int fd, std::string message, ...)
 	va_start(args, message);
 
 	message = buildClientMessage(message, args);
+	std::cout << "ERRMSG: " << message << "$" << std::endl;
 
 	va_end(args);
 

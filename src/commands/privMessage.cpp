@@ -6,7 +6,7 @@ void Server::privMessage(std::string buff_rx, int fd)
 		buff_rx[i] = std::tolower(buff_rx[i]);
 
 	std::string toChannel;
-	std::string sendMessage;
+	std::string message;
 	std::string nickname;
 
 	std::size_t newlinePos = buff_rx.find('\n');
@@ -14,19 +14,23 @@ void Server::privMessage(std::string buff_rx, int fd)
 	if (!buff_rx.empty() && buff_rx.back() == '\r')
 		buff_rx.erase(buff_rx.size() - 1);
 
+	std::cout << "Called privmsg!" << std::endl;
+
 	bool clientFound = false;
 	std::vector<Client>::iterator it;
 	for (it = clients.begin(); it != clients.end(); ++it)
 	{
+		std::cout << "loop -> " << it->getSocketFd() << "/" << fd << std::endl;
 		if (it->getSocketFd() == fd)
 		{
 			nickname = it->getNickname();
 			toChannel = it->getChannel();
-			Channel* channelObj = getChannelByName(toChannel);
-			if (channelObj != NULL && !channelObj->getTopic().empty())
+			//Channel* channelObj = getChannelByName(toChannel);
+			message = "PRIVMSG " + toChannel + " : " + buff_rx + "\r\n";
+			/*if (channelObj != NULL && !channelObj->getTopic().empty())
 				sendMessage = "PRIVMSG " + toChannel + ":" + channelObj->getTopic() + " :" + buff_rx + " " + nickname + "\r\n";
 			else
-				sendMessage = "PRIVMSG " + toChannel + " :" + buff_rx + " " + nickname + "\r\n";
+				sendMessage = "PRIVMSG " + toChannel + " :" + buff_rx + " " + nickname + "\r\n";*/
 			clientFound = true;
 			break;
 		}
@@ -42,7 +46,7 @@ void Server::privMessage(std::string buff_rx, int fd)
 	{
 		if (it->getChannel() == toChannel)
 		{
-			sendMsgToClient(sendMessage, it->getSocketFd());
+			sendMessage(it->getSocketFd(), message);
 		}
 	}
 }
