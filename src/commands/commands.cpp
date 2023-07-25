@@ -58,21 +58,22 @@ void Server::doIrcCommand(std::string buffer, int fd)
 	if (it != clients.end())
 	{
 		if (command == "JOIN")
-			handleJoin(getWord(buffer, 2), it->getNickname(), fd);
+			// handleJoin(getWord(buffer, 2), it->getNickname(), fd);
+			handleJoin(buffer, it->getNickname(), fd);
 		else if (command == "NICK")
 			changeNickName(getWord(buffer, 2), it->getNickname());
 		else if (command == "INVITE")
-			inviteNick(it->getNickname(), getWord(buffer, 2), getWord(buffer, 3), fd);
+			inviteNick(buffer, it->getNickname(), fd);
 		else if (command == "LIST")
 			listChannels(it->getNickname(), fd);
 		else if (command == "PART")
-			partChannel(it->getNickname(), getWord(buffer, 2), fd);
+			partChannel(buffer, it->getNickname(), fd);
 		else if (command == "TOPIC")
-			topicChannel(getWord(buffer, 2), fd, getWord(buffer, 3));
+			topicChannel(buffer, it->getNickname(), fd);
 		else if (command == "NAMES")
-			getNamesInChannel(getWord(buffer, 2), fd);
+			getNamesInChannel(buffer, fd);
 		else if (command == "NOTICE")
-			sendNotice(getWord(buffer, 3), getWord(buffer, 2), it->getNickname(), fd);
+			sendNotice(buffer, it->getNickname(), fd);
 		else if (command == "PING")
 			pingCheck(fd);
 		else if (command == "PONG")
@@ -80,7 +81,7 @@ void Server::doIrcCommand(std::string buffer, int fd)
 		else if (command == "WHO")
 			usersOnNetwork(getWord(buffer, 2), fd);
 		else if (command == "WHOIS")
-			getUserInfo(getWord(buffer, 2), fd);
+			getUserInfo(buffer, fd);
 		else if (command == "ISON")
 			getSpecificUsersInfo(buffer, fd);
 		else if (command == "KICK")

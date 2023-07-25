@@ -9,10 +9,7 @@ void Server::changeNickName(std::string newNick, std::string oldNick)
 		{
 			it->changeNickname(newNick);
 			std::string sendMessage = ":" + oldNick + "!user@host NICK " + newNick + "\r\n";
-			int retValue = send(it->getSocketFd(), sendMessage.c_str(), sendMessage.size(), 0);
-			if (retValue == -1)
-				std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
-
+			sendMsgToClient(sendMessage, it->getSocketFd());
 			break;
 		}
 	}
