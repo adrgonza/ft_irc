@@ -12,6 +12,7 @@
 
 #include <libraries.hpp>
 #include <Client.hpp>
+#include <Server.hpp>
 
 e_command parseCommandCode(std::string command)
 {
@@ -29,6 +30,7 @@ e_command parseCommandCode(std::string command)
 	if (command == "LIST") return CMD_LIST;
 	if (command == "KICK") return CMD_KICK;
 	if (command == "PRIVMSG") return CMD_PRIVMSG;
+	if (command == "SAY") return CMD_SAY;
 	if (command == "NOTICE") return CMD_NOTICE;
 	if (command == "KILL") return CMD_KILL;
 	if (command == "ERROR") return CMD_ERROR;
@@ -46,28 +48,37 @@ e_command parseCommandCode(std::string command)
 	return CMD_UNKNOWN;
 }
 
-void handleCommand(Client caller, std::string command, std::string body)
+void Server::handleCommand(Client &caller, std::string command, std::string body)
 {
+	std::cout << "cmd: " << command << ", " << body << std::endl;
 	e_command commandCode = parseCommandCode(command);
 	switch (commandCode)
 	{
-		// Commands done
-		case CMD_NICK: caller.doNickCommand(body); break;
+
+		// Client commands
+		case CMD_NICK: caller.changeNickname(body); break;
+		case CMD_USER: break;
+
+		// Channel commands
+		case CMD_JOIN: handleJoin(body, caller); break;
+		case CMD_LIST: listChannels(body, caller); break;
+		case CMD_PART: partChannel(body, caller); break;
+		case CMD_NAMES: getNamesInChannel(body, caller); break; // NO FUNCIONA
+		case CMD_INVITE: inviteNick(body, caller); break;
+		case CMD_TOPIC: topicChannel(body, caller); break;
+
+		// Server commands
+		case CMD_PRIVMSG: privMessage(body, caller); break;
+		case CMD_SAY: sayMsg(body, caller); break;
+
 
 		// Commands yet to do
-		case CMD_USER:
 		case CMD_PING:
 		case CMD_PONG:
 		case CMD_OPER:
 		case CMD_AUTH:
 		case CMD_QUIT:
-		case CMD_JOIN:
-		case CMD_PART:
-		case CMD_TOPIC:
-		case CMD_NAMES:
-		case CMD_LIST:
 		case CMD_KICK:
-		case CMD_PRIVMSG:
 		case CMD_NOTICE:
 		case CMD_KILL:
 
@@ -75,7 +86,6 @@ void handleCommand(Client caller, std::string command, std::string body)
 		case CMD_ERROR:
 		case CMD_PASS:
 		case CMD_CAP:
-		case CMD_INVITE:
 		case CMD_TIME:
 		case CMD_MODE:
 		case CMD_WHO:
@@ -88,4 +98,83 @@ void handleCommand(Client caller, std::string command, std::string body)
 			caller.sendMessage(ERR_UNKNOWNCOMMAND_421, caller.getNickname().c_str(), command.c_str());
 		break;
 	}
+}
+
+
+bool Server::userExists(std::string nickname)
+{
+	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
+	{
+		if (it->getNickname() == nickname)
+			return true;
+	}
+	return false;
+}
+bool Server::channelExists(std::string channelName)
+{
+	if (channels.find(channelName) != channels.end())
+		return true;
+	return false;
+}
+
+std::vector<Client>::iterator Server::findClientByFd(int fd)
+{
+	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
+	{
+		if (it->getFd() == fd)
+			return it;
+	}
+	return clients.end();
+}
+
+int Server::getClientSocketFdByNickname(const std::string &nickname)
+{
+	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
+	{
+		if (it->getNickname() == nickname)
+			return it->getFd();
+	}
+	return -1;
+}
+
+Channel* Server::getChannelByName(std::string channelName)
+{
+	std::map<std::string, Channel>::iterator it = channels.find(channelName);
+	if (it != channels.end())
+		return &(it->second);
+	else
+		return NULL;
+}
+
+Client* Server::findClientByNickname(std::string targetNickname)
+{
+	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
+	{
+		if (it->getNickname() == targetNickname)
+			return &(*it);
+	}
+	return NULL;
+}
+
+std::string Server::getWord(const std::string &str, int wordNumber)
+{
+	if (str.empty())
+		return "";
+
+	std::string::size_type startPos = 0;
+	std::string::size_type endPos = 0;
+	int currentWord = 0;
+
+	while (currentWord < wordNumber)
+	{
+		startPos = str.find_first_not_of(' ', endPos);
+		if (startPos == std::string::npos)
+			return "";
+		endPos = str.find(' ', startPos);
+		if (endPos == std::string::npos)
+			endPos = str.length();
+		currentWord++;
+	}
+
+	return str.substr(startPos, endPos - startPos);
 }

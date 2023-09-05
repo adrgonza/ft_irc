@@ -164,9 +164,9 @@ void Server::disconnectClient(int clientFd)
 }
 
 // server_utils.cpp
-void handleCommand(Client caller, std::string command, std::string body);
+// void handleCommand(Client caller, std::string command, std::string body);
 
-void Server::handleClientInput(Client caller, std::string message)
+void Server::handleClientInput(Client &caller, std::string message)
 {
 	(void) caller;
 	size_t spaceSeparator = message.find(' ');

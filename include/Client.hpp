@@ -23,21 +23,26 @@ class Client {
 
 		Client(int connectionFd);
 
-		int getFd() const;
-		int getFd();
-		std::string getNickname();
-		std::string getSource();
+		bool operator==(const Client& other) const;
 
-		void sendMessage(std::string message, ...);
+		int getFd() const;
+		std::string getNickname() const;
+		std::string getSource();
+		std::string getChannel() const;
+
 
 		// Commands
-		void doNickCommand(std::string body);
+		void sendMessage(std::string message, ...);
+		void privMessage(std::string body, Client user);
+		void changeNickname(std::string newNick);
+		void changeChannel(std::string channel);
 
 	private:
 		int fd;
 		std::string nickname;
 		std::string username;
 		std::string host;
+		std::string channel;
 };
 
 #endif

@@ -25,9 +25,17 @@ Client::Client(int connectionFd) {
 	this->fd = connectionFd;
 }
 
+bool Client::operator==(const Client& other) const {
+	if (this->fd == other.getFd() && this->nickname == other.getNickname())
+		return true;
+	else
+		return false;
+}
+
+
 int Client::getFd() const { return this->fd; }
-int Client::getFd() { return this->fd; }
-std::string Client::getNickname() { return this->nickname; }
+std::string Client::getNickname() const { return this->nickname; }
+std::string Client::getChannel() const { return this->channel; }
 
 // client_utils.cpp
 std::string buildClientMessage(std::string message, va_list args);
@@ -62,11 +70,16 @@ std::string Client::getSource()
 	return source;
 }
 
-void Client::doNickCommand(std::string body)
+void Client::changeNickname(std::string body)
 {
 	// Assumes (for now) body is always correct. No collisions, no weird characters, and never empty
 	// TODO: Handle NICK command correctly (please)
 
 	this->sendMessage("NICK <nickname>", body.c_str());
 	this->nickname = body; // Nickname is changed after the message is sent, to not affect the source of the message (see docs.)
+}
+
+void Client::changeChannel(std::string channel)
+{
+	this->channel = channel;
 }

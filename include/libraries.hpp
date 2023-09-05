@@ -22,6 +22,7 @@
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <vector>
+#include <map>
 
 typedef enum {
 	CMD_UNKNOWN, // Unknown command
@@ -41,6 +42,7 @@ typedef enum {
 	CMD_PRIVMSG,
 	CMD_NOTICE,
 	CMD_KILL,
+	CMD_SAY,
 	// I'm not sure if the commands below are needed
 	CMD_ERROR,
 	CMD_PASS,
