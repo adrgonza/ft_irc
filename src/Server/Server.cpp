@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dangonza <dangonza@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adrgonza <adrgonza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/27 13:14:29 by dangonza          #+#    #+#             */
-/*   Updated: 2023/07/28 15:41:50 by dangonza         ###   ########.fr       */
+/*   Updated: 2023/09/20 18:24:36 by adrgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <Server.hpp>
 
-Server::Server() {}
+Server::Server(int port, std::string password) {}
 Server::~Server() {}
 Server::Server(const Server & obj) { *this = obj; }
 Server& Server::operator=(const Server& obj) { (void)obj; return *this; }
@@ -29,7 +29,7 @@ std::vector<Client>::iterator Server::getClientByFd(int fd)
 }
 
 // Execute the Server
-void Server::run(int port)
+void Server::run()
 {
 	int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (serverSocket == -1)
