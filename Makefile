@@ -13,7 +13,7 @@ SRCS	=	main.cpp \
 OBJS = $(SRCS:%.cpp=bin/%.o)
 
 CXX = c++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -I include
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g3 -I include
 
 all: $(NAME)
 

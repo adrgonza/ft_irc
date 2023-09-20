@@ -82,48 +82,31 @@ bool Server::handleClientCommunications(size_t i)
 		return (std::cout << "Error: dont have access to read client fd." << std::endl, false);
 
 	if (readSize == 0)
-		disconnectClient(_pollFd[i].fd);
+	{
+		//disconnect a client
+		std::cout << "[SERVER]: A Client was disconnected from the server" << std::endl;
+		close(_pollFd[i].fd);
+		_clients.erase(std::find(_clients.begin(), _clients.end(), _pollFd[i].fd));
+
+		for (size_t i = 0; i < BACKLOG; i++)
+		{
+			if (_pollFd[i + 1].fd == _pollFd[i].fd)
+				_pollFd[i + 1].fd = -1;
+			_pollFd[i].revents = 0;
+		}
+	}
 	else
 	{
 		std::vector<Client>::iterator caller = std::find(_clients.begin(), _clients.end(), _pollFd[i].fd);
-		if (caller == _clients.end())
-			return (std::cout << "[SERVER :: WARNING]: getClientByFd() failed before executing a command" << std::endl, true);
 
-		handleClientInput(*caller, buffer);
+		if (caller != _clients.end() &&handleClientInput(*caller, buffer) == false)
+			return (false);
 	}
 	return (true);
 }
 
-void Server::disconnectClient(int clientFd)
+bool Server::handleClientInput(Client &caller, std::string message)
 {
-	std::cout << "[SERVER]: A Client was disconnected from the server" << std::endl;
-	close(clientFd);
-
-	// Removes the client from the Vector of Clients
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
-	{
-		if (it->getFd() == clientFd)
-		{
-			_clients.erase(it);
-			break;
-		}
-	}
-
-	// Remove the Client FD from the backlog
-	for (size_t i = 0; i < BACKLOG; i++)
-	{
-		if (_pollFd[i + 1].fd == clientFd)
-			_pollFd[i + 1].fd = -1;
-		_pollFd[i].revents = 0;
-	}
-}
-
-// server_utils.cpp
-// void handleCommand(Client caller, std::string command, std::string body);
-
-void Server::handleClientInput(Client &caller, std::string message)
-{
-	(void)caller;
 	size_t spaceSeparator = message.find(' ');
 	std::string command = (spaceSeparator == std::string::npos) ? message : message.substr(0, spaceSeparator);
 	std::string body = (spaceSeparator == std::string::npos) ? IRC_ENDLINE : message.substr(spaceSeparator + 1);
@@ -132,5 +115,18 @@ void Server::handleClientInput(Client &caller, std::string message)
 	if (endlinePosition != std::string::npos) // If the message does not end with '\r\n' should be ignored, but for now we accept it. TODO: change this
 		body = body.substr(0, endlinePosition);
 
-	handleCommand(caller, command, body);
+	if (command == "PASS")
+	{
+		if (body == _password)
+			caller.giveKey();
+		else
+			std::cout << "Error: invalid password.." << std::endl; //should send a message to server
+	}
+
+	if (caller.getKey() == true)
+		handleCommand(caller, command, body);
+	else
+		std::cout << "Error: a password is required.." << std::endl;
+
+	return (true);
 }

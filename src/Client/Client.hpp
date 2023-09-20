@@ -13,7 +13,8 @@ class Client {
 		std::string getNickname() const;
 		std::string getSource();
 		std::string getChannel() const;
-
+		void giveKey();
+		bool getKey();
 
 		// Commands
 		void sendMessage(std::string message, ...);
@@ -26,6 +27,7 @@ class Client {
 		std::string username;
 		std::string host;
 		std::string channel;
+		bool _passwordkey;
 };
 
 #endif

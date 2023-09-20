@@ -28,10 +28,7 @@ class Server {
 		bool handleClientConnections();
 		bool handleClientCommunications(size_t);
 
-		void handleClientInput(Client &caller, std::string message);
-
-		void disconnectClient(int clientFd);
-
+		bool handleClientInput(Client &caller, std::string message);
 
 		// Utils
 		void handleCommand(Client &caller, std::string command, std::string body);

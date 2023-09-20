@@ -1,9 +1,9 @@
 #include <libraries.hpp>
 #include "Client.hpp"
 
-Client::~Client() {}
+Client::Client(int connectionFd) : _fd(connectionFd), _passwordkey(false) {}
 
-Client::Client(int connectionFd) : _fd(connectionFd) {}
+Client::~Client() {}
 
 bool Client::operator==(const Client& other) const {
 	if (_fd == other.getFd() && this->nickname == other.getNickname())
@@ -62,4 +62,16 @@ void Client::changeNickname(std::string body)
 void Client::changeChannel(std::string channel)
 {
 	this->channel = channel;
+}
+
+void Client::giveKey()
+{
+	_passwordkey = true;
+}
+
+bool Client::getKey()
+{
+	if (_passwordkey == true)
+		return (true);
+	return(false);
 }
