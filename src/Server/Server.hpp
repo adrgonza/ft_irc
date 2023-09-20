@@ -6,7 +6,7 @@
 /*   By: adrgonza <adrgonza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/27 13:14:29 by dangonza          #+#    #+#             */
-/*   Updated: 2023/09/20 18:25:45 by adrgonza         ###   ########.fr       */
+/*   Updated: 2023/09/20 18:33:13 by adrgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,17 +24,15 @@ class Server {
 	public:
 		Server(int, std::string);
 		~Server();
-		Server(const Server & obj);
-		Server& operator=(const Server& obj);
 
-		// Execute the server
-		void run();
+		bool run();
 		std::vector<Client>::iterator getClientByFd(int fd);
 
 	private:
 		int _port;
-		std::string password;
-		
+		std::string _password;
+		int _socketFd;
+
 		struct pollfd	backlogFds[BACKLOG + 1];
 		std::vector<Client> clients;
 		std::map<std::string, Channel> channels;

@@ -1,7 +1,7 @@
 NAME = ircserv
 
 SRCS	=	main.cpp \
-			src/Server.cpp \
+			src/Server/Server.cpp \
 			src/Client.cpp \
 			src/Channel.cpp \
 			src/client_utils.cpp \

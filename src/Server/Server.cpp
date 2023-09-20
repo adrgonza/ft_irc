@@ -6,18 +6,16 @@
 /*   By: adrgonza <adrgonza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/27 13:14:29 by dangonza          #+#    #+#             */
-/*   Updated: 2023/09/20 18:24:36 by adrgonza         ###   ########.fr       */
+/*   Updated: 2023/09/20 18:39:40 by adrgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <Server.hpp>
+#include "Server.hpp"
 
-Server::Server(int port, std::string password) {}
+Server::Server(int port, std::string password) : _port(port), _password(password) {}
+
 Server::~Server() {}
-Server::Server(const Server & obj) { *this = obj; }
-Server& Server::operator=(const Server& obj) { (void)obj; return *this; }
 
-// Server utils
 std::vector<Client>::iterator Server::getClientByFd(int fd)
 {
 	for (std::vector<Client>::iterator it = this->clients.begin(); it != this->clients.end(); it++)
@@ -29,22 +27,27 @@ std::vector<Client>::iterator Server::getClientByFd(int fd)
 }
 
 // Execute the Server
-void Server::run()
+bool Server::run()
 {
-	int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-	if (serverSocket == -1)
-		throw std::runtime_error("Server Socket creation failed");
+	if ((_socketFd = socket(AF_INET, SOCK_STREAM, 0)) < 0) { // 1-familia de direcciones(ipv4) 2-tipo de socket (tipo orientado a protocolo TCP) 3-protocolo (automatico, TCP)
+		std::cout << "Error: could not create the sockets.." << std::endl;
+		return (false);
+	}
 
 	struct sockaddr_in serverAddress;
-	memset(&serverAddress, 0, sizeof(serverAddress)); // Not really needed
-	serverAddress.sin_family = AF_INET;
-	serverAddress.sin_addr.s_addr = INADDR_ANY; // Any useful address on this machine
-	serverAddress.sin_port = htons(port);
+	bzero(&serverAddress, sizeof(serverAddress));
+	serverAddress.sin_family = AF_INET; //specing the family, interenet (address)
+	serverAddress.sin_addr.s_addr = htonl(INADDR_ANY); //responding to anything
+	serverAddress.sin_port = htons(_port); //convert server port nb to network standart byte order (to avoid to conections use different byte order)
 
-	if (bind(serverSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
-		throw std::runtime_error("Server Socket bind failed");
+	if (bind(_socketFd, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) { // set the address wher is gonna be listening
+		std::cout << "Error: could not bind.." << std::endl;
+		return (false);
+	}
 
-	if (listen(serverSocket, serverAddress.sin_port) < 0)
+	std::cout << "Waiting for a connection in '127.0.0.1' port: " << _port << std::endl; //localhost ip default = 127.0.0.1
+
+	if (listen(_socketFd, serverAddress.sin_port) < 0)
 		throw std::runtime_error("Server Socket listen failed");
 
 	this->backlogFds[0].fd = serverSocket;

@@ -1,17 +1,4 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: adrgonza <adrgonza@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/07/27 13:11:51 by dangonza          #+#    #+#             */
-/*   Updated: 2023/09/20 18:25:15 by adrgonza         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-#include <iostream>
-#include <Server.hpp>
+#include "src/Server/Server.hpp"
 
 int main(int argc, char **argv) {
 
@@ -31,7 +18,9 @@ int main(int argc, char **argv) {
 	std::string password = argv[2];
 	//we have to parse password here
 
-	Server server = Server(atoi(port.c_str()), password);
+	Server IRC = Server(atoi(port.c_str()), password);
 
-	server.run();
+	if (IRC.run() == false)
+		return (1);
+	return (0);
 }
