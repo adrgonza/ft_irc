@@ -1,4 +1,4 @@
-#include "server/Server.hpp"
+#include <Server.hpp>
 #include <iomanip>
 
 bool checkArgs(char* argv[], std::string& host, int& port_network, std::string& password_network, int& port, std::string& password)

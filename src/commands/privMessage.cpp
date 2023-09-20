@@ -1,4 +1,4 @@
-#include "../server/Server.hpp"
+#include <Server.hpp>
 
 void Server::privMessage(std::string buff_rx, int fd)
 {
@@ -42,11 +42,7 @@ void Server::privMessage(std::string buff_rx, int fd)
 	{
 		if (it->getChannel() == toChannel)
 		{
-			int retValue = send(it->getSocketFd(), sendMessage.c_str(), sendMessage.size(), 0);
-			if (retValue == -1)
-			{
-				std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
-			}
+			sendMsgToClient(sendMessage, it->getSocketFd());
 		}
 	}
 }

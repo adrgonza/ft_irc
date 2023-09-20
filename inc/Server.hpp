@@ -4,8 +4,8 @@
 #include <iostream>
 #include <unistd.h>
 #include <poll.h>
-#include "../gnrl/Client.hpp"
-#include "../gnrl/Channel.hpp"
+#include <Client.hpp>
+#include <Channel.hpp>
 
 /* sockets */
 #include <netdb.h>
@@ -53,23 +53,26 @@ class Server {
 
 		// Commands
 		void	privMessage(std::string buffer, int fd);
-		void	sendNotice(std::string message, std::string target, std::string sender, int clientFd);
-		void	changeNickName(std::string newNick, std::string oldNick);
-		void	handleJoin(std::string channel, std::string user, int fd);
-		void	inviteNick(std::string invitingUser, std::string targetUser, std::string channel, int invitingUserFd);
+		void	sendNotice(std::string buffer, std::string sender, int clientFd);
+		void	changeNickName(std::string newNick, std::string oldNick, int clientFd);
+		void	handleJoin(std::string buffer, std::string user, int fd);
+		void	inviteNick(std::string buffer, std::string invitingUser, int invitingUserFd);
 		void	listChannels(std::string user, int clientFd);
-		void	partChannel(std::string user, std::string channel, int clientFd);
-		void	topicChannel(std::string channel, int clientFd, std::string newTopic);
+		void	partChannel(std::string buffer, std::string user, int clientFd);
+		void	topicChannel(std::string buffer, std::string user, int clientFd);
 		void	getNamesInChannel(std::string channel, int clientFd);
 		void	usersOnNetwork(std::string param, int clientFd);
-		void	getUserInfo(std::string targetNickname, int clientFd);
+		void	getUserInfo(std::string buffer, int clientFd);
 		void	getSpecificUsersInfo(std::string buffer, int clientFd);
 		void	pongCheck(int clientFd, std::string networkToCheck);
 		void	pingCheck(int clientFd);
 		void	checkUsersOnline(std::vector<std::string> clinetList, int clientFd);
+		void	kickUser(std::string buffer, int clientFd);
 };
 
 int cout_msg(std::string msg);
+void sendErrorMsgToClient(std::string msg, int errorCode, std::string nickname, int clientFd, std::string optParam);
+void sendMsgToClient(std::string msg, int clientFd);
 bool isIrcCommand(std::string buffer);
 std::string getCommand(std::string buffer);
 std::string getWord(const std::string &str, int wordNumber);
