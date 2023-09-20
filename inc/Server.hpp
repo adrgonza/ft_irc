@@ -17,6 +17,7 @@
 #include <map>
 
 #define BACKLOG 5	/* Max. client pending connections  */
+#define PING_INTERVAL 30
 
 class Server {
 	private:
@@ -27,6 +28,7 @@ class Server {
 		struct pollfd	fds[BACKLOG + 1];
 
 		std::vector<Client> clients;
+		std::vector<Client> disconnectedClients;
 		int 	nbrClients;
 
 		std::map<std::string, Channel> channels;
@@ -39,7 +41,7 @@ class Server {
 		void	processClientData(int connfd);
 		int		handleClientConnection(int sockfd);
 		void	handleReceivedData(std::string buff_rx, int fd);
-		void	addClient(std::string name, std::string nick, int socket);
+		void	addClient(std::string name, std::string nick, int socket, time_t currentTime);
 		void	doIrcCommand(std::string buffer, int fd);
 		void	closingClientSocket(int i);
 
@@ -64,6 +66,7 @@ class Server {
 		void	usersOnNetwork(std::string param, int clientFd);
 		void	getUserInfo(std::string buffer, int clientFd);
 		void	getSpecificUsersInfo(std::string buffer, int clientFd);
+		void	getPreviouslyUsersInfo(std::string buffer, int clientFd);
 		void	pongCheck(int clientFd, std::string networkToCheck);
 		void	pingCheck(int clientFd);
 		void	checkUsersOnline(std::vector<std::string> clinetList, int clientFd);

@@ -1,5 +1,9 @@
 #include <Server.hpp>
 
+// The mask can be one of the following:
+// A channel name, in which case the channel members are listed.
+// An exact nickname, in which case a single user is returned.
+// A mask pattern, in which case all visible users whose nickname matches are listed. Servers MAY match other user-specific values, such as the hostname, server, real name or username. Servers MAY not support mask patterns and return an empty list.
 void Server::usersOnNetwork(std::string param, int clientFd)
 {
 	std::vector<Client>::iterator it = findClientByFd(clientFd);
@@ -67,12 +71,12 @@ void Server::getUserInfo(std::string buffer, int clientFd)
 	}
 	if (target == targetNickname)
 		// no server to check on
-	// TODO - Use of target
-	if (!userExists(targetNickname))
-	{
-		sendErrorMsgToClient("User doesn't exist", 442, invitingUser, clientFd, targetNickname);
-		return;
-	}
+		// TODO - Use of target
+		if (!userExists(targetNickname))
+		{
+			sendErrorMsgToClient("User doesn't exist", 442, invitingUser, clientFd, targetNickname);
+			return;
+		}
 
 	std::string hostname = "pepe";
 	// std::string hostname = invitingUser.getHostname();
@@ -143,4 +147,56 @@ void Server::getSpecificUsersInfo(std::string buffer, int clientFd)
 	}
 	whoMessage += "\r\n";
 	sendMsgToClient(whoMessage, clientFd);
+}
+
+//	Command: WHOWAS
+//	Parameters: <nick> [<count>]
+void Server::getPreviouslyUsersInfo(std::string buffer, int clientFd)
+{
+	std::string nick = getWord(buffer, 2);
+	std::string countStr = getWord(buffer, 3);
+	std::vector<Client>::iterator it = findClientByFd(clientFd);
+	if (nick.empty())
+	{
+		sendErrorMsgToClient("WHOWAS <nick> [<count>] expected.", 442, it->getNickname(), clientFd, "");
+		return;
+	}
+	std::vector<Client>::iterator previousClient;
+	std::vector<Client> returnClients;
+	int count;
+	if (countStr.empty())
+		count = std::atoi(countStr.c_str());
+	else
+		count = -1;
+
+	if (count > 0)
+	{
+		for (previousClient = disconnectedClients.begin(); previousClient != disconnectedClients.end(); ++it)
+		{
+			if (previousClient->getNickname() == nick)
+			{
+				returnClients.push_back(*previousClient);
+                if (--count == 0)
+                    break;
+			}
+		}
+	}
+	else
+	{
+		for (previousClient = disconnectedClients.begin(); previousClient != disconnectedClients.end(); ++it)
+		{
+			if (previousClient->getNickname() == nick)
+				returnClients.push_back(*previousClient);
+		}
+	}
+
+	if (returnClients.size() == 0)
+	{
+		sendErrorMsgToClient("No user/s found", 442, it->getNickname(), clientFd, nick);
+	}
+
+	std::string sendMessage = "PREVIOUS USERS INFO: ";
+	for (previousClient = returnClients.begin(); previousClient != returnClients.end(); ++it)
+		sendMessage += "Nick: " + previousClient->getNickname() + ", Address: " + network + ", LastPingTime: " + std::to_string(previousClient->getLastPingTime()) + "\n";
+	sendMsgToClient(sendMessage, clientFd);
 }

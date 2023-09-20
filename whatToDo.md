@@ -36,8 +36,8 @@ The IRC (Internet Relay Chat) protocol is defined in RFC 1459, and later updated
 
 ## Server Commands
 
-- `PING`: PING triggers when a server sends a client aPING message to see if its still connected <span style="color:green">(CD)</span> (MATEO)
-- `PONG`: Respond to a PING message. <span style="color:green">(CD)</span> (MATEO)
+- `PING`: PING triggers when a server sends a client aPING message to see if its still connected ✅ (MATEO)
+- `PONG`: Respond to a PING message. ✅ (MATEO)
 
 ## Operator and Administrative Commands
 
