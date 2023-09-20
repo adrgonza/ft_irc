@@ -14,7 +14,6 @@ class Server {
 		~Server();
 
 		bool run();
-		std::vector<Client>::iterator getClientByFd(int fd);
 
 	private:
 		int _port;
@@ -27,8 +26,8 @@ class Server {
 		std::map<std::string, Channel> channels;
 
 		bool handleClientConnections();
+		bool handleClientCommunications(size_t);
 
-		void handleClientCommunications();
 		void handleClientInput(Client &caller, std::string message);
 
 		void disconnectClient(int clientFd);

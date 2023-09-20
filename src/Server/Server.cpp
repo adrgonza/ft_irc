@@ -23,7 +23,7 @@ bool Server::run()
 
 	std::cout << "Waiting for a connection in '127.0.0.1' port: " << _port << std::endl; // localhost ip default = 127.0.0.1
 
-	// fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
+	fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
 
 	_pollFd[0].fd = _socketFd;
 	_pollFd[0].events = POLLIN;
@@ -37,17 +37,6 @@ bool Server::run()
 			return (false);
 }
 
-std::vector<Client>::iterator Server::getClientByFd(int fd)
-{
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
-	{
-		if (it->getFd() == fd)
-			return it;
-	}
-	return _clients.end();
-}
-
-
 bool Server::handleClientConnections()
 {
 	if (poll(_pollFd, _clients.size() + 1, -1) < 0)
@@ -60,7 +49,7 @@ bool Server::handleClientConnections()
 		if (_connectionFd == -1)
 			return (std::cout << "Error accepting client's connection" << std::endl, false);
 
-		//fcntl(_SocketFd, F_SETFL, O_NONBLOCK); // avoid system differences
+		fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
 
 		if (this->_clients.size() >= BACKLOG)
 			return (std::cout << "Error: max connections limit reached" << std::endl, true);
@@ -69,7 +58,6 @@ bool Server::handleClientConnections()
 
 		_clients.push_back(Client(_connectionFd));
 
-		// Saves the new connection
 		size_t i = 1;
 		while (i <= _clients.size() && _pollFd[i].fd != -1)
 			i++;
@@ -77,46 +65,38 @@ bool Server::handleClientConnections()
 		_pollFd[i].events = POLLIN;
 	}
 
-	handleClientCommunications();
+	for (size_t i = 1; i <= _clients.size(); i++)
+		if (_pollFd[i].fd != -1 && _pollFd[i].revents == POLLIN && handleClientCommunications(i) == false)
+			return (false);
+
 	return (true);
 }
 
-void Server::handleClientCommunications()
+bool Server::handleClientCommunications(size_t i)
 {
-	for (size_t i = 1; i <= _clients.size(); i++)
+	char buffer[BUFFER_SIZE + 1];
+	bzero(&buffer, sizeof(buffer));
+
+	int readSize = read(_pollFd[i].fd, buffer, BUFFER_SIZE);
+	if (readSize == -1)
+		return (std::cout << "Error: dont have access to read client fd." << std::endl, false);
+
+	if (readSize == 0)
+		disconnectClient(_pollFd[i].fd);
+	else
 	{
-		if (_pollFd[i].fd == -1)
-			continue ;
+		std::vector<Client>::iterator caller = std::find(_clients.begin(), _clients.end(), _pollFd[i].fd);
+		if (caller == _clients.end())
+			return (std::cout << "[SERVER :: WARNING]: getClientByFd() failed before executing a command" << std::endl, true);
 
-		if (_pollFd[i].revents & POLLIN)
-		{
-			char buffer[BUFFER_SIZE + 1];
-			bzero(&buffer, sizeof(buffer));
-
-			size_t readSize = read(_pollFd[i].fd, buffer, BUFFER_SIZE);
-			if (readSize < 0)
-				throw std::runtime_error("A Client Socket can't be read from");
-			if (readSize == 0)
-				disconnectClient(_pollFd[i].fd);
-			else
-			{
-				std::vector<Client>::iterator caller = getClientByFd(_pollFd[i].fd);
-				if (caller == _clients.end())
-				{
-					std::cout << "[SERVER :: WARNING]: getClientByFd() failed before executing a command" << std::endl;
-					continue ;
-				}
-				// TODO: Handle not-ended inputs (see subject)
-				this->handleClientInput(*caller, buffer);
-			}
-		}
+		handleClientInput(*caller, buffer);
 	}
+	return (true);
 }
 
 void Server::disconnectClient(int clientFd)
 {
 	std::cout << "[SERVER]: A Client was disconnected from the server" << std::endl;
-	// Closes the FD (AKA: closes the connection)
 	close(clientFd);
 
 	// Removes the client from the Vector of Clients
