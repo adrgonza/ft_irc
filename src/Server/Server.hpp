@@ -6,7 +6,7 @@
 /*   By: adrgonza <adrgonza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/27 13:14:29 by dangonza          #+#    #+#             */
-/*   Updated: 2023/09/20 18:43:07 by adrgonza         ###   ########.fr       */
+/*   Updated: 2023/09/20 19:01:28 by adrgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,12 +32,14 @@ class Server {
 		int _port;
 		std::string _password;
 		int _socketFd;
-
 		struct pollfd _pollFd;
+		int _connectionFd;
+
 		std::vector<Client> clients;
 		std::map<std::string, Channel> channels;
 
-		void handleClientConnections(int socket);
+		bool handleClientConnections();
+
 		void handleClientCommunications();
 		void handleClientInput(Client &caller, std::string message);
 

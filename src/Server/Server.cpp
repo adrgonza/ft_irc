@@ -1,96 +1,82 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Server.cpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: adrgonza <adrgonza@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/07/27 13:14:29 by dangonza          #+#    #+#             */
-/*   Updated: 2023/09/20 18:48:43 by adrgonza         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "Server.hpp"
 
 Server::Server(int port, std::string password) : _port(port), _password(password) {}
 
 Server::~Server() {}
 
-std::vector<Client>::iterator Server::getClientByFd(int fd)
-{
-	for (std::vector<Client>::iterator it = this->clients.begin(); it != this->clients.end(); it++)
-	{
-		if (it->getFd() == fd)
-			return it;
-	}
-	return this->clients.end();
-}
+// std::vector<Client>::iterator Server::getClientByFd(int fd)
+// {
+// 	for (std::vector<Client>::iterator it = this->clients.begin(); it != this->clients.end(); it++)
+// 	{
+// 		if (it->getFd() == fd)
+// 			return it;
+// 	}
+// 	return this->clients.end();
+// }
 
 bool Server::run()
 {
-	if ((_socketFd = socket(AF_INET, SOCK_STREAM, 0)) < 0) { // 1-familia de direcciones(ipv4) 2-tipo de socket (tipo orientado a protocolo TCP) 3-protocolo (automatico, TCP)
+	if ((_socketFd = socket(AF_INET, SOCK_STREAM, 0)) < 0) // 1-familia de direcciones(ipv4) 2-tipo de socket (tipo orientado a protocolo TCP) 3-protocolo (automatico, TCP)
+	{
 		std::cout << "Error: could not create the sockets.." << std::endl;
 		return (false);
 	}
 
 	struct sockaddr_in serverAddress;
 	bzero(&serverAddress, sizeof(serverAddress));
-	serverAddress.sin_family = AF_INET; //specing the family, interenet (address)
-	serverAddress.sin_addr.s_addr = htonl(INADDR_ANY); //responding to anything
-	serverAddress.sin_port = htons(_port); //convert server port nb to network standart byte order (to avoid to conections use different byte order)
+	serverAddress.sin_family = AF_INET;					// specing the family, interenet (address)
+	serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);	// responding to anything
+	serverAddress.sin_port = htons(_port);				// convert server port nb to network standart byte order (to avoid to conections use different byte order)
 
-	if (bind(_socketFd, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) { // set the address wher is gonna be listening
+	if (bind(_socketFd, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) // set the address wher is gonna be listening
+	{
 		std::cout << "Error: could not bind.." << std::endl;
 		return (false);
 	}
 
-	std::cout << "Waiting for a connection in '127.0.0.1' port: " << _port << std::endl; //localhost ip default = 127.0.0.1
+	std::cout << "Waiting for a connection in '127.0.0.1' port: " << _port << std::endl; // localhost ip default = 127.0.0.1
 
-	if (listen(_socketFd, serverAddress.sin_port) < 0) {
+	if (listen(_socketFd, serverAddress.sin_port) < 0)
+	{
 		std::cout << "Error: trying to listeng" << std::endl;
 		return (false);
 	}
 
-	//fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
+	// fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
 
 	_pollFd.fd = _socketFd;
 	_pollFd.events = POLLIN;
 	_pollFd.revents = 0;
 
 	while (true)
-		if (handleClientConnections(_socketFd) == false)
+		if (handleClientConnections() == false)
 			return (false);
 }
 
-bool Server::handleClientConnections(int socket)
+bool Server::handleClientConnections()
 {
-	if (poll(this->backlogFds, clients.size() + 1, -1) == -1)
-		throw std::runtime_error("A call to poll() failed");
-
-	int connectionFd = -1;		struct sockaddr_in client;
-	unsigned int clientLenght = sizeof(client);
-	if (this->backlogFds[0].revents & POLLIN) // If poll() allows us to read & write ...
+	if (poll(&_pollFd, 1, -1) < 0)
 	{
-		connectionFd = accept(socket, (struct sockaddr *)&client, &clientLenght); // Accepts incoming connections
-		if (connectionFd < 0)
-			throw std::runtime_error("Connection not accepted"); // TODO: add errno & strerror(errno)
-
-		// Check if there is space for the new connection in the BackLog
-		if (this->clients.size() >= BACKLOG)
-			throw std::runtime_error("Max connections limit reached");
-		std::cout << "[SERVER]: A new connection has been made" << std::endl;
-		// Adds the connections as a new client			this->clients.push_back(Client(connectionFd));
-		for (size_t i = 1; i <= clients.size(); i++) // Saves the new connection
-		{
-			if (this->backlogFds[i].fd != -1)
-				continue ;
-
-			this->backlogFds[i].fd = connectionFd;
-			this->backlogFds[i].events = POLLIN;
-			break ;
-		}
+		std::cout << "Error: syscall poll failed.." << std::endl;
+		return (false);
 	}
-	this->handleClientCommunications();
+
+	struct sockaddr_in client;
+	unsigned int clientLenght = sizeof(client);
+
+	if (_pollFd.revents == POLLIN)
+	{
+		std::cout << "Incomming connecction" << std::endl;
+		_connectionFd = accept(_socketFd, NULL, NULL);
+		if (_connectionFd < 0)
+		{
+			std::cout << "Error accepting client's connection" << std::endl;
+			return (false);
+		}
+
+		//fcntl(_SocketFd, F_SETFL, O_NONBLOCK); // avoid system differences
+		handleClientCommunications();
+	}
 }
 
 void Server::handleClientCommunications()
@@ -98,7 +84,7 @@ void Server::handleClientCommunications()
 	for (size_t i = 1; i <= clients.size(); i++)
 	{
 		if (this->backlogFds[i].fd == -1)
-			continue ;
+			continue;
 
 		if (this->backlogFds[i].revents & POLLIN)
 		{
@@ -117,7 +103,7 @@ void Server::handleClientCommunications()
 				if (caller == clients.end())
 				{
 					std::cout << "[SERVER :: WARNING]: getClientByFd() failed before executing a command" << std::endl;
-					continue ;
+					continue;
 				}
 				// TODO: Handle not-ended inputs (see subject)
 				this->handleClientInput(*caller, buffer);
@@ -147,7 +133,7 @@ void Server::disconnectClient(int clientFd)
 	{
 		if (this->backlogFds[i + 1].fd == clientFd)
 			this->backlogFds[i + 1].fd = -1;
-			this->backlogFds[i].revents = 0;
+		this->backlogFds[i].revents = 0;
 	}
 }
 
@@ -156,7 +142,7 @@ void Server::disconnectClient(int clientFd)
 
 void Server::handleClientInput(Client &caller, std::string message)
 {
-	(void) caller;
+	(void)caller;
 	size_t spaceSeparator = message.find(' ');
 	std::string command = (spaceSeparator == std::string::npos) ? message : message.substr(0, spaceSeparator);
 	std::string body = (spaceSeparator == std::string::npos) ? IRC_ENDLINE : message.substr(spaceSeparator + 1);
