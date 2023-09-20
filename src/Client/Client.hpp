@@ -13,7 +13,7 @@ class Client {
 		std::string getNickname() const;
 		std::string getSource();
 		std::string getChannel() const;
-		void giveKey();
+		void giveKey(bool);
 		bool getKey();
 
 		// Commands

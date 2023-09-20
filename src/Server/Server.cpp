@@ -107,6 +107,11 @@ bool Server::handleClientCommunications(size_t i)
 
 bool Server::handleClientInput(Client &caller, std::string message)
 {
+	//change the function
+	//manage commands are working
+	//save user name and etc in client class
+	//improve client class
+	
 	size_t spaceSeparator = message.find(' ');
 	std::string command = (spaceSeparator == std::string::npos) ? message : message.substr(0, spaceSeparator);
 	std::string body = (spaceSeparator == std::string::npos) ? IRC_ENDLINE : message.substr(spaceSeparator + 1);
@@ -117,10 +122,17 @@ bool Server::handleClientInput(Client &caller, std::string message)
 
 	if (command == "PASS")
 	{
+		std::cout << "|" << body << "|" <<std::endl;
 		if (body == _password)
-			caller.giveKey();
+		{
+			std::cout << "A client has been accepted.." << std::endl;
+			caller.giveKey(true);
+		}
 		else
-			std::cout << "Error: invalid password.." << std::endl; //should send a message to server
+		{
+			std::cout << "Error: invalid password.." << std::endl; //should send a message to client
+			caller.giveKey(false);
+		}
 	}
 
 	if (caller.getKey() == true)

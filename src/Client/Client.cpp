@@ -64,9 +64,9 @@ void Client::changeChannel(std::string channel)
 	this->channel = channel;
 }
 
-void Client::giveKey()
+void Client::giveKey(bool key)
 {
-	_passwordkey = true;
+	_passwordkey = key;
 }
 
 bool Client::getKey()
