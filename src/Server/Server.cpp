@@ -4,23 +4,10 @@ Server::Server(int port, std::string password) : _port(port), _password(password
 
 Server::~Server() {}
 
-// std::vector<Client>::iterator Server::getClientByFd(int fd)
-// {
-// 	for (std::vector<Client>::iterator it = this->clients.begin(); it != this->clients.end(); it++)
-// 	{
-// 		if (it->getFd() == fd)
-// 			return it;
-// 	}
-// 	return this->clients.end();
-// }
-
 bool Server::run()
 {
 	if ((_socketFd = socket(AF_INET, SOCK_STREAM, 0)) < 0) // 1-familia de direcciones(ipv4) 2-tipo de socket (tipo orientado a protocolo TCP) 3-protocolo (automatico, TCP)
-	{
-		std::cout << "Error: could not create the sockets.." << std::endl;
-		return (false);
-	}
+		return (std::cout << "Error: could not create the sockets.." << std::endl, false);
 
 	struct sockaddr_in serverAddress;
 	bzero(&serverAddress, sizeof(serverAddress));
@@ -29,18 +16,12 @@ bool Server::run()
 	serverAddress.sin_port = htons(_port);				// convert server port nb to network standart byte order (to avoid to conections use different byte order)
 
 	if (bind(_socketFd, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) // set the address wher is gonna be listening
-	{
-		std::cout << "Error: could not bind.." << std::endl;
-		return (false);
-	}
+		return (std::cout << "Error: could not bind.." << std::endl, false);
 
 	std::cout << "Waiting for a connection in '127.0.0.1' port: " << _port << std::endl; // localhost ip default = 127.0.0.1
 
 	if (listen(_socketFd, serverAddress.sin_port) < 0)
-	{
-		std::cout << "Error: trying to listeng" << std::endl;
-		return (false);
-	}
+		return (std::cout << "Error: trying to listeng" << std::endl, false);
 
 	// fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
 
@@ -53,30 +34,34 @@ bool Server::run()
 			return (false);
 }
 
+// std::vector<Client>::iterator Server::getClientByFd(int fd)
+// {
+// 	for (std::vector<Client>::iterator it = this->clients.begin(); it != this->clients.end(); it++)
+// 	{
+// 		if (it->getFd() == fd)
+// 			return it;
+// 	}
+// 	return this->clients.end();
+// }
+
+
 bool Server::handleClientConnections()
 {
 	if (poll(&_pollFd, 1, -1) < 0)
-	{
-		std::cout << "Error: syscall poll failed.." << std::endl;
-		return (false);
-	}
-
-	struct sockaddr_in client;
-	unsigned int clientLenght = sizeof(client);
+		return (std::cout << "Error: syscall poll failed.." << std::endl, false);
 
 	if (_pollFd.revents == POLLIN)
 	{
 		std::cout << "Incomming connecction" << std::endl;
-		_connectionFd = accept(_socketFd, NULL, NULL);
-		if (_connectionFd < 0)
-		{
-			std::cout << "Error accepting client's connection" << std::endl;
-			return (false);
-		}
+		_connectionFd = accept(_socketFd, (struct sockaddr *) NULL, NULL);
+		if (_connectionFd == -1)
+			return (std::cout << "Error accepting client's connection" << std::endl, false);
 
 		//fcntl(_SocketFd, F_SETFL, O_NONBLOCK); // avoid system differences
+
 		handleClientCommunications();
 	}
+	return (true);
 }
 
 void Server::handleClientCommunications()
