@@ -25,67 +25,81 @@ bool Server::run()
 
 	// fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
 
-	_pollFd.fd = _socketFd;
-	_pollFd.events = POLLIN;
-	_pollFd.revents = 0;
+	_pollFd[0].fd = _socketFd;
+	_pollFd[0].events = POLLIN;
+	_pollFd[0].revents = 0;
 
 	while (true)
 		if (handleClientConnections() == false)
 			return (false);
 }
 
-// std::vector<Client>::iterator Server::getClientByFd(int fd)
-// {
-// 	for (std::vector<Client>::iterator it = this->clients.begin(); it != this->clients.end(); it++)
-// 	{
-// 		if (it->getFd() == fd)
-// 			return it;
-// 	}
-// 	return this->clients.end();
-// }
+std::vector<Client>::iterator Server::getClientByFd(int fd)
+{
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+	{
+		if (it->getFd() == fd)
+			return it;
+	}
+	return _clients.end();
+}
 
 
 bool Server::handleClientConnections()
 {
-	if (poll(&_pollFd, 1, -1) < 0)
+	if (poll(_pollFd, _clients.size() + 1, -1) < 0)
 		return (std::cout << "Error: syscall poll failed.." << std::endl, false);
 
-	if (_pollFd.revents == POLLIN)
+	if (_pollFd[0].revents == POLLIN)
 	{
-		std::cout << "Incomming connecction" << std::endl;
+		std::cout << "Incomming connecction..." << std::endl;
 		_connectionFd = accept(_socketFd, (struct sockaddr *) NULL, NULL);
 		if (_connectionFd == -1)
 			return (std::cout << "Error accepting client's connection" << std::endl, false);
 
 		//fcntl(_SocketFd, F_SETFL, O_NONBLOCK); // avoid system differences
 
-		handleClientCommunications();
+		if (this->_clients.size() >= BACKLOG)
+			return (std::cout << "Error: max connections limit reached" << std::endl, true);
+
+		std::cout << "[SERVER]: A new connection has been made." << std::endl;
+
+		_clients.push_back(Client(_connectionFd));
+
+		// Saves the new connection
+		size_t i = 1;
+		while (i <= _clients.size() && _pollFd[i].fd != -1)
+			i++;
+		_pollFd[i].fd = _connectionFd;
+		_pollFd[i].events = POLLIN;
 	}
+
+	handleClientCommunications();
 	return (true);
 }
 
 void Server::handleClientCommunications()
 {
-	for (size_t i = 1; i <= clients.size(); i++)
+	for (size_t i = 1; i <= _clients.size(); i++)
 	{
-		if (this->backlogFds[i].fd == -1)
+		if (_pollFd[i].fd == -1)
 			continue;
 
-		if (this->backlogFds[i].revents & POLLIN)
+		if (_pollFd[i].revents == POLLIN)
 		{
 			char buffer[BUFFER_SIZE + 1];
-			size_t readSize = read(this->backlogFds[i].fd, buffer, BUFFER_SIZE);
+			size_t readSize = read(_pollFd[i].fd, buffer, BUFFER_SIZE);
 			if (readSize < 0)
 				throw std::runtime_error("A Client Socket can't be read from");
 
 			buffer[readSize] = '\0';
 
 			if (readSize == 0)
-				disconnectClient(this->backlogFds[i].fd);
+				disconnectClient(_pollFd[i].fd);
 			else
 			{
-				std::vector<Client>::iterator caller = getClientByFd(this->backlogFds[i].fd);
-				if (caller == clients.end())
+				std::vector<Client>::iterator caller = getClientByFd(_pollFd[i].fd);
+				if (caller == _clients.end())
 				{
 					std::cout << "[SERVER :: WARNING]: getClientByFd() failed before executing a command" << std::endl;
 					continue;
@@ -104,11 +118,11 @@ void Server::disconnectClient(int clientFd)
 	close(clientFd);
 
 	// Removes the client from the Vector of Clients
-	for (std::vector<Client>::iterator it = this->clients.begin(); it != this->clients.end(); it++)
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
 		if (it->getFd() == clientFd)
 		{
-			clients.erase(it);
+			_clients.erase(it);
 			break;
 		}
 	}
@@ -116,9 +130,9 @@ void Server::disconnectClient(int clientFd)
 	// Remove the Client FD from the backlog
 	for (size_t i = 0; i < BACKLOG; i++)
 	{
-		if (this->backlogFds[i + 1].fd == clientFd)
-			this->backlogFds[i + 1].fd = -1;
-		this->backlogFds[i].revents = 0;
+		if (_pollFd[i + 1].fd == clientFd)
+			_pollFd[i + 1].fd = -1;
+		_pollFd[i].revents = 0;
 	}
 }
 

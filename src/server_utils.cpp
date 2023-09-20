@@ -1,6 +1,6 @@
 #include <libraries.hpp>
-#include <Client.hpp>
-#include <Server.hpp>
+#include "../src/Client/Client.hpp"
+#include "../src/Server/Server.hpp"
 
 e_command parseCommandCode(std::string command)
 {
@@ -91,7 +91,7 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 
 bool Server::userExists(std::string nickname)
 {
-	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 	{
 		if (it->getNickname() == nickname)
 			return true;
@@ -107,17 +107,17 @@ bool Server::channelExists(std::string channelName)
 
 std::vector<Client>::iterator Server::findClientByFd(int fd)
 {
-	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 	{
 		if (it->getFd() == fd)
 			return it;
 	}
-	return clients.end();
+	return _clients.end();
 }
 
 int Server::getClientSocketFdByNickname(const std::string &nickname)
 {
-	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 	{
 		if (it->getNickname() == nickname)
 			return it->getFd();
@@ -136,7 +136,7 @@ Channel* Server::getChannelByName(std::string channelName)
 
 Client* Server::findClientByNickname(std::string targetNickname)
 {
-	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 	{
 		if (it->getNickname() == targetNickname)
 			return &(*it);

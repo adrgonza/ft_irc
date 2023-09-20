@@ -20,10 +20,10 @@ class Server {
 		int _port;
 		int _socketFd;
 		int _connectionFd;
-		struct pollfd _pollFd;
+		struct pollfd _pollFd[BACKLOG + 1];
 		std::string _password;
 
-		std::vector<Client> clients;
+		std::vector<Client> _clients;
 		std::map<std::string, Channel> channels;
 
 		bool handleClientConnections();

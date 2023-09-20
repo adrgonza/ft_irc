@@ -3,10 +3,11 @@ NAME = ircserv
 SRCS	=	main.cpp \
 			src/Server/Server.cpp \
 			src/Client/Client.cpp \
-			src/Channel.cpp \
+			src/Channel/Channel.cpp \
 			src/client_utils.cpp \
 			src/server_utils.cpp \
-			src/commands/handleChannelCommands.cpp src/commands/messages.cpp  \
+			src/commands/handleChannelCommands.cpp \
+			src/commands/messages.cpp  \
 
 
 OBJS = $(SRCS:%.cpp=bin/%.o)
