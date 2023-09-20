@@ -6,7 +6,7 @@
 /*   By: adrgonza <adrgonza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/27 13:14:29 by dangonza          #+#    #+#             */
-/*   Updated: 2023/09/20 18:39:40 by adrgonza         ###   ########.fr       */
+/*   Updated: 2023/09/20 18:48:43 by adrgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,6 @@ std::vector<Client>::iterator Server::getClientByFd(int fd)
 	return this->clients.end();
 }
 
-// Execute the Server
 bool Server::run()
 {
 	if ((_socketFd = socket(AF_INET, SOCK_STREAM, 0)) < 0) { // 1-familia de direcciones(ipv4) 2-tipo de socket (tipo orientado a protocolo TCP) 3-protocolo (automatico, TCP)
@@ -47,65 +46,51 @@ bool Server::run()
 
 	std::cout << "Waiting for a connection in '127.0.0.1' port: " << _port << std::endl; //localhost ip default = 127.0.0.1
 
-	if (listen(_socketFd, serverAddress.sin_port) < 0)
-		throw std::runtime_error("Server Socket listen failed");
-
-	this->backlogFds[0].fd = serverSocket;
-	this->backlogFds[0].events = POLLIN;
-	this->backlogFds[0].revents = 0;
-
-
-	for (int i = 1; i <= BACKLOG; i++)
-	{
-		this->backlogFds[i].fd = -1;
+	if (listen(_socketFd, serverAddress.sin_port) < 0) {
+		std::cout << "Error: trying to listeng" << std::endl;
+		return (false);
 	}
 
-	// Inform everything is correct so far
-	std::cout << "Server listening on port " << port << std::endl;
+	//fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
 
-	// Accept the data from incoming sockets in a iterative way
-	this->handleClientConnections(serverSocket);
-	// Close connections
+	_pollFd.fd = _socketFd;
+	_pollFd.events = POLLIN;
+	_pollFd.revents = 0;
+
+	while (true)
+		if (handleClientConnections(_socketFd) == false)
+			return (false);
 }
 
-void Server::handleClientConnections(int socket)
+bool Server::handleClientConnections(int socket)
 {
-	while (true)
+	if (poll(this->backlogFds, clients.size() + 1, -1) == -1)
+		throw std::runtime_error("A call to poll() failed");
+
+	int connectionFd = -1;		struct sockaddr_in client;
+	unsigned int clientLenght = sizeof(client);
+	if (this->backlogFds[0].revents & POLLIN) // If poll() allows us to read & write ...
 	{
-		if (poll(this->backlogFds, clients.size() + 1, -1) == -1)
-			throw std::runtime_error("A call to poll() failed");
+		connectionFd = accept(socket, (struct sockaddr *)&client, &clientLenght); // Accepts incoming connections
+		if (connectionFd < 0)
+			throw std::runtime_error("Connection not accepted"); // TODO: add errno & strerror(errno)
 
-		int connectionFd = -1;
-		struct sockaddr_in client;
-		unsigned int clientLenght = sizeof(client);
-		if (this->backlogFds[0].revents & POLLIN) // If poll() allows us to read & write ...
+		// Check if there is space for the new connection in the BackLog
+		if (this->clients.size() >= BACKLOG)
+			throw std::runtime_error("Max connections limit reached");
+		std::cout << "[SERVER]: A new connection has been made" << std::endl;
+		// Adds the connections as a new client			this->clients.push_back(Client(connectionFd));
+		for (size_t i = 1; i <= clients.size(); i++) // Saves the new connection
 		{
-			connectionFd = accept(socket, (struct sockaddr *)&client, &clientLenght); // Accepts incoming connections
-			if (connectionFd < 0)
-				throw std::runtime_error("Connection not accepted"); // TODO: add errno & strerror(errno)
+			if (this->backlogFds[i].fd != -1)
+				continue ;
 
-			// Check if there is space for the new connection in the BackLog
-			if (this->clients.size() >= BACKLOG)
-				throw std::runtime_error("Max connections limit reached");
-
-			std::cout << "[SERVER]: A new connection has been made" << std::endl;
-
-			// Adds the connections as a new client
-			this->clients.push_back(Client(connectionFd));
-
-			for (size_t i = 1; i <= clients.size(); i++) // Saves the new connection
-			{
-				if (this->backlogFds[i].fd != -1)
-					continue ;
-
-				this->backlogFds[i].fd = connectionFd;
-				this->backlogFds[i].events = POLLIN;
-				break ;
-			}
+			this->backlogFds[i].fd = connectionFd;
+			this->backlogFds[i].events = POLLIN;
+			break ;
 		}
-
-		this->handleClientCommunications();
 	}
+	this->handleClientCommunications();
 }
 
 void Server::handleClientCommunications()

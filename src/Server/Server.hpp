@@ -6,7 +6,7 @@
 /*   By: adrgonza <adrgonza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/27 13:14:29 by dangonza          #+#    #+#             */
-/*   Updated: 2023/09/20 18:33:13 by adrgonza         ###   ########.fr       */
+/*   Updated: 2023/09/20 18:43:07 by adrgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ class Server {
 		std::string _password;
 		int _socketFd;
 
-		struct pollfd	backlogFds[BACKLOG + 1];
+		struct pollfd _pollFd;
 		std::vector<Client> clients;
 		std::map<std::string, Channel> channels;
 
