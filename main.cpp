@@ -6,7 +6,7 @@
 /*   By: adrgonza <adrgonza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/27 13:11:51 by dangonza          #+#    #+#             */
-/*   Updated: 2023/09/20 18:14:46 by adrgonza         ###   ########.fr       */
+/*   Updated: 2023/09/20 18:20:07 by adrgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,12 @@ int main(int argc, char **argv) {
 		return (1);
 	}
 
-	(void)argv;
+	//parse port
+	std::string port = argv[1];
+	for (size_t i = 0; i < port.length(); i++)
+		if (!std::isdigit(port[i]))
+			return (std::cout << "ERROR: invalid port.." << std::endl, 1);
+
 	Server server = Server();
 	try
 	{
