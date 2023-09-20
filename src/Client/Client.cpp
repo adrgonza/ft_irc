@@ -1,27 +1,19 @@
 #include <libraries.hpp>
 #include "Client.hpp"
 
-Client::Client() {}
 Client::~Client() {}
-Client::Client(const Client & obj) { *this = obj; }
-Client& Client::operator=(const Client& obj) {
-	this->fd = obj.getFd();
-	return *this;
-}
 
-Client::Client(int connectionFd) {
-	this->fd = connectionFd;
-}
+Client::Client(int connectionFd) : _fd(connectionFd) {}
 
 bool Client::operator==(const Client& other) const {
-	if (this->fd == other.getFd() && this->nickname == other.getNickname())
+	if (_fd == other.getFd() && this->nickname == other.getNickname())
 		return true;
 	else
 		return false;
 }
 
 
-int Client::getFd() const { return this->fd; }
+int Client::getFd() const { return _fd; }
 std::string Client::getNickname() const { return this->nickname; }
 std::string Client::getChannel() const { return this->channel; }
 
@@ -38,8 +30,8 @@ void Client::sendMessage(std::string message, ...)
 
 	va_end(args);
 
-	if (send(this->fd, message.c_str(), message.size(), 0) == -1)
-		std::cout << "[SERVER] Error. Couldn't send message to FD " << this->fd << ". Message: \n\t" << message << std::endl;
+	if (send(_fd, message.c_str(), message.size(), 0) == -1)
+		std::cout << "[SERVER] Error. Couldn't send message to FD " << _fd << ". Message: \n\t" << message << std::endl;
 }
 
 std::string Client::getSource()

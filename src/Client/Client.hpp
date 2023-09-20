@@ -3,12 +3,9 @@
 
 class Client {
 	public:
-		Client();
-		~Client();
-		Client(const Client & obj);
-		Client& operator=(const Client& obj);
-
 		Client(int connectionFd);
+
+		~Client();
 
 		bool operator==(const Client& other) const;
 
@@ -20,12 +17,11 @@ class Client {
 
 		// Commands
 		void sendMessage(std::string message, ...);
-		void privMessage(std::string body, Client user);
 		void changeNickname(std::string newNick);
 		void changeChannel(std::string channel);
 
 	private:
-		int fd;
+		int _fd;
 		std::string nickname;
 		std::string username;
 		std::string host;

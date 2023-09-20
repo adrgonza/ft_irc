@@ -18,16 +18,19 @@ bool Server::run()
 	if (bind(_socketFd, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) // set the address wher is gonna be listening
 		return (std::cout << "Error: could not bind.." << std::endl, false);
 
-	std::cout << "Waiting for a connection in '127.0.0.1' port: " << _port << std::endl; // localhost ip default = 127.0.0.1
-
 	if (listen(_socketFd, serverAddress.sin_port) < 0)
 		return (std::cout << "Error: trying to listeng" << std::endl, false);
+
+	std::cout << "Waiting for a connection in '127.0.0.1' port: " << _port << std::endl; // localhost ip default = 127.0.0.1
 
 	// fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
 
 	_pollFd[0].fd = _socketFd;
 	_pollFd[0].events = POLLIN;
 	_pollFd[0].revents = 0;
+
+	for (int i = 1; i <= BACKLOG; i++)
+		_pollFd[i].fd = -1;
 
 	while (true)
 		if (handleClientConnections() == false)
@@ -83,17 +86,16 @@ void Server::handleClientCommunications()
 	for (size_t i = 1; i <= _clients.size(); i++)
 	{
 		if (_pollFd[i].fd == -1)
-			continue;
+			continue ;
 
-		if (_pollFd[i].revents == POLLIN)
+		if (_pollFd[i].revents & POLLIN)
 		{
 			char buffer[BUFFER_SIZE + 1];
+			bzero(&buffer, sizeof(buffer));
+
 			size_t readSize = read(_pollFd[i].fd, buffer, BUFFER_SIZE);
 			if (readSize < 0)
 				throw std::runtime_error("A Client Socket can't be read from");
-
-			buffer[readSize] = '\0';
-
 			if (readSize == 0)
 				disconnectClient(_pollFd[i].fd);
 			else
@@ -102,7 +104,7 @@ void Server::handleClientCommunications()
 				if (caller == _clients.end())
 				{
 					std::cout << "[SERVER :: WARNING]: getClientByFd() failed before executing a command" << std::endl;
-					continue;
+					continue ;
 				}
 				// TODO: Handle not-ended inputs (see subject)
 				this->handleClientInput(*caller, buffer);
