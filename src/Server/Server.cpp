@@ -111,7 +111,6 @@ bool Server::handleClientCommunications(size_t i)
 
 bool Server::handleClientInput(Client &caller, std::string message)
 {
-	std::cout << "holaaa" <<std::endl;
 	std::istringstream splitted(message);
 	std::string command;
 	splitted >> command;
@@ -131,7 +130,14 @@ bool Server::handleClientInput(Client &caller, std::string message)
 	if (caller.getKey() == true)
 		handleCommand(caller, command, body);
 	else
-		std::cout << "Error: a password is required.." << std::endl;
+	{
+		if (command == "NICK")
+			caller.changeNickname(body);
+		else if (command == "USER")
+			return (true);
+		else
+			std::cout << "Error: a password is required.." << std::endl;
+	}
 
 	return (true);
 }
@@ -140,7 +146,7 @@ void Server::checkPassword(std::string body, Client &caller)
 {
 	if (body == _password)
 	{
-		std::cout << "A client has been accepted.." << std::endl;
+		std::cout << "Password accepted.." << std::endl;
 		caller.giveKey(true);
 	}
 	else
