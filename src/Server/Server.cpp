@@ -123,7 +123,7 @@ bool Server::handleClientInput(Client &caller, std::string message)
 	if (command == "PASS")
 		checkPassword(body, caller);
 
-	if (caller.getKey())
+	if (caller.getKey() == true)
 		handleCommand(caller, command, body);
 	else
 		std::cout << "Error: a password is required.." << std::endl;

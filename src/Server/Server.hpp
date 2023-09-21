@@ -29,6 +29,7 @@ class Server {
 		bool handleClientCommunications(size_t);
 		bool handleClientInput(Client &caller, std::string message);
 		void checkPassword(std::string, Client &);
+		std::vector<Client>::iterator getClientByFd(int fd);
 
 		// Utils
 		void handleCommand(Client &caller, std::string command, std::string body);
