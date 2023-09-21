@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dangonza <dangonza@student.42.fr>          +#+  +:+       +#+        */
+/*   By: antgonza <antgonza@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/27 14:54:20 by dangonza          #+#    #+#             */
-/*   Updated: 2023/07/28 15:42:49 by dangonza         ###   ########.fr       */
+/*   Updated: 2023/09/21 18:24:26 by antgonza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,23 +15,26 @@
 
 Client::Client() {}
 Client::~Client() {}
-Client::Client(const Client & obj) { *this = obj; }
-Client& Client::operator=(const Client& obj) {
+Client::Client(const Client &obj) { *this = obj; }
+Client &Client::operator=(const Client &obj)
+{
 	this->fd = obj.getFd();
+	this->nickname = obj.getNickname();
 	return *this;
 }
 
-Client::Client(int connectionFd) {
+Client::Client(int connectionFd)
+{
 	this->fd = connectionFd;
 }
 
-bool Client::operator==(const Client& other) const {
+bool Client::operator==(const Client &other) const
+{
 	if (this->fd == other.getFd() && this->nickname == other.getNickname())
 		return true;
 	else
 		return false;
 }
-
 
 int Client::getFd() const { return this->fd; }
 std::string Client::getNickname() const { return this->nickname; }
