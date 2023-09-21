@@ -111,12 +111,17 @@ bool Server::handleClientInput(Client &caller, std::string message)
 	//manage commands are working
 	//save user name and etc in client class
 	//improve client class
-	
-	size_t spaceSeparator = message.find(' ');
-	std::string command = (spaceSeparator == std::string::npos) ? message : message.substr(0, spaceSeparator);
-	std::string body = (spaceSeparator == std::string::npos) ? IRC_ENDLINE : message.substr(spaceSeparator + 1);
+	std::istringstream splitted(message);
 
-	size_t endlinePosition = body.find(IRC_ENDLINE);
+	std::string command;
+	splitted >> command;
+
+	std::string body;
+	std::getline(splitted >> std::ws, body);
+	if (body.empty())
+		body = IRC_ENDLINE;
+
+	size_t endlinePosition = body.find("\r");
 	if (endlinePosition != std::string::npos) // If the message does not end with '\r\n' should be ignored, but for now we accept it. TODO: change this
 		body = body.substr(0, endlinePosition);
 

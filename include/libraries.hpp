@@ -1,7 +1,13 @@
 #ifndef LIBRARIES_HPP
 #define LIBRARIES_HPP
 
+//c++
 #include <iostream>
+#include <sstream>
+#include <vector>
+#include <map>
+
+//c
 #include <unistd.h>
 #include <poll.h>
 #include <netdb.h>
@@ -10,8 +16,6 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <arpa/inet.h>
-#include <vector>
-#include <map>
 
 typedef enum {
 	CMD_UNKNOWN, // Unknown command
