@@ -27,8 +27,8 @@ class Server {
 
 		bool handleClientConnections();
 		bool handleClientCommunications(size_t);
-
 		bool handleClientInput(Client &caller, std::string message);
+		void checkPassword(std::string, Client &);
 
 		// Utils
 		void handleCommand(Client &caller, std::string command, std::string body);

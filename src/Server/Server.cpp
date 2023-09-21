@@ -107,12 +107,7 @@ bool Server::handleClientCommunications(size_t i)
 
 bool Server::handleClientInput(Client &caller, std::string message)
 {
-	//change the function
-	//manage commands are working
-	//save user name and etc in client class
-	//improve client class
 	std::istringstream splitted(message);
-
 	std::string command;
 	splitted >> command;
 
@@ -126,24 +121,26 @@ bool Server::handleClientInput(Client &caller, std::string message)
 		body = body.substr(0, endlinePosition);
 
 	if (command == "PASS")
-	{
-		std::cout << "|" << body << "|" <<std::endl;
-		if (body == _password)
-		{
-			std::cout << "A client has been accepted.." << std::endl;
-			caller.giveKey(true);
-		}
-		else
-		{
-			std::cout << "Error: invalid password.." << std::endl; //should send a message to client
-			caller.giveKey(false);
-		}
-	}
+		checkPassword(body, caller);
 
-	if (caller.getKey() == true)
+	if (caller.getKey())
 		handleCommand(caller, command, body);
 	else
 		std::cout << "Error: a password is required.." << std::endl;
 
 	return (true);
+}
+
+void Server::checkPassword(std::string body, Client &caller)
+{
+	if (body == _password)
+	{
+		std::cout << "A client has been accepted.." << std::endl;
+		caller.giveKey(true);
+	}
+	else
+	{
+		std::cout << "Error: invalid password.." << std::endl; //should send a message to client
+		caller.giveKey(false);
+	}
 }
