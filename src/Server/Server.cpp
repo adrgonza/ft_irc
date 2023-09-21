@@ -97,16 +97,21 @@ bool Server::handleClientCommunications(size_t i)
 	}
 	else
 	{
-		std::vector<Client>::iterator caller = std::find(_clients.begin(), _clients.end(), _pollFd[i].fd);
-
-		if (caller != _clients.end() &&handleClientInput(*caller, buffer) == false)
-			return (false);
+		std::vector<Client>::iterator caller = getClientByFd(_pollFd[i].fd);
+		if (caller == _clients.end())
+		{
+			std::cout << "[SERVER :: WARNING]: getClientByFd() failed before executing a command" << std::endl;
+			return (true);
+		}
+		// TODO: Handle not-ended inputs (see subject)
+		handleClientInput(*caller, buffer);
 	}
 	return (true);
 }
 
 bool Server::handleClientInput(Client &caller, std::string message)
 {
+	std::cout << "holaaa" <<std::endl;
 	std::istringstream splitted(message);
 	std::string command;
 	splitted >> command;
@@ -143,4 +148,14 @@ void Server::checkPassword(std::string body, Client &caller)
 		std::cout << "Error: invalid password.." << std::endl; //should send a message to client
 		caller.giveKey(false);
 	}
+}
+
+std::vector<Client>::iterator Server::getClientByFd(int fd)
+{
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+	{
+		if (it->getFd() == fd)
+			return it;
+	}
+	return _clients.end();
 }
