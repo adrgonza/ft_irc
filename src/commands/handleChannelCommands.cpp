@@ -1,4 +1,4 @@
-#include <Server.hpp>
+#include "../Server/Server.hpp"
 
 // /list [#channel] [-MIN #] [-MAX #]
 // Lists currently available channels. You can also tell mIRC to show only channels with a minimum and a maximum number of people. If you specify a #channel then mIRC will only list information for that channel. If you specify wildcards, eg. *mirc* then mIRC will list all channels that contain the word mirc in them.
@@ -225,7 +225,7 @@ void Server::inviteNick(std::string body, Client &user)
 	}
 
 	int clientFd = 0;
-	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 	{
 		if (it->getNickname() == targetUser)
 		{

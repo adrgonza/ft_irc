@@ -1,4 +1,4 @@
-#include <Server.hpp>
+#include "../Server/Server.hpp"
 
 void Server::sayMsg(std::string body, Client &user)
 {
@@ -25,7 +25,7 @@ void Server::sayMsg(std::string body, Client &user)
 		sendMessage = "PRIVMSG " + toChannel + " :" + body + " " + nickname + "\r\n";
 
 	std::vector<Client>::iterator it;
-	for (it = clients.begin(); it != clients.end(); ++it)
+	for (it = _clients.begin(); it != _clients.end(); ++it)
 	{
 		if (it->getChannel() == toChannel)
 		{
@@ -54,7 +54,7 @@ void Server::privMessage(std::string body, Client user)
 
 	bool clientFound = false;
 	std::vector<Client>::iterator it;
-	for (it = clients.begin(); it != clients.end(); ++it)
+	for (it = _clients.begin(); it != _clients.end(); ++it)
 	{
 		if (it->getFd() == user.getFd())
 		{
@@ -76,7 +76,7 @@ void Server::privMessage(std::string body, Client user)
 		return;
 	}
 
-	for (it = clients.begin(); it != clients.end(); ++it)
+	for (it = _clients.begin(); it != _clients.end(); ++it)
 	{
 		if (it->getChannel() == toChannel)
 		{
