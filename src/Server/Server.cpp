@@ -137,8 +137,7 @@ bool Server::handleClientInput(Client &caller, std::string message)
 		else if (command == "USER")
 			return (true);
 		else
-			caller.sendMessage(ERR_PASSWDREQUIRED, caller.getNickname()) // TODO, a password is required
-			// std::cout << "Error: a password is required.." << std::endl;
+			caller.sendMessage(ERR_PASSWDREQUIRED, caller.getNickname()); // TODO, std::cout << "Error: a password is required.." << std::endl;
 	}
 
 	return (true);
