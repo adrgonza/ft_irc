@@ -46,6 +46,9 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 		// Client commands
 		case CMD_NICK: caller.changeNickname(body); break;
 		case CMD_USER: break;
+		case CMD_PASS: break;
+		case CMD_PRIVMSG: privMessage(body, caller); break;
+		case CMD_SAY: sayMsg(body, caller); break;
 
 		// Channel commands
 		case CMD_JOIN: handleJoin(body, caller); break;
@@ -56,8 +59,6 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 		case CMD_TOPIC: topicChannel(body, caller); break;
 
 		// Server commands
-		case CMD_PRIVMSG: privMessage(body, caller); break;
-		case CMD_SAY: sayMsg(body, caller); break;
 
 
 		// Commands yet to do
@@ -72,7 +73,6 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 
 		// Not sure if needed
 		case CMD_ERROR:
-		case CMD_PASS:
 		case CMD_CAP:
 		case CMD_TIME:
 		case CMD_MODE:
