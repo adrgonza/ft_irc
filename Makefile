@@ -2,10 +2,10 @@ NAME = ircserv
 
 SRCS	=	main.cpp \
 			src/Server/Server.cpp \
+			src/Server/server_utils.cpp \
 			src/Client/Client.cpp \
+			src/Client/client_utils.cpp \
 			src/Channel/Channel.cpp \
-			src/client_utils.cpp \
-			src/server_utils.cpp \
 			src/commands/handleChannelCommands.cpp \
 			src/commands/messages.cpp  \
 
@@ -29,6 +29,7 @@ clean:
 
 fclean: clean
 	rm -f $(NAME)
+	rm -rf bin
 
 re: fclean all
 
