@@ -80,7 +80,7 @@ bool Server::handleClientCommunications(size_t i)
 	int readSize = read(_pollFd[i].fd, buffer, BUFFER_SIZE);
 	if (readSize == -1)
 		return (std::cout << "Error: dont have access to read client fd." << std::endl, false);
-	std::cout << "++" <<  buffer << " readSize: " << readSize << std::endl;
+	std::cout << "Received: " << buffer;
 	if (readSize == 0)
 	{
 		//disconnect a client
