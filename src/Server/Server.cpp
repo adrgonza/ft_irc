@@ -56,13 +56,17 @@ bool Server::handleClientConnections()
 
 		std::cout << "[SERVER]: A new connection has been made." << std::endl;
 
-		_clients.push_back(Client(_connectionFd));
+		Client newClient(_connectionFd);
+		_clients.push_back(newClient);
+		// newClient.welcomeMsg(); Si esta aca lo manda a la terminal por alguna razón
+
 
 		size_t i = 1;
 		while (i <= _clients.size() && _pollFd[i].fd != -1)
 			i++;
 		_pollFd[i].fd = _connectionFd;
 		_pollFd[i].events = POLLIN;
+
 	}
 
 	for (size_t i = 1; i <= _clients.size(); i++)
@@ -124,6 +128,7 @@ bool Server::handleClientInput(Client &caller, std::string message)
 	if (endlinePosition != std::string::npos) // If the message does not end with '\r\n' should be ignored, but for now we accept it. TODO: change this
 		body = body.substr(0, endlinePosition);
 
+	caller.welcomeMsg();
 
 	if (command == "PASS")
 		checkPassword(body, caller);
