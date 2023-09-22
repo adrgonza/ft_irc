@@ -6,7 +6,6 @@
 #include <sstream>
 #include <vector>
 #include <map>
-#include <cstdarg>
 
 //c
 #include <unistd.h>
