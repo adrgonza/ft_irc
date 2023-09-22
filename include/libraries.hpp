@@ -53,8 +53,30 @@ typedef enum {
 
 e_command parseCommandCode(std::string command);
 
-// Error messages
 #define IRC_ENDLINE "\r\n"
+
+// Error Messages
 #define ERR_UNKNOWNCOMMAND_421 "421 <client> <command> :Unknown command"
+#define ERR_NOSUCHNICK "401 <client> <nickname> :No such nick/channel"
+#define ERR_NOSUCHCHANNEL "403 <client> <channel> :No such channel"
+#define ERR_CANNOTSENDTOCHAN "404 <client> <channel> :Cannot send to channel"
+#define ERR_TOOMANYCHANNELS "405 <client> <channel> :You have joined too many channels"
+#define ERR_WASNOSUCHNICK "406 <client> :There was no such nickname"
+#define ERR_NORECIPIENT "411 <client> :No recipient given (<command>)"
+#define ERR_NOTEXTTOSEND "412 <client> :No text to send"
+#define ERR_NONICKNAMEGIVEN "431 <client> :No nickname given" 
+#define ERR_NICKNAMEINUSE "433 <client> <nick> :Nickname is already in use"
+#define ERR_USERONCHANNEL "443 <client> <nick> <channel> :is already on channel"
+
+
+// Command Messages
+#define USER_CMD "USER <username> 0 * <realname>"
+#define NICK_CMD "NICK <nickname>"
+#define PRIVMSG_CMD "PRIVMSG <target> <text>" // PRIVMSG Parameters: <target>{,<target>} <text to be sent>
+#define PRIVMSG_RECEIVER_CMD ":<sender> PRIVMSG <target> <text>" // PRIVMSG Parameters: <target>{,<target>} <text to be sent>
+#define JOIN_CMD "JOIN <channel>" // <channel>{,<channel>} [<key>{,<key>}]
+
+#define PING_CMD "PING <token>"
+#define OPER_CMD "OPER <name> <password>"
 
 #endif

@@ -92,23 +92,19 @@ void Server::handleJoin(std::string body, Client &user)
 	}
 	else
 	{
-		// When a user creates a channel, should it be the admin ?
+		// When a user creates a channel, should it be the admin/operator ?
 		Channel newChannel;
 		newChannel.addParticipant(user);
 		channels[channel] = newChannel;
 		std::cout << "User " << user.getNickname() << " created and joined channel " << channel << std::endl;
 	}
-
 	user.changeChannel(channel);
-	Channel *channelObj = getChannelByName(channel);
-	std::string sendMessage;
-	if (channelObj != NULL && !channelObj->getTopic().empty())
-		sendMessage = "JOIN " + channel + ":" + channelObj->getTopic() + "\r\n";
-	else
-		sendMessage = "JOIN " + channel + "\r\n";
-	int retValue = send(user.getFd(), sendMessage.c_str(), sendMessage.size(), 0);
-	if (retValue == -1)
-		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+
+	Channel *toChan = getChannelByName(channel);
+	std::vector<Client> clientsInChannel = toChan->getParticipants();
+	std::string sendMessage = ":" + user.getNickname() + " " + JOIN_CMD;
+	for (std::vector<Client>::iterator it = clientsInChannel.begin(); it != clientsInChannel.end(); ++it)
+		it->sendMessage(sendMessage, channel.c_str());
 }
 
 // void Server::topicChannel(std::string channel, std::string newTopic, int clientFd,)
