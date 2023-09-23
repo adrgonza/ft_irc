@@ -46,7 +46,9 @@ void Server::listChannels(std::string body, Client &user)
 // sudo for one user in channel? as if to kick somebody?
 void Server::partChannel(std::string body, Client &user)
 {
-	std::string channel = "#" + body;
+	std::string channel = getWord(body, 2);
+	if (!channel.empty() && channel[0] != '#')
+		channel = "#" + channel;
 	std::string leavingChannelMsg = ":" + user.getNickname() + "!user@host PART " + channel + "\r\n";
 	if (user.getChannel() != channel)
 	{
@@ -95,6 +97,7 @@ void Server::handleJoin(std::string body, Client &user)
 		// When a user creates a channel, should it be the admin/operator ?
 		Channel newChannel;
 		newChannel.addParticipant(user);
+		newChannel.addOperator(user);
 		channels[channel] = newChannel;
 		std::cout << "User " << user.getNickname() << " created and joined channel " << channel << std::endl;
 	}
@@ -241,4 +244,35 @@ void Server::inviteNick(std::string body, Client &user)
 	int retValue = send(clientFd, inviteMessage.c_str(), inviteMessage.size(), 0);
 	if (retValue == -1)
 		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+}
+
+void Server::kickUser(std::string body, Client &user)
+{
+	std::string channel = getWord(body, 1);
+	std::string targetUser = getWord(body, 2);
+
+	if (!channelExists(channel))
+	{
+		std::cout << "Channel does not exist" << std::endl;
+		return;
+	}
+	if (!userExists(targetUser))
+	{
+		std::cout << "User does not exist" << std::endl;
+		return;
+	}
+	Channel *chan = getChannelByName(channel);
+	std::string nick = user.getNickname();
+	if (chan->isOperator(user))
+	{	
+		user.sendMessage(KICK_CMD, nick.c_str(), channel.c_str(), targetUser.c_str());
+		Client *tarUser = findClientByNickname(targetUser);
+		// std::string part = "PART " + channel;
+		// partChannel(part, *tarUser);
+		chan->removeParticipant(*tarUser);
+		tarUser->changeChannel("");
+		tarUser->sendMessage(KICK_CMD, nick.c_str(), channel.c_str(), targetUser.c_str());
+	}
+	else
+		user.sendMessage(ERR_CHANOPRIVSNEEDED, nick.c_str(), channel.c_str());
 }

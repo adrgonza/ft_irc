@@ -52,7 +52,7 @@ void Server::privMessage(std::string body, Client user)
 	std::string target = getWord(body, 1);
 	std::size_t spacePos = body.find(' ') + 1;
 	if (spacePos != std::string::npos)
-    	body = body.substr(spacePos);
+		body = body.substr(spacePos);
 	if (!body.empty() && body[0] != ':')
 		body = ":" + body;
 	if (!channelExists(target) && !userExists(target))
@@ -64,11 +64,16 @@ void Server::privMessage(std::string body, Client user)
 		if (!target.empty() && target[0] != '#')
 			target = "#" + target;
 		std::vector<Client>::iterator it;
+		std::cout << "target: " << target << std::endl;
 		for (it = _clients.begin(); it != _clients.end(); ++it)
 		{
 			std::string sendMessage = ":" + user.getNickname() + " " + PRIVMSG_CMD;
-			if (it->getChannel() == target && it->getNickname() != user.getNickname())
-				it->sendMessage(sendMessage, target.c_str(), body.c_str());
+			if (it->getChannel() == target)
+			{
+				if (it->getNickname() != user.getNickname())
+					it->sendMessage(sendMessage, target.c_str(), body.c_str());
+			}
+			std::cout << it->getNickname() << " " << it->getChannel() << std::endl;
 		}
 	}
 	else
@@ -78,7 +83,7 @@ void Server::privMessage(std::string body, Client user)
 			return;
 		// user.sendMessage(PRIVMSG_CMD, target.c_str(), body.c_str());
 
-		Client* receiver = findClientByNickname(target);
+		Client *receiver = findClientByNickname(target);
 		receiver->sendMessage(PRIVMSG_RECEIVER_CMD, user.getNickname().c_str(), target.c_str(), body.c_str());
 	}
 }
