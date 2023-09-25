@@ -128,8 +128,6 @@ bool Server::handleClientInput(Client &caller, std::string message)
 	if (endlinePosition != std::string::npos) // If the message does not end with '\r\n' should be ignored, but for now we accept it. TODO: change this
 		body = body.substr(0, endlinePosition);
 
-	caller.welcomeMsg();
-
 	if (command == "PASS")
 		checkPassword(body, caller);
 
@@ -154,9 +152,11 @@ void Server::checkPassword(std::string body, Client &caller)
 	{
 		std::cout << "Password accepted.." << std::endl;
 		caller.giveKey(true);
+		caller.sendMessage(MOTD, caller.getNickname().c_str(), "Welcome to the TONY_WARRIORS Internet Relay Chat Network");
 	}
 	else
 	{
+		caller.sendMessage(ERR_PASSWDMISMATCH, caller.getNickname().c_str());
 		std::cout << "Error: invalid password.." << std::endl; //should send a message to client
 		caller.giveKey(false);
 	}

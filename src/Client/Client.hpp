@@ -31,7 +31,6 @@ class Client {
 		void sendMessage(std::string message, ...);
 		void changeNickname(std::string newNick);
 		void changeChannel(std::string channel);
-		void welcomeMsg();
 
 	private:
 		Client();
