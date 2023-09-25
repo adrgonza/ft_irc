@@ -1,6 +1,10 @@
 #ifndef CLIENT_HPP_
 #define CLIENT_HPP_
 
+# define RESET "\e[0m"
+# define RED "\e[1;91m"
+# define BLUE "\e[1;34m"
+
 class Client {
 	public:
 		Client(int connectionFd);
