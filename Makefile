@@ -1,48 +1,27 @@
 NAME = ircserv
 
-#SRCS = ./src/main.cpp ./src/server/Server.cpp ./src/server/serverUtils.cpp \
-		./src/gnrl/utils.cpp ./src/gnrl/Client.cpp ./src/gnrl/Channel.cpp \
-		./src/commands/commands.cpp ./src/commands/privMessage.cpp ./src/commands/changeNickname.cpp \
-		./src/commands/handleChannelCommands.cpp ./src/commands/invite.cpp ./src/commands/userInformation.cpp \
-		./src/commands/pingpong.cpp ./src/commands/sendNotice.cpp
-SRC = main
+SRCS	=	main.cpp \
+			src/Server/Server.cpp \
+			src/Server/server_utils.cpp \
+			src/Client/Client.cpp \
+			src/Client/client_utils.cpp \
+			src/Channel/Channel.cpp \
+			src/commands/handleChannelCommands.cpp \
+			src/commands/messages.cpp  \
 
-SERVER = Server \
-		 serverUtils
 
-CMDS = commands \
-	   privMessage \
-	   changeNickname \
-	   handleChannelCommands \
-	   invite \
-	   userInformation \
-	   pingpong \
-	   sendNotice \
+OBJS = $(SRCS:%.cpp=bin/%.o)
 
-GNRL = utils \
-       Client \
-	   Channel
-
-DSRVER = $(addprefix server/, $(SERVER))
-DCMDS  = $(addprefix commands/, $(CMDS))
-DGNRL = $(addprefix gnrl/, $(GNRL))
-
-FILES = $(DSRVER) $(DCMDS) $(DGNRL) $(SRC)
-
-DSRCS = $(addprefix src/, $(FILES))
-SRCS = $(addsuffix .cpp, $(DSRCS))
-
-OBJS = $(SRCS:.cpp=.o)
-
-CXX = g++ -std=c++98 -Iinc
-CXXFLAGS = -Wall -Wextra -Werror -I inc
+CXX = c++
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -I include
 
 all: $(NAME)
 
 $(NAME): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS)
 
-%.o: %.cpp
+bin/%.o: %.cpp
+	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
@@ -50,6 +29,7 @@ clean:
 
 fclean: clean
 	rm -f $(NAME)
+	rm -rf bin
 
 re: fclean all
 

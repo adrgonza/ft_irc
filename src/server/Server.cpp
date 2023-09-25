@@ -1,185 +1,168 @@
-#include <Server.hpp>
+#include "Server.hpp"
+
+Server::Server(int port, std::string password) : _port(port), _password(password) {}
 
 Server::~Server() {}
 
-Server::Server(std::string network, int port, std::string passw) : network(network), port(port), passw(passw), nbrClients(0) {}
-
-void Server::handleReceivedData(std::string buff_rx, int fd)
+bool Server::run()
 {
-	cout_msg("[SERVER] (recived): " + buff_rx);
-	if (isIrcCommand(buff_rx))
-		doIrcCommand(buff_rx, fd);
-	else
-		privMessage(buff_rx, fd);
+	if ((_socketFd = socket(AF_INET, SOCK_STREAM, 0)) < 0) // 1-familia de direcciones(ipv4) 2-tipo de socket (tipo orientado a protocolo TCP) 3-protocolo (automatico, TCP)
+		return (std::cout << "Error: could not create the sockets.." << std::endl, false);
+
+	struct sockaddr_in serverAddress;
+	bzero(&serverAddress, sizeof(serverAddress));
+	serverAddress.sin_family = AF_INET;					// specing the family, interenet (address)
+	serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);	// responding to anything
+	serverAddress.sin_port = htons(_port);				// convert server port nb to network standart byte order (to avoid to conections use different byte order)
+
+	if (bind(_socketFd, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) // set the address wher is gonna be listening
+		return (std::cout << "Error: could not bind.." << std::endl, false);
+
+	if (listen(_socketFd, serverAddress.sin_port) < 0)
+		return (std::cout << "Error: trying to listeng" << std::endl, false);
+
+	std::cout << "Waiting for a connection in '127.0.0.1' port: " << _port << std::endl; // localhost ip default = 127.0.0.1
+
+	fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
+
+	_pollFd[0].fd = _socketFd;
+	_pollFd[0].events = POLLIN;
+	_pollFd[0].revents = 0;
+
+	for (int i = 1; i <= BACKLOG; i++)
+		_pollFd[i].fd = -1;
+
+	while (true)
+		if (handleClientConnections() == false)
+			return (false);
 }
 
-void Server::closingClientSocket(int i)
+bool Server::handleClientConnections()
 {
-	cout_msg("[SERVER]: client socket closed \n\n");
-	close(fds[i].fd);
-	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
+	if (poll(_pollFd, _clients.size() + 1, -1) < 0)
+		return (std::cout << "Error: syscall poll failed.." << std::endl, false);
+
+	if (_pollFd[0].revents == POLLIN)
 	{
-		if (it->getSocketFd() == fds[i].fd)
-		{
-			disconnectedClients.push_back(*it);
-			clients.erase(it);
-			break;
-		}
+		std::cout << "Incomming connecction..." << std::endl;
+		_connectionFd = accept(_socketFd, (struct sockaddr *) NULL, NULL);
+		if (_connectionFd == -1)
+			return (std::cout << "Error accepting client's connection" << std::endl, false);
+
+		fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
+
+		if (this->_clients.size() >= BACKLOG)
+			return (std::cout << "Error: max connections limit reached" << std::endl, true);
+
+		std::cout << "[SERVER]: A new connection has been made." << std::endl;
+
+		_clients.push_back(Client(_connectionFd));
+
+		size_t i = 1;
+		while (i <= _clients.size() && _pollFd[i].fd != -1)
+			i++;
+		_pollFd[i].fd = _connectionFd;
+		_pollFd[i].events = POLLIN;
 	}
-	fds[i].fd = -1;
+
+	for (size_t i = 1; i <= _clients.size(); i++)
+		if (_pollFd[i].fd != -1 && _pollFd[i].revents == POLLIN && handleClientCommunications(i) == false)
+			return (false);
+
+	return (true);
 }
 
-void Server::processClientData(int connfd)
+bool Server::handleClientCommunications(size_t i)
 {
-	int len_rx = 0; /* received and sent length, in bytes */
-	char buff_tx[100] = "Hello client, I am the server\r\n";
-	char buff_rx[100]; /* buffers for reception  */
+	char buffer[BUFFER_SIZE + 1];
+	bzero(&buffer, sizeof(buffer));
 
-	for (unsigned long i = 1; i <= clients.size(); ++i)
+	int readSize = read(_pollFd[i].fd, buffer, BUFFER_SIZE);
+	if (readSize == -1)
+		return (std::cout << "Error: dont have access to read client fd." << std::endl, false);
+	// std::cout << "Received: " << buffer;
+	if (readSize == 0)
 	{
-		if (fds[i].revents & POLLIN)
+		//disconnect a client
+		std::cout << "[SERVER]: A Client was disconnected from the server" << std::endl;
+		close(_pollFd[i].fd);
+		_clients.erase(std::find(_clients.begin(), _clients.end(), _pollFd[i].fd));
+
+		for (size_t i = 0; i < BACKLOG; i++)
 		{
-			len_rx = read(fds[i].fd, buff_rx, sizeof(buff_rx));
-			buff_rx[len_rx] = '\0';
-			if (len_rx == -1)
-				std::cerr << "[SERVER-error]: connfd cannot be read. " << errno << strerror(errno) << std::endl;
-			else if (len_rx == 0)
-				closingClientSocket(i);
-			else
-			{
-				handleReceivedData(buff_rx, fds[i].fd);
-				write(connfd, buff_tx, strlen(buff_tx));
-			}
+			if (_pollFd[i + 1].fd == _pollFd[i].fd)
+				_pollFd[i + 1].fd = -1;
+			_pollFd[i].revents = 0;
 		}
+	}
+	else
+	{
+		std::vector<Client>::iterator caller = getClientByFd(_pollFd[i].fd);
+		if (caller == _clients.end())
+		{
+			std::cout << "[SERVER :: WARNING]: getClientByFd() failed before executing a command" << std::endl;
+			return (true);
+		}
+		// TODO: Handle not-ended inputs (see subject)
+		handleClientInput(*caller, buffer);
+	}
+	return (true);
+}
+
+bool Server::handleClientInput(Client &caller, std::string message)
+{
+	std::istringstream splitted(message);
+	std::string command;
+	splitted >> command;
+
+	std::string body;
+	std::getline(splitted >> std::ws, body);
+	if (body.empty())
+		body = IRC_ENDLINE;
+
+	size_t endlinePosition = body.find("\r");
+	if (endlinePosition != std::string::npos) // If the message does not end with '\r\n' should be ignored, but for now we accept it. TODO: change this
+		body = body.substr(0, endlinePosition);
+
+
+	if (command == "PASS")
+		checkPassword(body, caller);
+
+	if (caller.getKey() == true)
+		handleCommand(caller, command, body);
+	else
+	{
+		if (command == "NICK")
+			caller.changeNickname(body);
+		else if (command == "USER")
+			return (true);
+		else
+			std::cout << "Error: a password is required.." << std::endl;
+	}
+
+	return (true);
+}
+
+void Server::checkPassword(std::string body, Client &caller)
+{
+	if (body == _password)
+	{
+		std::cout << "Password accepted.." << std::endl;
+		caller.giveKey(true);
+	}
+	else
+	{
+		std::cout << "Error: invalid password.." << std::endl; //should send a message to client
+		caller.giveKey(false);
 	}
 }
 
-int Server::handleClientConnection(int sockfd)
+std::vector<Client>::iterator Server::getClientByFd(int fd)
 {
-	int connfd; /* listening socket and connection socket file descriptors */
-	struct sockaddr_in client;
-	unsigned int len = sizeof(client); /* length of client address */
-	time_t currentTime;
-	time_t lastPingTimerCheck = time(NULL);
-
-	while (1)
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
-		currentTime = time(NULL);
-		time_t elapsedTimeSinceLastCheck = currentTime - lastPingTimerCheck;
-		int timeout = (PING_INTERVAL - elapsedTimeSinceLastCheck) * 1000;
-		if (timeout < 0)
-			timeout = 0;
-		int readySockets = poll(fds, clients.size() + 1, timeout);
-		if (readySockets == -1)
-		{
-			std::cerr << "[SERVER-error]: poll() failed" << std::endl;
-			return -1;
-		}
-		if (fds[0].revents & POLLIN)
-		{
-			connfd = accept(sockfd, (struct sockaddr *)&client, &len);
-			if (connfd < 0)
-			{
-				std::cerr << "[SERVER-error]: connection not accepted" << errno << strerror(errno) << std::endl;
-				return -1;
-			}
-			else
-			{
-				cout_msg("[SERVER]: a connection has been made");
-				char nicknameBuffer[256]; // Adjust the buffer size as needed
-				ssize_t receivedBytes = recv(connfd, nicknameBuffer, sizeof(nicknameBuffer) - 1, 0);
-				if (receivedBytes > 0)
-				{
-					nicknameBuffer[receivedBytes] = '\0';
-					std::string nickname(nicknameBuffer);
-					time_t currentTime = time(NULL);
-					addClient("", nickname, connfd, currentTime);
-					nbrClients += 1;
-					for (unsigned long i = 1; i <= clients.size(); ++i)
-					{
-						if (fds[i].fd == -1)
-						{
-							fds[i].fd = connfd;
-							fds[i].events = POLLIN;
-							break;
-						}
-					}
-				}
-				else
-				{
-					std::cerr << "Error receiving Nickname" << std::endl;
-					return -1;
-				}
-			}
-		}
-		currentTime = time(NULL);
-		if (timeout == 0 || (readySockets > 0 && fds[1].revents & POLLIN))
-		{
-			for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); ++it)
-			{
-				if (currentTime - it->getLastPingTime() >= PING_INTERVAL)
-				{
-					pingCheck(it->getSocketFd());
-					it->changeLastPingTime(currentTime);
-				}
-			}
-			lastPingTimerCheck = currentTime;
-		}
-		processClientData(connfd);
+		if (it->getFd() == fd)
+			return it;
 	}
-	return (0);
-}
-
-int Server::start(void)
-{
-	int sockfd;
-	struct sockaddr_in servaddr;
-
-	/* socket creation */
-	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if (sockfd == -1)
-	{
-		std::cerr << "[SERVER-error]: socket creation failed." << std::endl;
-		return -1;
-	}
-	else
-		cout_msg("[SERVER]: socket succesfully created");
-
-	/* clear structure */
-	memset(&servaddr, 0, sizeof(servaddr));
-	/* assign IP, SERV_PORT, IPV4 */
-	servaddr.sin_family = AF_INET;
-	servaddr.sin_addr.s_addr = inet_addr(network.c_str());
-	servaddr.sin_port = htons(port);
-
-	/* Bind socket */
-	if ((bind(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr))) != 0)
-	{
-		std::cerr << "[SERVER-error]: socket bind failed. " << errno << strerror(errno) << std::endl;
-		return -1;
-	}
-	else
-		cout_msg("[SERVER]: Socket successfully binded \n");
-
-	/* Listen */
-	if ((listen(sockfd, BACKLOG)) != 0)
-	{
-		std::cerr << "[SERVER-error]: socket listen failed. " << errno << strerror(errno) << std::endl;
-		return -1;
-	}
-	else
-		std::cout << "[SERVER]: Listening on socket: " << network << ":" << std::to_string(ntohs(servaddr.sin_port)) << std::endl;
-
-	fds[0].fd = sockfd;
-	fds[0].events = POLLIN;
-	fds[0].revents = 0;
-
-	for (int i = 1; i <= BACKLOG; ++i)
-		fds[i].fd = -1; // Set -1 to indicate an unused entry
-
-	/* Accept the data from incoming sockets in a iterative way */
-	if (handleClientConnection(sockfd))
-		return 1;
-	else
-		return -1;
+	return _clients.end();
 }
