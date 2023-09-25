@@ -21,6 +21,8 @@ class Channel {
 
 		void addParticipant(Client participant);
 		void removeParticipant(Client participant);
+
+		bool hasParticipant(Client participant);
 };
 
 #endif
