@@ -78,7 +78,7 @@ e_command parseCommandCode(std::string command);
 #define PRIVMSG_CMD "PRIVMSG <target> <text>" // PRIVMSG Parameters: <target>{,<target>} <text to be sent>
 #define PRIVMSG_RECEIVER_CMD ":<sender> PRIVMSG <target> <text>" // PRIVMSG Parameters: <target>{,<target>} <text to be sent>
 #define JOIN_CMD "JOIN <channel>" // <channel>{,<channel>} [<key>{,<key>}]
-#define MOTD "375 <client> :- <server> -"
+#define MOTD "<client> - <server> -"
 
 #define PING_CMD "PING <token>"
 #define OPER_CMD "OPER <name> <password>"

@@ -58,15 +58,12 @@ bool Server::handleClientConnections()
 
 		Client newClient(_connectionFd);
 		_clients.push_back(newClient);
-		// newClient.welcomeMsg(); Si esta aca lo manda a la terminal por alguna razón
-
 
 		size_t i = 1;
 		while (i <= _clients.size() && _pollFd[i].fd != -1)
 			i++;
 		_pollFd[i].fd = _connectionFd;
 		_pollFd[i].events = POLLIN;
-
 	}
 
 	for (size_t i = 1; i <= _clients.size(); i++)
@@ -84,7 +81,6 @@ bool Server::handleClientCommunications(size_t i)
 	int readSize = read(_pollFd[i].fd, buffer, BUFFER_SIZE);
 	if (readSize == -1)
 		return (std::cout << "Error: dont have access to read client fd." << std::endl, false);
-	// std::cout << "Received: " << buffer;
 	if (readSize == 0)
 	{
 		//disconnect a client
@@ -130,8 +126,7 @@ bool Server::handleClientInput(Client &caller, std::string message)
 
 	if (command == "PASS")
 		checkPassword(body, caller);
-
-	if (caller.getKey() == true)
+	else if (caller.getKey() == true)
 		handleCommand(caller, command, body);
 	else
 	{
@@ -150,14 +145,12 @@ void Server::checkPassword(std::string body, Client &caller)
 {
 	if (body == _password)
 	{
-		std::cout << "Password accepted.." << std::endl; // Should send a message to the client
 		caller.giveKey(true);
-		caller.sendMessage(MOTD, caller.getNickname().c_str(), "Welcome to the TONY_WARRIORS Internet Relay Chat Network");
+		caller.sendMessage(MOTD, caller.getNickname().c_str(), "\033[34mWelcome to the TONY_WARRIORS Internet Relay Chat Network\033[39m");
 	}
 	else
 	{
 		caller.sendMessage(ERR_PASSWDMISMATCH, caller.getNickname().c_str());
-		std::cout << "Error: invalid password.." << std::endl; //should send a message to client
 		caller.giveKey(false);
 	}
 }
