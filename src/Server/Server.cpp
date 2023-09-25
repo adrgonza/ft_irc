@@ -140,7 +140,7 @@ bool Server::handleClientInput(Client &caller, std::string message)
 		else if (command == "USER")
 			return (true);
 		else
-			std::cout << "Error: a password is required.." << std::endl;
+			caller.sendMessage(ERR_PASSWDREQUIRED, caller.getNickname().c_str()); // TODO, std::cout << "Error: a password is required.." << std::endl;
 	}
 
 	return (true);
@@ -150,7 +150,7 @@ void Server::checkPassword(std::string body, Client &caller)
 {
 	if (body == _password)
 	{
-		std::cout << "Password accepted.." << std::endl;
+		std::cout << "Password accepted.." << std::endl; // Should send a message to the client
 		caller.giveKey(true);
 		caller.sendMessage(MOTD, caller.getNickname().c_str(), "Welcome to the TONY_WARRIORS Internet Relay Chat Network");
 	}
