@@ -31,3 +31,12 @@ void Channel::removeParticipant(Client participant)
         participants.erase(userIt);
 }
 
+bool Channel::hasParticipant(Client participant)
+{
+	std::vector<Client>::iterator userIt = std::find(participants.begin(), participants.end(), participant);
+    if (userIt != participants.end())
+		return true;
+	else
+		return false;
+}
+
