@@ -38,6 +38,8 @@ void Server::sayMsg(std::string body, Client &user)
 	}
 }
 
+// Check body, if no text, ERR_NOTEXTTOSEND
+// Check body, if no target, ERR_NORECIPIENT
 void Server::privMessage(std::string body, Client user)
 {
 	for (std::string::size_type i = 0; i < body.length(); ++i)
