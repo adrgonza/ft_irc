@@ -27,14 +27,14 @@ void Channel::addParticipant(Client newParticipant)
 void Channel::removeParticipant(Client participant)
 {
 	std::vector<Client>::iterator userIt = std::find(participants.begin(), participants.end(), participant);
-    if (userIt != participants.end())
-        participants.erase(userIt);
+	if (userIt != participants.end())
+		participants.erase(userIt);
 }
 
 bool Channel::hasParticipant(Client participant)
 {
 	std::vector<Client>::iterator userIt = std::find(participants.begin(), participants.end(), participant);
-    if (userIt != participants.end())
+	if (userIt != participants.end())
 		return true;
 	else
 		return false;
