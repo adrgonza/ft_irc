@@ -59,15 +59,19 @@ bool Server::handleClientConnections()
 		Client newClient(_connectionFd);
 		_clients.push_back(newClient);
 
-		size_t i = 1;
-		while (i <= _clients.size() && _pollFd[i].fd != -1)
-			i++;
-		_pollFd[i].fd = _connectionFd;
-		_pollFd[i].events = POLLIN;
+		for (size_t i = 1; i <= _clients.size(); i++) // Saves the new connection
+		{
+			if (_pollFd[i].fd != -1)
+				continue ;
+
+			_pollFd[i].fd = _connectionFd;
+			_pollFd[i].events = POLLIN;
+			break ;
+		}
 	}
 
 	for (size_t i = 1; i <= _clients.size(); i++)
-		if (_pollFd[i].fd != -1 && _pollFd[i].revents == POLLIN && handleClientCommunications(i) == false)
+		if (_pollFd[i].fd != -1 && _pollFd[i].revents & POLLIN && handleClientCommunications(i) == false)
 			return (false);
 
 	return (true);
@@ -137,7 +141,6 @@ bool Server::handleClientInput(Client &caller, std::string message)
 		else
 			caller.sendMessage(ERR_PASSWDREQUIRED, caller.getNickname().c_str()); // TODO, std::cout << "Error: a password is required.." << std::endl;
 	}
-
 	return (true);
 }
 

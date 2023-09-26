@@ -52,7 +52,7 @@ void Server::privMessage(std::string body, Client user)
 	std::string target = getWord(body, 1);
 	std::size_t spacePos = body.find(' ') + 1;
 	if (spacePos != std::string::npos)
-    	body = body.substr(spacePos);
+		body = body.substr(spacePos);
 	if (!body.empty() && body[0] != ':')
 		body = ":" + body;
 	if (!channelExists(target) && !userExists(target))

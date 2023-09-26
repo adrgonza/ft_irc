@@ -3,12 +3,8 @@
 int main(int argc, char **argv)
 {
 	if (argc != 3)
-	{
-		std::cout << "\033[0;31mERROR: input structure expected:\033[0m ./ircserv <port> <password>" << std::endl;
-		return (1);
-	}
+		return (std::cout << "\033[0;31mERROR: input structure expected:\033[0m ./ircserv <port> <password>" << std::endl, 1);
 
-	// parse port
 	std::string port = argv[1];
 	for (size_t i = 0; i < port.length(); i++)
 		if (!std::isdigit(port[i]))
@@ -20,10 +16,16 @@ int main(int argc, char **argv)
 	if (password.length() < 4)
 		return (std::cout << "\033[0;31mERROR: Password too short.." << std::endl, 1);
 
-	Server IRC = Server(atoi(port.c_str()), password);
+	try
+	{
+		Server IRC = Server(atoi(port.c_str()), password);
 
-	if (IRC.run() == false)
-		return (1);
-
+		if (IRC.run() == false)
+			return (1);
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
 	return (0);
 }
