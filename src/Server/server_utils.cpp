@@ -57,16 +57,17 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 		case CMD_NAMES: getNamesInChannel(body, caller); break; // NO FUNCIONA
 		case CMD_INVITE: inviteNick(body, caller); break;
 		case CMD_TOPIC: topicChannel(body, caller); break;
-		// Channel Operator commands
-		case CMD_KICK: kickUser(body, caller); break;
+
+		// Server commands
 
 
 		// Commands yet to do
-		case CMD_OPER:
 		case CMD_PING:
 		case CMD_PONG:
+		case CMD_OPER:
 		case CMD_AUTH:
 		case CMD_QUIT:
+		case CMD_KICK:
 		case CMD_NOTICE:
 		case CMD_KILL:
 

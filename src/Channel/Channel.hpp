@@ -27,6 +27,8 @@ class Channel {
 		void removeOperator(Client oper);
 
 		bool isOperator(Client user);
+
+		bool hasParticipant(Client participant);
 };
 
 #endif
