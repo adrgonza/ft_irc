@@ -90,6 +90,8 @@ bool Server::handleClientCommunications(size_t i)
 		//disconnect a client
 		std::cout << "[SERVER]: A Client was disconnected from the server" << std::endl;
 		close(_pollFd[i].fd);
+		Client *oldClient = findClientByFd(_pollFd[i].fd);
+		_disconnectedClients.push_back(*oldClient);
 		_clients.erase(std::find(_clients.begin(), _clients.end(), _pollFd[i].fd));
 
 		for (size_t i = 0; i < BACKLOG; i++)
