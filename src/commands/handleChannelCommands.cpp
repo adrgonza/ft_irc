@@ -267,8 +267,6 @@ void Server::kickUser(std::string body, Client &user)
 	{	
 		user.sendMessage(KICK_CMD, nick.c_str(), channel.c_str(), targetUser.c_str());
 		Client *tarUser = findClientByNickname(targetUser);
-		// std::string part = "PART " + channel;
-		// partChannel(part, *tarUser);
 		chan->removeParticipant(*tarUser);
 		tarUser->changeChannel("");
 		tarUser->sendMessage(KICK_CMD, nick.c_str(), channel.c_str(), targetUser.c_str());
