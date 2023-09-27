@@ -42,19 +42,11 @@ The IRC (Internet Relay Chat) protocol is defined in RFC 1459, and later updated
 ## Operator and Administrative Commands
 
 Include any additional operator-specific actions or commands that your server supports here.
-- `MODE`: Set channel or user modes, including user privileges. 
-- `KICK`: Kick a user from a channel. 
-- `KILL`: Remove a user from the network. 
-- `OPER`: Authenticate as an IRC operator.
+- `KICK`: Kick a user from a channel. ✅
+.
 
 ## User Information and Tracking
 
 - `WHO`: Get information about users on the network.
 - `WHOIS`: Get detailed information about a specific user.
 - `WHOWAS`: Get information about previously connected users.
-- `ISON`: Check if a list of users is online.
-
-## Miscellaneous
-
-- `VERSION`: Get the version of the server or a user's client. ?
-- `TIME`: Get the local time of the server or a user. ?
