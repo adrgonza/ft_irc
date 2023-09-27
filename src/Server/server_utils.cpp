@@ -59,11 +59,11 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 		case CMD_TOPIC: topicChannel(body, caller); break;
 
 		// Server commands
+		case CMD_PING: pingCheck(body, caller); break;
+		case CMD_PONG: pongCheck(body, caller); break;
 
 
 		// Commands yet to do
-		case CMD_PING:
-		case CMD_PONG:
 		case CMD_OPER:
 		case CMD_AUTH:
 		case CMD_QUIT:

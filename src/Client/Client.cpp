@@ -89,3 +89,13 @@ void Client::sendMessage(std::string message, ...)
 	if (send(_fd, message.c_str(), message.size(), 0) == -1)
 		std::cout << "[SERVER] Error. Couldn't send message to FD " << _fd << ". Message: \n\t" << message << std::endl;
 }
+
+time_t Client::getLastPingTime() const
+{
+	return this->lastPingTime;
+}
+
+void Client::changeLastPingTime(time_t newPingTime)
+{
+	this->lastPingTime = newPingTime;
+}

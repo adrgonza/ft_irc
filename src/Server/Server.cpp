@@ -11,9 +11,9 @@ bool Server::run()
 
 	struct sockaddr_in serverAddress;
 	bzero(&serverAddress, sizeof(serverAddress));
-	serverAddress.sin_family = AF_INET;					// specing the family, interenet (address)
-	serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);	// responding to anything
-	serverAddress.sin_port = htons(_port);				// convert server port nb to network standart byte order (to avoid to conections use different byte order)
+	serverAddress.sin_family = AF_INET;				   // specing the family, interenet (address)
+	serverAddress.sin_addr.s_addr = htonl(INADDR_ANY); // responding to anything
+	serverAddress.sin_port = htons(_port);			   // convert server port nb to network standart byte order (to avoid to conections use different byte order)
 
 	if (bind(_socketFd, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) // set the address wher is gonna be listening
 		return (std::cout << "Error: could not bind.." << std::endl, false);
@@ -23,7 +23,7 @@ bool Server::run()
 
 	std::cout << "Waiting for a connection in '127.0.0.1' port: " << _port << std::endl; // localhost ip default = 127.0.0.1
 
-	//fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
+	// fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
 
 	_pollFd[0].fd = _socketFd;
 	_pollFd[0].events = POLLIN;
@@ -45,11 +45,11 @@ bool Server::handleClientConnections()
 	if (_pollFd[0].revents == POLLIN)
 	{
 		std::cout << "Incomming connecction..." << std::endl;
-		_connectionFd = accept(_socketFd, (struct sockaddr *) NULL, NULL);
+		_connectionFd = accept(_socketFd, (struct sockaddr *)NULL, NULL);
 		if (_connectionFd == -1)
 			return (std::cout << "Error accepting client's connection" << std::endl, false);
 
-		//fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
+		// fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
 
 		if (this->_clients.size() >= BACKLOG)
 			return (std::cout << "Error: max connections limit reached" << std::endl, true);
@@ -62,18 +62,39 @@ bool Server::handleClientConnections()
 		for (size_t i = 1; i <= _clients.size(); i++) // Saves the new connection
 		{
 			if (_pollFd[i].fd != -1)
-				continue ;
+				continue;
 
 			_pollFd[i].fd = _connectionFd;
 			_pollFd[i].events = POLLIN;
-			break ;
+			break;
 		}
 	}
 
 	for (size_t i = 1; i <= _clients.size(); i++)
+	{
 		if (_pollFd[i].fd != -1 && _pollFd[i].revents & POLLIN && handleClientCommunications(i) == false)
 			return (false);
 
+		// DONDE VA ESTO ??????????	
+		time_t currentTime = time(NULL);
+		time_t lastPingTimerCheck = time(NULL);
+		currentTime = time(NULL);
+		time_t elapsedTimeSinceLastCheck = currentTime - lastPingTimerCheck;
+		int timeout = (PING_INTERVAL - elapsedTimeSinceLastCheck) * 1000;
+		std::cout << "timeout: " << timeout << std::endl;
+		if (timeout < 0)
+		{
+			for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+			{
+				if (currentTime - it->getLastPingTime() >= PING_INTERVAL)
+				{
+					pingCheck("", (*it));
+					it->changeLastPingTime(currentTime);
+				}
+			}
+			lastPingTimerCheck = currentTime;
+		}
+	}
 	return (true);
 }
 
@@ -87,7 +108,7 @@ bool Server::handleClientCommunications(size_t i)
 		return (std::cout << "Error: dont have access to read client fd." << std::endl, false);
 	if (readSize == 0)
 	{
-		//disconnect a client
+		// disconnect a client
 		std::cout << "[SERVER]: A Client was disconnected from the server" << std::endl;
 		close(_pollFd[i].fd);
 		_clients.erase(std::find(_clients.begin(), _clients.end(), _pollFd[i].fd));
