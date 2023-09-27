@@ -59,6 +59,7 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 		case CMD_TOPIC: topicChannel(body, caller); break;
 
 		// Server commands
+		case CMD_KICK: kickUser(body, caller); break;
 
 
 		// Commands yet to do
@@ -67,7 +68,6 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 		case CMD_OPER:
 		case CMD_AUTH:
 		case CMD_QUIT:
-		case CMD_KICK:
 		case CMD_NOTICE:
 		case CMD_KILL:
 
