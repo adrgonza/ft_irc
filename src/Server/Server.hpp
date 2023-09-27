@@ -50,6 +50,7 @@ class Server {
 		void getNamesInChannel(std::string body, Client &user);
 		void topicChannel(std::string body, Client &user);
 		void inviteNick(std::string body, Client &user);
+		void kickUser(std::string body, Client &user);
 };
 
 #endif
