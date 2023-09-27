@@ -74,6 +74,7 @@ void Server::handleJoin(std::string body, Client &user)
 		// When a user creates a channel, should it be the admin/operator ?
 		Channel newChannel;
 		newChannel.addParticipant(user);
+		newChannel.addOperator(user);
 		channels[channel] = newChannel;
 		std::cout << "User " << user.getNickname() << " created and joined channel " << channel << std::endl;
 	}
@@ -187,4 +188,33 @@ void Server::inviteNick(std::string body, Client &user)
 		return ;
 	}
 	targetClient->sendMessage(INVITE_CMD, user.getNickname().c_str(), targetUser.c_str(), channel.c_str());
+}
+
+void Server::kickUser(std::string body, Client &user)
+{
+	std::string channel = getWord(body, 1);
+	std::string targetUser = getWord(body, 2);
+
+	if (!channelExists(channel))
+	{
+		std::cout << "Channel does not exist" << std::endl;
+		return;
+	}
+	if (!userExists(targetUser))
+	{
+		std::cout << "User does not exist" << std::endl;
+		return;
+	}
+	Channel *chan = getChannelByName(channel);
+	std::string nick = user.getNickname();
+	if (chan->isOperator(user))
+	{	
+		user.sendMessage(KICK_CMD, nick.c_str(), channel.c_str(), targetUser.c_str());
+		Client *tarUser = findClientByNickname(targetUser);
+		chan->removeParticipant(*tarUser);
+		tarUser->changeChannel("");
+		tarUser->sendMessage(KICK_CMD, nick.c_str(), channel.c_str(), targetUser.c_str());
+	}
+	else
+		user.sendMessage(ERR_CHANOPRIVSNEEDED, nick.c_str(), channel.c_str());
 }

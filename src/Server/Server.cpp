@@ -23,7 +23,7 @@ bool Server::run()
 
 	std::cout << "Waiting for a connection in '127.0.0.1' port: " << _port << std::endl; // localhost ip default = 127.0.0.1
 
-	fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
+	//fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
 
 	_pollFd[0].fd = _socketFd;
 	_pollFd[0].events = POLLIN;
@@ -49,24 +49,29 @@ bool Server::handleClientConnections()
 		if (_connectionFd == -1)
 			return (std::cout << "Error accepting client's connection" << std::endl, false);
 
-		fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
+		//fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
 
 		if (this->_clients.size() >= BACKLOG)
 			return (std::cout << "Error: max connections limit reached" << std::endl, true);
 
 		std::cout << "[SERVER]: A new connection has been made." << std::endl;
 
-		_clients.push_back(Client(_connectionFd));
+		Client newClient(_connectionFd);
+		_clients.push_back(newClient);
 
-		size_t i = 1;
-		while (i <= _clients.size() && _pollFd[i].fd != -1)
-			i++;
-		_pollFd[i].fd = _connectionFd;
-		_pollFd[i].events = POLLIN;
+		for (size_t i = 1; i <= _clients.size(); i++) // Saves the new connection
+		{
+			if (_pollFd[i].fd != -1)
+				continue ;
+
+			_pollFd[i].fd = _connectionFd;
+			_pollFd[i].events = POLLIN;
+			break ;
+		}
 	}
 
 	for (size_t i = 1; i <= _clients.size(); i++)
-		if (_pollFd[i].fd != -1 && _pollFd[i].revents == POLLIN && handleClientCommunications(i) == false)
+		if (_pollFd[i].fd != -1 && _pollFd[i].revents & POLLIN && handleClientCommunications(i) == false)
 			return (false);
 
 	return (true);
@@ -80,14 +85,11 @@ bool Server::handleClientCommunications(size_t i)
 	int readSize = read(_pollFd[i].fd, buffer, BUFFER_SIZE);
 	if (readSize == -1)
 		return (std::cout << "Error: dont have access to read client fd." << std::endl, false);
-	// std::cout << "Received: " << buffer;
 	if (readSize == 0)
 	{
 		//disconnect a client
 		std::cout << "[SERVER]: A Client was disconnected from the server" << std::endl;
 		close(_pollFd[i].fd);
-		Client *oldClient = findClientByFd(_pollFd[i].fd);
-		_disconnectedClients.push_back(*oldClient);
 		_clients.erase(std::find(_clients.begin(), _clients.end(), _pollFd[i].fd));
 
 		for (size_t i = 0; i < BACKLOG; i++)
@@ -126,11 +128,9 @@ bool Server::handleClientInput(Client &caller, std::string message)
 	if (endlinePosition != std::string::npos) // If the message does not end with '\r\n' should be ignored, but for now we accept it. TODO: change this
 		body = body.substr(0, endlinePosition);
 
-
 	if (command == "PASS")
 		checkPassword(body, caller);
-
-	if (caller.getKey() == true)
+	else if (caller.getKey() == true)
 		handleCommand(caller, command, body);
 	else
 	{
@@ -139,9 +139,8 @@ bool Server::handleClientInput(Client &caller, std::string message)
 		else if (command == "USER")
 			return (true);
 		else
-			std::cout << "Error: a password is required.." << std::endl;
+			caller.sendMessage(ERR_PASSWDREQUIRED, caller.getNickname().c_str()); // TODO, std::cout << "Error: a password is required.." << std::endl;
 	}
-
 	return (true);
 }
 
@@ -149,12 +148,12 @@ void Server::checkPassword(std::string body, Client &caller)
 {
 	if (body == _password)
 	{
-		std::cout << "Password accepted.." << std::endl;
 		caller.giveKey(true);
+		caller.sendMessage(MOTD, caller.getNickname().c_str(), "\033[34mWelcome to the TONY_WARRIORS Internet Relay Chat Network\033[39m");
 	}
 	else
 	{
-		std::cout << "Error: invalid password.." << std::endl; //should send a message to client
+		caller.sendMessage(ERR_PASSWDMISMATCH, caller.getNickname().c_str());
 		caller.giveKey(false);
 	}
 }

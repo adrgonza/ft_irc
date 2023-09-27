@@ -23,7 +23,6 @@ class Server {
 		std::string _password;
 
 		std::vector<Client> _clients;
-		std::vector<Client> _disconnectedClients;
 		std::map<std::string, Channel> channels;
 
 		bool handleClientConnections();
@@ -36,7 +35,7 @@ class Server {
 		void handleCommand(Client &caller, std::string command, std::string body);
 		bool	userExists(std::string nickname);
 		bool	channelExists(std::string channelName);
-		Client* findClientByFd(int fd);
+		std::vector<Client>::iterator findClientByFd(int fd);
 		int		getClientSocketFdByNickname(const std::string &nickname);
 		Channel* getChannelByName(std::string channelName);
 		Client* findClientByNickname(std::string targetNickname);
@@ -51,9 +50,7 @@ class Server {
 		void getNamesInChannel(std::string body, Client &user);
 		void topicChannel(std::string body, Client &user);
 		void inviteNick(std::string body, Client &user);
-		void usersOnNetwork(std::string body, Client &user);
-		void getUserInfo(std::string body, Client &user);
-		void getPreviouslyUsersInfo(std::string body, Client &user);
+		void kickUser(std::string body, Client &user);
 };
 
 #endif

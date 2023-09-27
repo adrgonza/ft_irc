@@ -59,9 +59,6 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 		case CMD_TOPIC: topicChannel(body, caller); break;
 
 		// Server commands
-		case CMD_WHO: usersOnNetwork(body, caller); break;
-		case CMD_WHOIS: getUserInfo(body, caller); break;
-		case CMD_WHOWAS: getPreviouslyUsersInfo(body, caller); break;
 
 
 		// Commands yet to do
@@ -79,6 +76,9 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 		case CMD_CAP:
 		case CMD_TIME:
 		case CMD_MODE:
+		case CMD_WHO:
+		case CMD_WHOIS:
+		case CMD_WHOWAS:
 		case CMD_REHASH:
 		case CMD_RESTART:
 		case CMD_SQUIT:
@@ -104,14 +104,15 @@ bool Server::channelExists(std::string channelName)
 		return true;
 	return false;
 }
-Client* Server::findClientByFd(int fd)
+
+std::vector<Client>::iterator Server::findClientByFd(int fd)
 {
 	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 	{
 		if (it->getFd() == fd)
-			return &(*it);
+			return it;
 	}
-	return NULL;
+	return _clients.end();
 }
 
 int Server::getClientSocketFdByNickname(const std::string &nickname)
