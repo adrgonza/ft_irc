@@ -23,7 +23,7 @@ bool Server::run()
 
 	std::cout << "Waiting for a connection in '127.0.0.1' port: " << _port << std::endl; // localhost ip default = 127.0.0.1
 
-	fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
+	//fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
 
 	_pollFd[0].fd = _socketFd;
 	_pollFd[0].events = POLLIN;
@@ -49,7 +49,7 @@ bool Server::handleClientConnections()
 		if (_connectionFd == -1)
 			return (std::cout << "Error accepting client's connection" << std::endl, false);
 
-		fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
+		//fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
 
 		if (this->_clients.size() >= BACKLOG)
 			return (std::cout << "Error: max connections limit reached" << std::endl, true);
