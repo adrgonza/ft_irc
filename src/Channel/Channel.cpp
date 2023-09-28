@@ -73,3 +73,13 @@ bool Channel::isOperator(Client user)
 	else
 		return false;
 }
+
+std::string Channel::getName() const
+{
+	return this->_name;
+}
+
+void Channel::setName(std::string name)
+{
+	this->_name = name;
+}

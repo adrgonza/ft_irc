@@ -10,6 +10,7 @@ class Channel {
 		std::vector<Client> participants;
 		std::vector<Client> operators;
     	std::string topic;
+		std::string _name;
 
 	public:
 		Channel();
@@ -19,8 +20,10 @@ class Channel {
 		std::vector<Client> getParticipants() const;
 		std::vector<Client> getOperators() const;
 		std::string getTopic() const;
+		std::string getName() const;
 
 		void setTopic(std::string newTopic);
+		void setName(std::string name);
 
 		void addParticipant(Client participant);
 		void removeParticipant(Client participant);
