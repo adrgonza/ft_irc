@@ -5,7 +5,7 @@
 #include "../Client/Client.hpp"
 #include "../Channel/Channel.hpp"
 
-#define BACKLOG 5 // Nº of clients pending to connect w/ server
+#define BACKLOG 5		// Nº of clients pending to connect w/ server
 #define BUFFER_SIZE 512 // Max size of each message (Docs: https://modern.ircdocs.horse/#message-format)
 
 class Server {
@@ -51,6 +51,7 @@ class Server {
 		void topicChannel(std::string body, Client &user);
 		void inviteNick(std::string body, Client &user);
 		void kickUser(std::string body, Client &user);
+		void noticeMessage(std::string body, Client &user);
 };
 
 #endif
