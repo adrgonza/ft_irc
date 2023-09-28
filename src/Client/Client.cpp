@@ -29,7 +29,7 @@ Client::Client(const Client &obj)
 	this->username = obj.getUsername();
 }
 
-Client::Client(int connectionFd) : _fd(connectionFd), _passwordkey(false) {}
+Client::Client(int connectionFd) : _fd(connectionFd), _ping(false), _passwordkey(false) {}
 
 int Client::getFd() const { return this->_fd; }
 std::string Client::getNickname() const { return this->nickname; }
@@ -37,6 +37,8 @@ std::string Client::getChannel() const { return this->channel; }
 std::string Client::getUsername() const { return this->username; }
 std::string Client::getHost() const { return this->host; }
 bool Client::getKey() const { return this->_passwordkey; }
+bool Client::getPing() const { return (_ping); }
+void Client::setPing(bool tof) { _ping = tof; }
 
 std::string Client::getSource() const
 {

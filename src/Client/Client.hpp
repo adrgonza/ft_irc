@@ -24,6 +24,8 @@ class Client {
 		bool getKey() const;
 		std::string getSource() const;
 		time_t		getLastPingTime() const;
+		bool getPing() const;
+		void setPing(bool);
 
 
 		void giveKey(bool);
@@ -37,6 +39,7 @@ class Client {
 	private:
 		Client();
 		int _fd;
+		bool _ping;
 		std::string nickname;
 		std::string username;
 		std::string host;

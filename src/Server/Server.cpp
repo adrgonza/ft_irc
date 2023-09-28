@@ -39,16 +39,16 @@ bool Server::run()
 		time_t currentTime;
 		time(&currentTime);
 		long seconds = static_cast<long>(currentTime);
-		std::cout << "seconds----" << seconds << std::endl;
+		//std::cout << "seconds----" << seconds << std::endl;
 		for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
 		{
 			long clientSeconds = static_cast<long>(it->getLastPingTime());
-			std::cout << "Clien-seconds----" << clientSeconds << std::endl;
-			if (seconds - clientSeconds >= 30 && clientSeconds > 0)
+			//std::cout << "Clien-seconds----" << clientSeconds << std::endl;
+			if (seconds - clientSeconds >= 15 && clientSeconds > 0)
 			{
-				it->sendMessage(PING_CMD, "");
+				it->sendMessage(PING_CMD, it->getNickname().c_str());
 				it->changeLastPingTime(seconds);
-				continue;
+				it->setPing(true);
 			}
 		}
 	}
@@ -171,6 +171,8 @@ bool Server::handleClientInput(Client &caller, std::string message)
 		else
 			caller.sendMessage(ERR_PASSWDREQUIRED, caller.getNickname().c_str()); // TODO, std::cout << "Error: a password is required.." << std::endl;
 	}
+	// if (caller.getPing() == false);
+	// 	caller.
 	return (true);
 }
 
