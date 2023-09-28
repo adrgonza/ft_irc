@@ -57,10 +57,24 @@ std::string Client::getSource() const
 	return source;
 }
 
-void Client::changeNickname(std::string body)
+void Client::changeNickname(std::vector<Client> clients, std::string body)
 {
 	// Assumes (for now) body is always correct. No collisions, no weird characters, and never empty
 	// TODO: Handle NICK command correctly (please)
+	bool flag = false;
+
+	while (flag == false)
+	{
+		flag = true;
+		for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); it++)
+		{
+			if (it->getNickname() == body)
+			{
+				body = body + "_";
+				flag = false;
+			}
+		}
+	}
 
 	this->sendMessage("NICK <nickname>", body.c_str());
 	this->nickname = body; // Nickname is changed after the message is sent, to not affect the source of the message (see docs.)

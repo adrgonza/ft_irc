@@ -44,7 +44,7 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 	{
 
 		// Client commands
-		case CMD_NICK: caller.changeNickname(body); break;
+		case CMD_NICK: caller.changeNickname(_clients, body); break;
 		case CMD_USER: break;
 		case CMD_PASS: break;
 		case CMD_PRIVMSG: privMessage(body, caller); break;
