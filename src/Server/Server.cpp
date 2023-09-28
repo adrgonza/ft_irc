@@ -89,8 +89,8 @@ bool Server::handleClientCommunications(size_t i)
 	{
 		//disconnect a client
 		std::cout << "[SERVER]: A Client was disconnected from the server" << std::endl;
-		close(_pollFd[i].fd);
 		std::vector<Client>::iterator it = std::find(_clients.begin(), _clients.end(), _pollFd[i].fd);
+		close(_pollFd[i].fd);
 		if (it != _clients.end())
 		{
 			_disconnectedClients.push_back(*it);

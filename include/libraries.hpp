@@ -91,7 +91,12 @@ e_command parseCommandCode(std::string command);
 #define INVITE_CMD ":<nickname>!user@host INVITE <targetNick> <channel>"
 #define KICK_CMD "KICK <channel> <user>" //<channel> <user> *( "," <user> ) [<comment>]
 #define MOTD "<client> - <server> -"
-
+#define RPL_WHOREPLY ":<server> 352 <client> <channel> <username> <host> <server> <nick> <flags> :<hopcount> <realname>"
+#define RPL_ENDOFWHO ":<server> 315 <client> <mask> :End of WHO list"
+#define RPL_WHOISUSER ":<server> 311 <client> <nick> <username> <host> * :<realname>"
+#define RPL_ENDOFWHOIS ":<server> 318 <client> <nick> :End of /WHOIS list"
+#define RPL_WHOWASUSER ":<server> 319 <client> <nick> <username> <host> * :<realname>"
+#define RPL_ENDOFWHOWAS ":<server> 319 <client> <nick> :End of WHOWAS"
 #define PING_CMD "PING <token>"
 #define OPER_CMD "OPER <name> <password>"
 
