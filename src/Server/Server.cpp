@@ -138,7 +138,7 @@ bool Server::handleClientInput(Client &caller, std::string message)
 	else
 	{
 		if (command == "NICK")
-			caller.changeNickname(body);
+			caller.changeNickname(_clients, body);
 		else if (command == "USER")
 			return (true);
 		else
