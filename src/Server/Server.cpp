@@ -154,7 +154,6 @@ bool Server::handleClientInput(Client &caller, std::string message)
 	time_t currentTime;
 	time(&currentTime);
 	caller.changeLastPingTime(currentTime);
-	//this is for messages that are sent in two or more request
 	if (message.find("\r") == message.npos)
 	{
 		if (message.find("\n") != message.npos)
@@ -162,7 +161,7 @@ bool Server::handleClientInput(Client &caller, std::string message)
 			caller.sendMessage("You are a invalid Client!");
 			return (true);
 		}
-		if(caller.getjoined().empty() )
+		if (caller.getjoined().empty())
 			caller.setjoined(message);
 		else if (caller.getjoined().length() >= 1024)
 			caller.sendMessage("Msg buffer is full!");
@@ -206,7 +205,7 @@ bool Server::handleClientInput(Client &caller, std::string message)
 		else if (command == "USER")
 			return (true);
 		else
-			caller.sendMessage(ERR_PASSWDREQUIRED, caller.getNickname().c_str()); // TODO, std::cout << "Error: a password is required.." << std::endl;
+			caller.sendMessage(ERR_PASSWDREQUIRED, caller.getNickname().c_str());
 	}
 	// if (caller.getPing() == false);
 	// 	caller.
@@ -218,7 +217,9 @@ void Server::checkPassword(std::string body, Client &caller)
 	if (body == _password)
 	{
 		caller.giveKey(true);
-		caller.sendMessage(MOTD, caller.getNickname().c_str(), "\033[34mWelcome to the TONY_WARRIORS Internet Relay Chat Network\033[39m");
+		std::string serverName = "ToniWarrior's";
+		caller.sendMessage(RPL_MOTDSTART, caller.getNickname().c_str(), serverName.c_str(), "Welcome to the TONY_WARRIORS Internet Relay Chat Network");
+		caller.sendMessage(RPL_ENDOFMOTD, serverName.c_str(), caller.getNickname().c_str());
 	}
 	else
 	{
