@@ -60,6 +60,7 @@ e_command parseCommandCode(std::string command);
 #define ERR_UNKNOWNCOMMAND_421 "421 <client> <command> :Unknown command"
 #define ERR_NOSUCHNICK "401 <client> <nickname> :No such nick/channel"
 #define ERR_NOSUCHCHANNEL "403 <client> <channel> :No such channel"
+#define ERR_NOCHANNELS "403 <client> :There are no channels"
 #define ERR_CANNOTSENDTOCHAN "404 <client> <channel> :Cannot send to channel"
 #define ERR_TOOMANYCHANNELS "405 <client> <channel> :You have joined too many channels"
 #define ERR_WASNOSUCHNICK "406 <client> :There was no such nickname"
@@ -67,7 +68,13 @@ e_command parseCommandCode(std::string command);
 #define ERR_NOTEXTTOSEND "412 <client> :No text to send"
 #define ERR_NONICKNAMEGIVEN "431 <client> :No nickname given"
 #define ERR_NICKNAMEINUSE "433 <client> <nick> :Nickname is already in use"
+#define ERR_NOTONCHANNEL "442 <client> <channel> :You're not on that channel"
 #define ERR_USERONCHANNEL "443 <client> <nick> <channel> :is already on channel"
+#define ERR_CHANOPRIVSNEEDED "482 <client> <channel> :You're not channel operator"
+#define ERR_PASSWDMISMATCH "464 <client> :Password incorrect"
+#define ERR_PASSWDREQUIRED "421 <client> :Password required"
+#define ERR_YOUREBANNEDCREEP "465 <client> :You are banned from this server."
+#define ERR_BANNEDFROMCHAN "474 <client> <channel> :Cannot join channel (+b)"
 
 // Command Messages
 #define USER_CMD "USER <username> 0 * <realname>"
@@ -77,6 +84,13 @@ e_command parseCommandCode(std::string command);
 #define NOTICE_RECEIVER_CMD ":<sender> NOTICE <target> <text>"
 #define PRIVMSG_RECEIVER_CMD ":<sender> PRIVMSG <target> <text>" // PRIVMSG Parameters: <target>{,<target>} <text to be sent>
 #define JOIN_CMD "JOIN <channel>"								 // <channel>{,<channel>} [<key>{,<key>}]
+#define PART_CMD ":<nickname>!user@host PART <channel>"			 // <channel>{,<channel>} [<reason>]
+#define TOPIC_CMD "TOPIC <channel> <topic>"
+#define NAMES_CMD "NAMES <channel>" // <channel>{,<channel>}
+#define LIST_CMD "LIST"				// [<channel>{,<channel>}] [<elistcond>{,<elistcond>}]
+#define INVITE_CMD ":<nickname>!user@host INVITE <targetNick> <channel>"
+#define KICK_CMD "KICK <channel> <user>" //<channel> <user> *( "," <user> ) [<comment>]
+#define MOTD "<client> - <server> -"
 
 #define PING_CMD "PING <token>"
 #define OPER_CMD "OPER <name> <password>"
