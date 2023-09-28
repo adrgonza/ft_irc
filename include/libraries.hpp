@@ -1,13 +1,13 @@
 #ifndef LIBRARIES_HPP
 #define LIBRARIES_HPP
 
-//c++
+// c++
 #include <iostream>
 #include <sstream>
 #include <vector>
 #include <map>
 
-//c
+// c
 #include <unistd.h>
 #include <poll.h>
 #include <netdb.h>
@@ -17,7 +17,8 @@
 #include <fcntl.h>
 #include <arpa/inet.h>
 
-typedef enum {
+typedef enum
+{
 	CMD_UNKNOWN, // Unknown command
 	CMD_NICK,
 	CMD_USER,
@@ -79,16 +80,23 @@ e_command parseCommandCode(std::string command);
 #define USER_CMD "USER <username> 0 * <realname>"
 #define NICK_CMD "NICK <nickname>"
 #define PRIVMSG_CMD "PRIVMSG <target> <text>" // PRIVMSG Parameters: <target>{,<target>} <text to be sent>
+#define NOTICE_CMD "NOTICE <target> <text>"
+#define NOTICE_RECEIVER_CMD ":<sender> NOTICE <target> <text>"
 #define PRIVMSG_RECEIVER_CMD ":<sender> PRIVMSG <target> <text>" // PRIVMSG Parameters: <target>{,<target>} <text to be sent>
-#define JOIN_CMD "JOIN <channel>" // <channel>{,<channel>} [<key>{,<key>}]
-#define PART_CMD ":<nickname>!user@host PART <channel>" // <channel>{,<channel>} [<reason>]
+#define JOIN_CMD "JOIN <channel>"								 // <channel>{,<channel>} [<key>{,<key>}]
+#define PART_CMD ":<nickname>!user@host PART <channel>"			 // <channel>{,<channel>} [<reason>]
 #define TOPIC_CMD "TOPIC <channel> <topic>"
 #define NAMES_CMD "NAMES <channel>" // <channel>{,<channel>}
-#define LIST_CMD "LIST" // [<channel>{,<channel>}] [<elistcond>{,<elistcond>}]
+#define LIST_CMD "LIST"				// [<channel>{,<channel>}] [<elistcond>{,<elistcond>}]
 #define INVITE_CMD ":<nickname>!user@host INVITE <targetNick> <channel>"
 #define KICK_CMD "KICK <channel> <user>" //<channel> <user> *( "," <user> ) [<comment>]
 #define MOTD "<client> - <server> -"
-
+#define RPL_WHOREPLY ":<server> 352 <client> <channel> <username> <host> <server> <nick> <flags> :<hopcount> <realname>"
+#define RPL_ENDOFWHO ":<server> 315 <client> <mask> :End of WHO list"
+#define RPL_WHOISUSER ":<server> 311 <client> <nick> <username> <host> * :<realname>"
+#define RPL_ENDOFWHOIS ":<server> 318 <client> <nick> :End of /WHOIS list"
+#define RPL_WHOWASUSER ":<server> 319 <client> <nick> <username> <host> * :<realname>"
+#define RPL_ENDOFWHOWAS ":<server> 319 <client> <nick> :End of WHOWAS"
 #define PING_CMD "PING <token>"
 #define OPER_CMD "OPER <name> <password>"
 

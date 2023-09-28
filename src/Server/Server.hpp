@@ -5,7 +5,7 @@
 #include "../Client/Client.hpp"
 #include "../Channel/Channel.hpp"
 
-#define BACKLOG 5 // Nº of clients pending to connect w/ server
+#define BACKLOG 5		// Nº of clients pending to connect w/ server
 #define BUFFER_SIZE 512 // Max size of each message (Docs: https://modern.ircdocs.horse/#message-format)
 #define PING_INTERVAL 30
 
@@ -25,6 +25,7 @@ class Server {
 		std::string _password;
 
 		std::vector<Client> _clients;
+		std::vector<Client> _disconnectedClients;
 		std::map<std::string, Channel> channels;
 
 		bool handleClientConnections();
@@ -37,7 +38,7 @@ class Server {
 		void handleCommand(Client &caller, std::string command, std::string body);
 		bool	userExists(std::string nickname);
 		bool	channelExists(std::string channelName);
-		std::vector<Client>::iterator findClientByFd(int fd);
+		Client* findClientByFd(int fd);
 		int		getClientSocketFdByNickname(const std::string &nickname);
 		Channel* getChannelByName(std::string channelName);
 		Client* findClientByNickname(std::string targetNickname);
@@ -55,6 +56,10 @@ class Server {
 		void kickUser(std::string body, Client &user);
 		void pongCheck(std::string body, Client &user);
 		void pingCheck(std::string body, Client &user);
+		void noticeMessage(std::string body, Client &user);
+		void usersOnNetwork(std::string body, Client &user);
+		void getUserInfo(std::string body, Client &user);
+		void getPreviouslyUsersInfo(std::string body, Client &user);
 };
 
 #endif

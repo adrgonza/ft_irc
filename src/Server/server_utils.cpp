@@ -44,7 +44,7 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 	{
 
 		// Client commands
-		case CMD_NICK: caller.changeNickname(body); break;
+		case CMD_NICK: caller.changeNickname(_clients, body); break;
 		case CMD_USER: break;
 		case CMD_PASS: break;
 		case CMD_PRIVMSG: privMessage(body, caller); break;
@@ -57,18 +57,21 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 		case CMD_NAMES: getNamesInChannel(body, caller); break; // NO FUNCIONA
 		case CMD_INVITE: inviteNick(body, caller); break;
 		case CMD_TOPIC: topicChannel(body, caller); break;
+		case CMD_NOTICE: noticeMessage(body, caller); break;
 
 		// Server commands
 		case CMD_PING: pingCheck(body, caller); break;
 		case CMD_PONG: pongCheck(body, caller); break;
+		case CMD_WHO: usersOnNetwork(body, caller); break;
+		case CMD_WHOIS: getUserInfo(body, caller); break;
+		case CMD_WHOWAS: getPreviouslyUsersInfo(body, caller); break;
+		case CMD_KICK: kickUser(body, caller); break;
 
 
 		// Commands yet to do
 		case CMD_OPER:
 		case CMD_AUTH:
 		case CMD_QUIT:
-		case CMD_KICK:
-		case CMD_NOTICE:
 		case CMD_KILL:
 
 		// Not sure if needed
@@ -76,9 +79,6 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 		case CMD_CAP:
 		case CMD_TIME:
 		case CMD_MODE:
-		case CMD_WHO:
-		case CMD_WHOIS:
-		case CMD_WHOWAS:
 		case CMD_REHASH:
 		case CMD_RESTART:
 		case CMD_SQUIT:
@@ -105,14 +105,14 @@ bool Server::channelExists(std::string channelName)
 	return false;
 }
 
-std::vector<Client>::iterator Server::findClientByFd(int fd)
+Client* Server::findClientByFd(int fd)
 {
 	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 	{
 		if (it->getFd() == fd)
-			return it;
+			return &(*it);
 	}
-	return _clients.end();
+	return NULL;
 }
 
 int Server::getClientSocketFdByNickname(const std::string &nickname)

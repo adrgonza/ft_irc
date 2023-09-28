@@ -113,11 +113,13 @@ bool Server::handleClientCommunications(size_t i)
 	{
 		// disconnect a client
 		std::cout << "[SERVER]: A Client was disconnected from the server" << std::endl;
-		close(_pollFd[i].fd);
 		std::vector<Client>::iterator it = std::find(_clients.begin(), _clients.end(), _pollFd[i].fd);
+		close(_pollFd[i].fd);
 		if (it != _clients.end())
+		{
+			_disconnectedClients.push_back(*it);
 			_clients.erase(it);
-
+		}
 		for (size_t i = 0; i < BACKLOG; i++)
 		{
 			if (_pollFd[i + 1].fd == _pollFd[i].fd)
@@ -134,6 +136,14 @@ bool Server::handleClientCommunications(size_t i)
 			return (true);
 		}
 		// TODO: Handle not-ended inputs (see subject)
+		// for (size_t i = 0; i < strlen(buffer); i++)
+		// {
+		// 	printf("bufer[%lu]: %c\n", i, buffer[i]);
+		// 	if (buffer[i] == '\r')
+		// 		printf("TUVIEHA");
+		// 	else if (buffer[i] == '\n')
+		// 		printf("TUVIEHAAA");
+		// }
 		handleClientInput(*caller, buffer);
 	}
 	return (true);
@@ -144,6 +154,28 @@ bool Server::handleClientInput(Client &caller, std::string message)
 	time_t currentTime;
 	time(&currentTime);
 	caller.changeLastPingTime(currentTime);
+	//this is for messages that are sent in two or more request
+	if (message.find("\r") == message.npos)
+	{
+		if (message.find("\n") != message.npos)
+		{
+			caller.sendMessage("You are a invalid Client!");
+			return (true);
+		}
+		if(caller.getjoined().empty() )
+			caller.setjoined(message);
+		else if (caller.getjoined().length() >= 1024)
+			caller.sendMessage("Msg buffer is full!");
+		else
+			caller.setjoined(caller.getjoined() + message);
+
+		return (true);
+	}
+	if (!caller.getjoined().empty())
+	{
+		message = caller.getjoined() + message;
+		caller.setjoined("");
+	}
 
 	std::istringstream splitted(message);
 	std::string command;
@@ -157,6 +189,11 @@ bool Server::handleClientInput(Client &caller, std::string message)
 	size_t endlinePosition = body.find("\r");
 	if (endlinePosition != std::string::npos) // If the message does not end with '\r\n' should be ignored, but for now we accept it. TODO: change this
 		body = body.substr(0, endlinePosition);
+	else
+	{
+		caller.sendMessage("You are a invalid Client!");
+		return (true);
+	}
 
 	if (command == "PASS")
 		checkPassword(body, caller);
@@ -165,7 +202,7 @@ bool Server::handleClientInput(Client &caller, std::string message)
 	else
 	{
 		if (command == "NICK")
-			caller.changeNickname(body);
+			caller.changeNickname(_clients, body);
 		else if (command == "USER")
 			return (true);
 		else

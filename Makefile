@@ -9,12 +9,14 @@ SRCS	=	main.cpp \
 			src/commands/handleChannelCommands.cpp \
 			src/commands/messages.cpp  \
 			src/commands/pingpong.cpp  \
+			src/commands/userInformationCommands.cpp  \
+			src/commands/notice.cpp  \
 
 
 OBJS = $(SRCS:%.cpp=bin/%.o)
 
 CXX = c++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -I include
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -I include -fsanitize=address -g3
 
 all: $(NAME)
 
