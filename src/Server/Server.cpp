@@ -33,13 +33,30 @@ bool Server::run()
 		_pollFd[i].fd = -1;
 
 	while (true)
+	{
 		if (handleClientConnections() == false)
 			return (false);
+		time_t currentTime;
+		time(&currentTime);
+		long seconds = static_cast<long>(currentTime);
+		std::cout << "seconds----" << seconds << std::endl;
+		for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+		{
+			long clientSeconds = static_cast<long>(it->getLastPingTime());
+			std::cout << "Clien-seconds----" << clientSeconds << std::endl;
+			if (seconds - clientSeconds >= 30 && clientSeconds > 0)
+			{
+				it->sendMessage(PING_CMD, "");
+				it->changeLastPingTime(seconds);
+				continue;
+			}
+		}
+	}
 }
 
 bool Server::handleClientConnections()
 {
-	if (poll(_pollFd, _clients.size() + 1, -1) < 0)
+	if (poll(_pollFd, _clients.size() + 1, 1) < 0)
 		return (std::cout << "Error: syscall poll failed.." << std::endl, false);
 
 	if (_pollFd[0].revents == POLLIN)
@@ -57,7 +74,13 @@ bool Server::handleClientConnections()
 		std::cout << "[SERVER]: A new connection has been made." << std::endl;
 
 		Client newClient(_connectionFd);
+
+		time_t currentTime;
+		time(&currentTime);
+		newClient.changeLastPingTime(currentTime);
+
 		_clients.push_back(newClient);
+
 
 		for (size_t i = 1; i <= _clients.size(); i++) // Saves the new connection
 		{
@@ -74,26 +97,6 @@ bool Server::handleClientConnections()
 	{
 		if (_pollFd[i].fd != -1 && _pollFd[i].revents & POLLIN && handleClientCommunications(i) == false)
 			return (false);
-
-		// DONDE VA ESTO ??????????	
-		time_t currentTime = time(NULL);
-		time_t lastPingTimerCheck = time(NULL);
-		currentTime = time(NULL);
-		time_t elapsedTimeSinceLastCheck = currentTime - lastPingTimerCheck;
-		int timeout = (PING_INTERVAL - elapsedTimeSinceLastCheck) * 1000;
-		std::cout << "timeout: " << timeout << std::endl;
-		if (timeout < 0)
-		{
-			for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
-			{
-				if (currentTime - it->getLastPingTime() >= PING_INTERVAL)
-				{
-					pingCheck("", (*it));
-					it->changeLastPingTime(currentTime);
-				}
-			}
-			lastPingTimerCheck = currentTime;
-		}
 	}
 	return (true);
 }
@@ -111,7 +114,9 @@ bool Server::handleClientCommunications(size_t i)
 		// disconnect a client
 		std::cout << "[SERVER]: A Client was disconnected from the server" << std::endl;
 		close(_pollFd[i].fd);
-		_clients.erase(std::find(_clients.begin(), _clients.end(), _pollFd[i].fd));
+		std::vector<Client>::iterator it = std::find(_clients.begin(), _clients.end(), _pollFd[i].fd);
+		if (it != _clients.end())
+			_clients.erase(it);
 
 		for (size_t i = 0; i < BACKLOG; i++)
 		{
@@ -136,6 +141,10 @@ bool Server::handleClientCommunications(size_t i)
 
 bool Server::handleClientInput(Client &caller, std::string message)
 {
+	time_t currentTime;
+	time(&currentTime);
+	caller.changeLastPingTime(currentTime);
+
 	std::istringstream splitted(message);
 	std::string command;
 	splitted >> command;
