@@ -11,9 +11,9 @@ bool Server::run()
 
 	struct sockaddr_in serverAddress;
 	bzero(&serverAddress, sizeof(serverAddress));
-	serverAddress.sin_family = AF_INET;					// specing the family, interenet (address)
-	serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);	// responding to anything
-	serverAddress.sin_port = htons(_port);				// convert server port nb to network standart byte order (to avoid to conections use different byte order)
+	serverAddress.sin_family = AF_INET;				   // specing the family, interenet (address)
+	serverAddress.sin_addr.s_addr = htonl(INADDR_ANY); // responding to anything
+	serverAddress.sin_port = htons(_port);			   // convert server port nb to network standart byte order (to avoid to conections use different byte order)
 
 	if (bind(_socketFd, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) // set the address wher is gonna be listening
 		return (std::cout << "Error: could not bind.." << std::endl, false);
@@ -23,7 +23,7 @@ bool Server::run()
 
 	std::cout << "Waiting for a connection in '127.0.0.1' port: " << _port << std::endl; // localhost ip default = 127.0.0.1
 
-	//fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
+	// fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
 
 	_pollFd[0].fd = _socketFd;
 	_pollFd[0].events = POLLIN;
@@ -45,11 +45,11 @@ bool Server::handleClientConnections()
 	if (_pollFd[0].revents == POLLIN)
 	{
 		std::cout << "Incomming connecction..." << std::endl;
-		_connectionFd = accept(_socketFd, (struct sockaddr *) NULL, NULL);
+		_connectionFd = accept(_socketFd, (struct sockaddr *)NULL, NULL);
 		if (_connectionFd == -1)
 			return (std::cout << "Error accepting client's connection" << std::endl, false);
 
-		//fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
+		// fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
 
 		if (this->_clients.size() >= BACKLOG)
 			return (std::cout << "Error: max connections limit reached" << std::endl, true);
@@ -62,11 +62,11 @@ bool Server::handleClientConnections()
 		for (size_t i = 1; i <= _clients.size(); i++) // Saves the new connection
 		{
 			if (_pollFd[i].fd != -1)
-				continue ;
+				continue;
 
 			_pollFd[i].fd = _connectionFd;
 			_pollFd[i].events = POLLIN;
-			break ;
+			break;
 		}
 	}
 
@@ -87,7 +87,7 @@ bool Server::handleClientCommunications(size_t i)
 		return (std::cout << "Error: dont have access to read client fd." << std::endl, false);
 	if (readSize == 0)
 	{
-		//disconnect a client
+		// disconnect a client
 		std::cout << "[SERVER]: A Client was disconnected from the server" << std::endl;
 		std::vector<Client>::iterator it = std::find(_clients.begin(), _clients.end(), _pollFd[i].fd);
 		close(_pollFd[i].fd);
@@ -127,7 +127,7 @@ bool Server::handleClientCommunications(size_t i)
 
 bool Server::handleClientInput(Client &caller, std::string message)
 {
-	//this is for messages that are sent in two or more request
+	// this is for messages that are sent in two or more request
 	if (message.find("\r") == message.npos)
 	{
 		if (message.find("\n") != message.npos)
@@ -135,7 +135,7 @@ bool Server::handleClientInput(Client &caller, std::string message)
 			caller.sendMessage("You are a invalid Client!");
 			return (true);
 		}
-		if(caller.getjoined().empty() )
+		if (caller.getjoined().empty())
 			caller.setjoined(message);
 		else if (caller.getjoined().length() >= 1024)
 			caller.sendMessage("Msg buffer is full!");
@@ -179,7 +179,7 @@ bool Server::handleClientInput(Client &caller, std::string message)
 		else if (command == "USER")
 			return (true);
 		else
-			caller.sendMessage(ERR_PASSWDREQUIRED, caller.getNickname().c_str()); // TODO, std::cout << "Error: a password is required.." << std::endl;
+			caller.sendMessage(ERR_PASSWDREQUIRED, caller.getNickname().c_str());
 	}
 	return (true);
 }
@@ -189,7 +189,9 @@ void Server::checkPassword(std::string body, Client &caller)
 	if (body == _password)
 	{
 		caller.giveKey(true);
-		caller.sendMessage(MOTD, caller.getNickname().c_str(), "\033[34mWelcome to the TONY_WARRIORS Internet Relay Chat Network\033[39m");
+		std::string serverName = "ToniWarrior's";
+		caller.sendMessage(RPL_MOTDSTART, caller.getNickname().c_str(), serverName.c_str(), "Welcome to the TONY_WARRIORS Internet Relay Chat Network");
+		caller.sendMessage(RPL_ENDOFMOTD, serverName.c_str(), caller.getNickname().c_str());
 	}
 	else
 	{

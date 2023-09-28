@@ -56,6 +56,7 @@ class Server {
 		void usersOnNetwork(std::string body, Client &user);
 		void getUserInfo(std::string body, Client &user);
 		void getPreviouslyUsersInfo(std::string body, Client &user);
+		void quitServ(std::string body, Client &user);
 };
 
 #endif
