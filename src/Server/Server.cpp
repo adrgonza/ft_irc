@@ -111,6 +111,14 @@ bool Server::handleClientCommunications(size_t i)
 			return (true);
 		}
 		// TODO: Handle not-ended inputs (see subject)
+		// for (size_t i = 0; i < strlen(buffer); i++)
+		// {
+		// 	printf("bufer[%lu]: %c\n", i, buffer[i]);
+		// 	if (buffer[i] == '\r')
+		// 		printf("TUVIEHA");
+		// 	else if (buffer[i] == '\n')
+		// 		printf("TUVIEHAAA");
+		// }
 		handleClientInput(*caller, buffer);
 	}
 	return (true);
@@ -118,6 +126,29 @@ bool Server::handleClientCommunications(size_t i)
 
 bool Server::handleClientInput(Client &caller, std::string message)
 {
+	//this is for messages that are sent in two or more request
+	if (message.find("\r") == message.npos)
+	{
+		if (message.find("\n") != message.npos)
+		{
+			caller.sendMessage("You are a invalid Client!");
+			return (true);
+		}
+		if(caller.getjoined().empty() )
+			caller.setjoined(message);
+		else if (caller.getjoined().length() >= 1024)
+			caller.sendMessage("Msg buffer is full!");
+		else
+			caller.setjoined(caller.getjoined() + message);
+
+		return (true);
+	}
+	if (!caller.getjoined().empty())
+	{
+		message = caller.getjoined() + message;
+		caller.setjoined("");
+	}
+
 	std::istringstream splitted(message);
 	std::string command;
 	splitted >> command;
@@ -130,6 +161,11 @@ bool Server::handleClientInput(Client &caller, std::string message)
 	size_t endlinePosition = body.find("\r");
 	if (endlinePosition != std::string::npos) // If the message does not end with '\r\n' should be ignored, but for now we accept it. TODO: change this
 		body = body.substr(0, endlinePosition);
+	else
+	{
+		caller.sendMessage("You are a invalid Client!");
+		return (true);
+	}
 
 	if (command == "PASS")
 		checkPassword(body, caller);
