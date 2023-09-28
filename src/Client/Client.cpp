@@ -35,8 +35,11 @@ int Client::getFd() const { return this->_fd; }
 std::string Client::getNickname() const { return this->nickname; }
 std::string Client::getChannel() const { return this->channel; }
 std::string Client::getUsername() const { return this->username; }
+std::string Client::getjoined() const{ return _joined; }
+void Client::setjoined(std::string str) { _joined = str; }
 std::string Client::getHost() const { return this->host; }
 bool Client::getKey() const { return this->_passwordkey; }
+
 
 std::string Client::getSource() const
 {

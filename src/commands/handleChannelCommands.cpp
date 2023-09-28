@@ -64,7 +64,7 @@ void Server::handleJoin(std::string body, Client &user)
 	if (body == "#")
 		return;
 	std::string channel = body;
-	if (channel == user.getChannel())
+	if (channel == user.getChannel() || channel.empty())
 		return;
 	if (channels.find(channel) != channels.end())
 	{
@@ -77,6 +77,7 @@ void Server::handleJoin(std::string body, Client &user)
 		Channel newChannel;
 		newChannel.addParticipant(user);
 		newChannel.addOperator(user);
+		newChannel.setTopic("");
 		channels[channel] = newChannel;
 		std::cout << "User " << user.getNickname() << " created and joined channel " << channel << std::endl;
 	}
