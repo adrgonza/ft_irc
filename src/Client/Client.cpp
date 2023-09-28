@@ -35,8 +35,11 @@ int Client::getFd() const { return this->_fd; }
 std::string Client::getNickname() const { return this->nickname; }
 std::string Client::getChannel() const { return this->channel; }
 std::string Client::getUsername() const { return this->username; }
+std::string Client::getjoined() const{ return _joined; }
+void Client::setjoined(std::string str) { _joined = str; }
 std::string Client::getHost() const { return this->host; }
 bool Client::getKey() const { return this->_passwordkey; }
+
 
 std::string Client::getSource() const
 {
@@ -54,10 +57,24 @@ std::string Client::getSource() const
 	return source;
 }
 
-void Client::changeNickname(std::string body)
+void Client::changeNickname(std::vector<Client> clients, std::string body)
 {
 	// Assumes (for now) body is always correct. No collisions, no weird characters, and never empty
 	// TODO: Handle NICK command correctly (please)
+	bool flag = false;
+
+	while (flag == false)
+	{
+		flag = true;
+		for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); it++)
+		{
+			if (it->getNickname() == body)
+			{
+				body = body + "_";
+				flag = false;
+			}
+		}
+	}
 
 	this->sendMessage("NICK <nickname>", body.c_str());
 	this->nickname = body; // Nickname is changed after the message is sent, to not affect the source of the message (see docs.)

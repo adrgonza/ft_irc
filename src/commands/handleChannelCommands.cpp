@@ -61,8 +61,10 @@ void Server::partChannel(std::string body, Client &user)
 void Server::handleJoin(std::string body, Client &user)
 {
 	// check body
+	if (body == "#")
+		return;
 	std::string channel = body;
-	if (channel == user.getChannel())
+	if (channel == user.getChannel() || channel.empty())
 		return;
 	if (channels.find(channel) != channels.end())
 	{
@@ -76,6 +78,7 @@ void Server::handleJoin(std::string body, Client &user)
 		newChannel.addParticipant(user);
 		newChannel.addOperator(user);
 		newChannel.setName(channel);
+		newChannel.setTopic("");
 		channels[channel] = newChannel;
 		std::cout << "User " << user.getNickname() << " created and joined channel " << channel << std::endl;
 	}
@@ -90,19 +93,31 @@ void Server::handleJoin(std::string body, Client &user)
 
 void Server::topicChannel(std::string body, Client &user)
 {
-	std::string network = "";
-	std::string channel = getWord(body, 1);
+	std::istringstream iss(body);
+	std::string channel;
+    iss >> channel;
+	std::string newTopic;
+    std::getline(iss, newTopic);
+
 	if (!channel.empty() && channel[0] != '#')
 		channel = "#" + channel;
-	std::string newTopic = getWord(body, 2);
-	if (newTopic[0] == ':')
-		newTopic = getWord(body, 3);
 	if (!channelExists(channel))
 	{
 		user.sendMessage(ERR_NOSUCHCHANNEL, user.getNickname().c_str(), channel.c_str());
 		return;
 	}
 	Channel *channelObj = getChannelByName(channel);
+	if (newTopic.empty())
+	{
+		std::string sendMsg = "332 TOPIC: " + channelObj->getTopic() + IRC_ENDLINE;
+		sendMsg = "332 " + user.getNickname() + " " + channel + " :" + channelObj->getTopic() + IRC_ENDLINE;
+		user.sendMessage(sendMsg);
+		return ;
+	}
+
+    if (!newTopic.empty() && newTopic[0] == ' ')
+        newTopic = newTopic.substr(1);
+	std::string network = "";
 	if (!channelObj->hasParticipant(user))
 	{
 		user.sendMessage(ERR_NOTONCHANNEL, user.getNickname().c_str(), channel.c_str());

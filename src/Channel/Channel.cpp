@@ -3,6 +3,13 @@
 Channel::Channel() : topic("") {}
 Channel::~Channel() {}
 
+Channel::Channel(const Channel &obj)
+{
+	this->participants = obj.participants;
+	this->operators = obj.operators;
+	this->topic = obj.topic;
+}
+
 std::vector<Client> Channel::getParticipants() const
 {
 	return this->participants;

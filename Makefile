@@ -9,6 +9,7 @@ SRCS	=	main.cpp \
 			src/commands/handleChannelCommands.cpp \
 			src/commands/messages.cpp  \
 			src/commands/userInformationCommands.cpp  \
+			src/commands/notice.cpp  \
 
 
 OBJS = $(SRCS:%.cpp=bin/%.o)

@@ -44,7 +44,7 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 	{
 
 		// Client commands
-		case CMD_NICK: caller.changeNickname(body); break;
+		case CMD_NICK: caller.changeNickname(_clients, body); break;
 		case CMD_USER: break;
 		case CMD_PASS: break;
 		case CMD_PRIVMSG: privMessage(body, caller); break;
@@ -57,6 +57,7 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 		case CMD_NAMES: getNamesInChannel(body, caller); break; // NO FUNCIONA
 		case CMD_INVITE: inviteNick(body, caller); break;
 		case CMD_TOPIC: topicChannel(body, caller); break;
+		case CMD_NOTICE: noticeMessage(body, caller); break;
 
 		// Server commands
 		case CMD_WHO: usersOnNetwork(body, caller); break;
@@ -71,7 +72,6 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 		case CMD_OPER:
 		case CMD_AUTH:
 		case CMD_QUIT:
-		case CMD_NOTICE:
 		case CMD_KILL:
 
 		// Not sure if needed

@@ -19,6 +19,8 @@ class Client {
 		int getFd() const;
 		std::string getNickname() const;
 		std::string getUsername() const;
+		std::string getjoined() const;
+		void setjoined(std::string);
 		std::string getHost() const;
 		std::string getChannel() const;
 		bool getKey() const;
@@ -29,12 +31,13 @@ class Client {
 
 		// Commands
 		void sendMessage(std::string message, ...);
-		void changeNickname(std::string newNick);
+		void changeNickname(std::vector<Client> clients, std::string newNick);
 		void changeChannel(std::string channel);
 
 	private:
 		Client();
 		int _fd;
+		std::string _joined;
 		std::string nickname;
 		std::string username;
 		std::string host;

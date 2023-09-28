@@ -14,6 +14,7 @@ class Channel {
 
 	public:
 		Channel();
+		Channel(const Channel &obj);
 		~Channel();
 
 		std::vector<Client> getParticipants() const;
