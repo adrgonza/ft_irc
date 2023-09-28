@@ -1,13 +1,13 @@
 #ifndef LIBRARIES_HPP
 #define LIBRARIES_HPP
 
-//c++
+// c++
 #include <iostream>
 #include <sstream>
 #include <vector>
 #include <map>
 
-//c
+// c
 #include <unistd.h>
 #include <poll.h>
 #include <netdb.h>
@@ -17,7 +17,8 @@
 #include <fcntl.h>
 #include <arpa/inet.h>
 
-typedef enum {
+typedef enum
+{
 	CMD_UNKNOWN, // Unknown command
 	CMD_NICK,
 	CMD_USER,
@@ -64,17 +65,18 @@ e_command parseCommandCode(std::string command);
 #define ERR_WASNOSUCHNICK "406 <client> :There was no such nickname"
 #define ERR_NORECIPIENT "411 <client> :No recipient given (<command>)"
 #define ERR_NOTEXTTOSEND "412 <client> :No text to send"
-#define ERR_NONICKNAMEGIVEN "431 <client> :No nickname given" 
+#define ERR_NONICKNAMEGIVEN "431 <client> :No nickname given"
 #define ERR_NICKNAMEINUSE "433 <client> <nick> :Nickname is already in use"
 #define ERR_USERONCHANNEL "443 <client> <nick> <channel> :is already on channel"
-
 
 // Command Messages
 #define USER_CMD "USER <username> 0 * <realname>"
 #define NICK_CMD "NICK <nickname>"
 #define PRIVMSG_CMD "PRIVMSG <target> <text>" // PRIVMSG Parameters: <target>{,<target>} <text to be sent>
+#define NOTICE_CMD "NOTICE <target> <text>"
+#define NOTICE_RECEIVER_CMD ":<sender> NOTICE <target> <text>"
 #define PRIVMSG_RECEIVER_CMD ":<sender> PRIVMSG <target> <text>" // PRIVMSG Parameters: <target>{,<target>} <text to be sent>
-#define JOIN_CMD "JOIN <channel>" // <channel>{,<channel>} [<key>{,<key>}]
+#define JOIN_CMD "JOIN <channel>"								 // <channel>{,<channel>} [<key>{,<key>}]
 
 #define PING_CMD "PING <token>"
 #define OPER_CMD "OPER <name> <password>"
