@@ -75,6 +75,7 @@ void Server::handleJoin(std::string body, Client &user)
 		Channel newChannel;
 		newChannel.addParticipant(user);
 		newChannel.addOperator(user);
+		newChannel.setName(channel);
 		channels[channel] = newChannel;
 		std::cout << "User " << user.getNickname() << " created and joined channel " << channel << std::endl;
 	}

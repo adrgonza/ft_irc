@@ -6,33 +6,45 @@
 // A mask pattern, in which case all visible users whose nickname matches are listed. Servers MAY match other user-specific values, such as the hostname, server, real name or username. Servers MAY not support mask patterns and return an empty list.
 void Server::usersOnNetwork(std::string body, Client &user)
 {
-    body = "" + body;
-    std::string serverName = "Toni Warrios";
-
-    std::string username = user.getNickname();
-    std::string userNickname = user.getNickname();
-    std::string hostname = "hostname";
-    std::string nickname = "pepe";
-
-    std::string channelStatus = "";
-
-    std::string whoMessage = ":" + serverName + " 352 " + userNickname + " * " + username + " " + hostname + " " + serverName + " " + nickname + " " + channelStatus + " :1 ";
-    for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+    std::string target = getWord(body, 1);
+    if (target.empty() || (!channelExists(target) && !userExists(target)))
     {
-        std::string clientNickname = it->getNickname();
-        std::string clientUsername = "pepe";
-        // std::string clientUsername = it->getUsername();
-        std::string clientHostname = "pepe";
-        // std::string clientHostname = it->getHostname();
-        std::string clientRealname = "pepe";
-        // std::string clientRealname = it->getRealname();
-        whoMessage += "\r\n";
-        whoMessage += ":" + serverName + " 352 " + userNickname + " * " + clientUsername + " " + clientHostname + " " + serverName + " " + clientNickname + " " + channelStatus + " :1 ";
+        user.sendMessage(ERR_NOSUCHNICK, target.c_str(), user.getNickname().c_str());
+        return;
     }
-    whoMessage += "\r\n";
-    user.sendMessage(whoMessage);
+
+    std::string serverName = "Toni Warrior's"; // Replace with your server's name
+    std::string userNickname = user.getNickname();
+
+    if (channelExists(target))
+    {
+        Channel *targetChannel = getChannelByName(target);
+        std::vector<Client> channelMembers = targetChannel->getParticipants();
+        for (std::vector<Client>::iterator it = channelMembers.begin(); it != channelMembers.end(); ++it)
+        {
+            std::string nickname = it->getNickname();
+            std::string whoResponse = ":" + serverName + " 352 " + userNickname + " " + target + " " + nickname + " " + serverName + " " + serverName + " H :1 " + nickname;
+	        whoResponse += "\r\n";
+            user.sendMessage(whoResponse.c_str());
+        }
+    }
+
+    if (userExists(target))
+    {
+        Client *targetClient = findClientByNickname(target);
+        std::string nickname = targetClient->getNickname();
+        std::string username = ""; // Replace with the username if available, or use an empty string
+        std::string hostname = ""; // Replace with the hostname if available, or use an empty string
+        std::string realname = ""; // Replace with the realname if available, or use an empty string
+
+        std::string whoResponse = ":" + serverName + " 352 " + userNickname + " " + target + " " + serverName + " " + nickname + " H :1 " + realname;
+	    whoResponse += "\r\n";
+        user.sendMessage(whoResponse.c_str());
+    }
+
     std::string endOfWhoMessage = ":" + serverName + " 315 " + userNickname + " :End of WHO list";
-    user.sendMessage(endOfWhoMessage);
+	endOfWhoMessage += "\r\n";
+    user.sendMessage(endOfWhoMessage.c_str());
 }
 
 // If the <target> parameter is specified, it SHOULD be a server name or the nick of a user.
