@@ -5,7 +5,7 @@
 #include "../Client/Client.hpp"
 #include "../Channel/Channel.hpp"
 
-#define BACKLOG 5		// Nº of clients pending to connect w/ server
+#define BACKLOG 10		// Nº of clients pending to connect w/ server
 #define BUFFER_SIZE 512 // Max size of each message (Docs: https://modern.ircdocs.horse/#message-format)
 #define PING_INTERVAL 30
 
