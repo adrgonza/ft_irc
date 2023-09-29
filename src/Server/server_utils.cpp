@@ -72,76 +72,47 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 	switch (commandCode)
 	{
 
-	// Client commands
-	case CMD_NICK:
-		caller.changeNickname(_clients, body);
-		break;
-	case CMD_USER:
-		break;
-	case CMD_PASS:
-		break;
-	case CMD_PRIVMSG:
-		privMessage(body, caller);
-		break;
-	case CMD_SAY:
-		sayMsg(body, caller);
-		break;
+		// Client commands
+		case CMD_NICK: caller.changeNickname(_clients, body); break;
+		case CMD_USER: break;
+		case CMD_PASS: break;
+		case CMD_PRIVMSG: privMessage(body, caller); break;
+		case CMD_SAY: sayMsg(body, caller); break;
 
-	// Channel commands
-	case CMD_JOIN:
-		handleJoin(body, caller);
-		break;
-	case CMD_LIST:
-		listChannels(body, caller);
-		break;
-	case CMD_PART:
-		partChannel(body, caller);
-		break;
-	case CMD_NAMES:
-		getNamesInChannel(body, caller);
-		break; // NO FUNCIONA
-	case CMD_INVITE:
-		inviteNick(body, caller);
-		break;
-	case CMD_TOPIC:
-		topicChannel(body, caller);
-		break;
-	case CMD_NOTICE:
-		noticeMessage(body, caller);
-		break;
+		// Channel commands
+		case CMD_JOIN: handleJoin(body, caller); break;
+		case CMD_LIST: listChannels(body, caller); break;
+		case CMD_PART: partChannel(body, caller); break;
+		case CMD_NAMES: getNamesInChannel(body, caller); break; // NO FUNCIONA
+		case CMD_INVITE: inviteNick(body, caller); break;
+		case CMD_TOPIC: topicChannel(body, caller); break;
+		case CMD_NOTICE: noticeMessage(body, caller); break;
+		case CMD_QUIT: quitServ(body, caller); break;
 
-	// Server commands
-	case CMD_WHO:
-		usersOnNetwork(body, caller);
-		break;
-	case CMD_WHOIS:
-		getUserInfo(body, caller);
-		break;
-	case CMD_WHOWAS:
-		getPreviouslyUsersInfo(body, caller);
-		break;
-	case CMD_KICK:
-		kickUser(body, caller);
-		break;
+		// Server commands
+		case CMD_PING: pingCheck(body, caller); break;
+		case CMD_PONG: pongCheck(body, caller); break;
+		case CMD_WHO: usersOnNetwork(body, caller); break;
+		case CMD_WHOIS: getUserInfo(body, caller); break;
+		case CMD_WHOWAS: getPreviouslyUsersInfo(body, caller); break;
+		case CMD_KICK: kickUser(body, caller); break;
 
-	// Commands yet to do
-	case CMD_PING:
-	case CMD_PONG:
-	case CMD_OPER:
-	case CMD_AUTH:
-	case CMD_QUIT:
-	case CMD_KILL:
 
-	// Not sure if needed
-	case CMD_ERROR:
-	case CMD_CAP:
-	case CMD_TIME:
-	case CMD_MODE:
-	case CMD_REHASH:
-	case CMD_RESTART:
-	case CMD_SQUIT:
-	case CMD_UNKNOWN:
-		caller.sendMessage(ERR_UNKNOWNCOMMAND_421, caller.getNickname().c_str(), command.c_str());
+		// Commands yet to do
+		case CMD_OPER:
+		case CMD_AUTH:
+		case CMD_KILL:
+
+		// Not sure if needed
+		case CMD_ERROR:
+		case CMD_CAP:
+		case CMD_TIME:
+		case CMD_MODE:
+		case CMD_REHASH:
+		case CMD_RESTART:
+		case CMD_SQUIT:
+		case CMD_UNKNOWN:
+			caller.sendMessage(ERR_UNKNOWNCOMMAND_421, caller.getNickname().c_str(), command.c_str());
 		break;
 	}
 }

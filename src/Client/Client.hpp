@@ -17,6 +17,7 @@ class Client {
 
 
 		int getFd() const;
+		void setFD(int);
 		std::string getNickname() const;
 		std::string getUsername() const;
 		std::string getjoined() const;
@@ -25,6 +26,9 @@ class Client {
 		std::string getChannel() const;
 		bool getKey() const;
 		std::string getSource() const;
+		time_t		getLastPingTime() const;
+		bool getPing() const;
+		void setPing(bool);
 
 
 		void giveKey(bool);
@@ -34,16 +38,19 @@ class Client {
 		void changeNickname(std::vector<Client> clients, std::string newNick);
 		void changeChannel(std::string channel);
 		std::string buildClientMessage(std::string message, va_list args);
+		void changeLastPingTime(time_t newPingTime);
 
 	private:
 		Client();
 		int _fd;
+		bool _ping;
 		std::string _joined;
 		std::string nickname;
 		std::string username;
 		std::string host;
 		std::string channel;
 		bool _passwordkey;
+		time_t		lastPingTime;
 };
 
 #endif
