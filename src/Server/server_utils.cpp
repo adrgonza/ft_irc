@@ -33,6 +33,9 @@ e_command parseCommandCode(std::string command)
 	if (command == "REHASH") return CMD_REHASH;
 	if (command == "RESTART") return CMD_RESTART;
 	if (command == "SQUIT") return CMD_SQUIT;
+	if (command == "BAN") return CMD_BAN;
+	if (command == "UNBAN") return CMD_UNBAN;
+
 	return CMD_UNKNOWN;
 }
 
@@ -58,6 +61,9 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 		case CMD_INVITE: inviteNick(body, caller); break;
 		case CMD_TOPIC: topicChannel(body, caller); break;
 		case CMD_NOTICE: noticeMessage(body, caller); break;
+		case CMD_BAN: banUser(body, caller); break;
+		case CMD_UNBAN: unbanUser(body, caller); break;
+		case CMD_MODE: modeHandler(body, caller); break;
 
 		// Server commands
 		case CMD_WHO: usersOnNetwork(body, caller); break;
@@ -78,7 +84,6 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 		case CMD_ERROR:
 		case CMD_CAP:
 		case CMD_TIME:
-		case CMD_MODE:
 		case CMD_REHASH:
 		case CMD_RESTART:
 		case CMD_SQUIT:

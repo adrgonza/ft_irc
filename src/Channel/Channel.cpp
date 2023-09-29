@@ -25,7 +25,6 @@ void Channel::setTopic(std::string newTopic)
 	this->topic = newTopic;
 }
 
-
 void Channel::addParticipant(Client newParticipant)
 {
 	participants.push_back(newParticipant);
@@ -47,7 +46,6 @@ bool Channel::hasParticipant(Client participant)
 		return false;
 }
 
-
 std::vector<Client> Channel::getOperators() const
 {
 	return this->operators;
@@ -61,14 +59,14 @@ void Channel::addOperator(Client newOper)
 void Channel::removeOperator(Client oper)
 {
 	std::vector<Client>::iterator userIt = std::find(operators.begin(), operators.end(), oper);
-    if (userIt != operators.end())
-        operators.erase(userIt);
+	if (userIt != operators.end())
+		operators.erase(userIt);
 }
 
 bool Channel::isOperator(Client user)
 {
 	std::vector<Client>::iterator userIt = std::find(operators.begin(), operators.end(), user);
-    if (userIt != operators.end())
+	if (userIt != operators.end())
 		return true;
 	else
 		return false;
@@ -82,4 +80,25 @@ std::string Channel::getName() const
 void Channel::setName(std::string name)
 {
 	this->_name = name;
+}
+
+bool Channel::isBanned(Client user)
+{
+	std::vector<Client>::iterator userIt = std::find(bannedParticipants.begin(), bannedParticipants.end(), user);
+	if (userIt != bannedParticipants.end())
+		return true;
+	else
+		return false;
+}
+
+void Channel::addBan(Client user)
+{
+	bannedParticipants.push_back(user);
+}
+
+void Channel::removeBan(Client user)
+{
+	std::vector<Client>::iterator userIt = std::find(bannedParticipants.begin(), bannedParticipants.end(), user);
+	if (userIt != bannedParticipants.end())
+		bannedParticipants.erase(userIt);
 }

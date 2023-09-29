@@ -10,6 +10,7 @@ SRCS	=	main.cpp \
 			src/commands/messages.cpp  \
 			src/commands/userInformationCommands.cpp  \
 			src/commands/notice.cpp  \
+			src/commands/handleOperatorChannelCommands.cpp
 
 
 OBJS = $(SRCS:%.cpp=bin/%.o)

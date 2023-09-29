@@ -49,7 +49,9 @@ typedef enum
 	CMD_WHOWAS,
 	CMD_REHASH,
 	CMD_RESTART,
-	CMD_SQUIT
+	CMD_SQUIT,
+	CMD_BAN,
+	CMD_UNBAN
 } e_command;
 
 e_command parseCommandCode(std::string command);
@@ -75,6 +77,8 @@ e_command parseCommandCode(std::string command);
 #define ERR_PASSWDREQUIRED "421 <client> :Password required"
 #define ERR_YOUREBANNEDCREEP "465 <client> :You are banned from this server."
 #define ERR_BANNEDFROMCHAN "474 <client> <channel> :Cannot join channel (+b)"
+#define ERR_USERALREADYBANNED "484 <nickname> <channel> :Cannot ban user; they are already banned (+b)"
+
 
 // Command Messages
 #define USER_CMD "USER <username> 0 * <realname>"
@@ -99,5 +103,7 @@ e_command parseCommandCode(std::string command);
 #define RPL_ENDOFWHOWAS ":<server> 319 <client> <nick> :End of WHOWAS"
 #define PING_CMD "PING <token>"
 #define OPER_CMD "OPER <name> <password>"
+#define BAN_CMD ":<server> MODE <channel> +b <host>"
+#define UNBAN_CMD ":<server> MODE <channel> -b <host>"
 
 #endif

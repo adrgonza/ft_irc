@@ -66,8 +66,15 @@ void Server::handleJoin(std::string body, Client &user)
 	std::string channel = body;
 	if (channel == user.getChannel() || channel.empty())
 		return;
+	
 	if (channels.find(channel) != channels.end())
 	{
+		Channel *targetChannel = getChannelByName(channel);
+		if (targetChannel->isBanned(user))
+		{
+			user.sendMessage(ERR_YOUREBANNEDCREEP, user.getNickname().c_str());
+			return;
+		}
 		channels[channel].addParticipant(user);
 		std::cout << "User " << user.getNickname() << " joined channel " << channel << std::endl;
 	}
@@ -204,33 +211,4 @@ void Server::inviteNick(std::string body, Client &user)
 		return ;
 	}
 	targetClient->sendMessage(INVITE_CMD, user.getNickname().c_str(), targetUser.c_str(), channel.c_str());
-}
-
-void Server::kickUser(std::string body, Client &user)
-{
-	std::string channel = getWord(body, 1);
-	std::string targetUser = getWord(body, 2);
-
-	if (!channelExists(channel))
-	{
-		std::cout << "Channel does not exist" << std::endl;
-		return;
-	}
-	if (!userExists(targetUser))
-	{
-		std::cout << "User does not exist" << std::endl;
-		return;
-	}
-	Channel *chan = getChannelByName(channel);
-	std::string nick = user.getNickname();
-	if (chan->isOperator(user))
-	{	
-		user.sendMessage(KICK_CMD, nick.c_str(), channel.c_str(), targetUser.c_str());
-		Client *tarUser = findClientByNickname(targetUser);
-		chan->removeParticipant(*tarUser);
-		tarUser->changeChannel("");
-		tarUser->sendMessage(KICK_CMD, nick.c_str(), channel.c_str(), targetUser.c_str());
-	}
-	else
-		user.sendMessage(ERR_CHANOPRIVSNEEDED, nick.c_str(), channel.c_str());
 }
