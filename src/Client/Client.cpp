@@ -32,6 +32,7 @@ Client::Client(const Client &obj)
 Client::Client(int connectionFd) : _fd(connectionFd), _ping(false), _passwordkey(false) {}
 
 int Client::getFd() const { return this->_fd; }
+void Client::setFD(int newFD) { _fd = newFD; }
 std::string Client::getNickname() const { return this->nickname; }
 std::string Client::getChannel() const { return this->channel; }
 std::string Client::getUsername() const { return this->username; }

@@ -50,6 +50,11 @@ bool Server::run()
 				it->changeLastPingTime(seconds);
 				it->setPing(true);
 			}
+			if (it->getPing() == true && seconds - clientSeconds >= 5 && clientSeconds > 0)
+			{
+				quitServ("There is no pong response", *it);
+				
+			}
 		}
 	}
 }
@@ -135,15 +140,7 @@ bool Server::handleClientCommunications(size_t i)
 			std::cout << "[SERVER :: WARNING]: getClientByFd() failed before executing a command" << std::endl;
 			return (true);
 		}
-		// TODO: Handle not-ended inputs (see subject)
-		// for (size_t i = 0; i < strlen(buffer); i++)
-		// {
-		// 	printf("bufer[%lu]: %c\n", i, buffer[i]);
-		// 	if (buffer[i] == '\r')
-		// 		printf("TUVIEHA");
-		// 	else if (buffer[i] == '\n')
-		// 		printf("TUVIEHAAA");
-		// }
+
 		handleClientInput(*caller, buffer);
 	}
 	return (true);
@@ -207,8 +204,8 @@ bool Server::handleClientInput(Client &caller, std::string message)
 		else
 			caller.sendMessage(ERR_PASSWDREQUIRED, caller.getNickname().c_str());
 	}
-	// if (caller.getPing() == false);
-	// 	caller.
+	if (caller.getPing() == true)
+		quitServ("There is no pong response", caller);
 	return (true);
 }
 
@@ -217,9 +214,7 @@ void Server::checkPassword(std::string body, Client &caller)
 	if (body == _password)
 	{
 		caller.giveKey(true);
-		std::string serverName = "ToniWarrior's";
-		caller.sendMessage(RPL_MOTDSTART, caller.getNickname().c_str(), serverName.c_str(), "Welcome to the TONY_WARRIORS Internet Relay Chat Network");
-		caller.sendMessage(RPL_ENDOFMOTD, serverName.c_str(), caller.getNickname().c_str());
+		caller.sendMessage(RPL_MOTDSTART, caller.getNickname().c_str(), "Welcome to the TONY_WARRIORS Internet Relay Chat Network");
 	}
 	else
 	{

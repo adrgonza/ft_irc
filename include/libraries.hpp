@@ -92,7 +92,7 @@ e_command parseCommandCode(std::string command);
 #define KICK_CMD "KICK <channel> <user>" //<channel> <user> *( "," <user> ) [<comment>]
 #define QUIT_CMD ":<server> QUIT :<reason>"
 #define RPL_MOTD ":<server> 372 <client> :<text>"
-#define RPL_MOTDSTART "375 <client> :-<server> <text>"
+#define RPL_MOTDSTART "375 <client> : <text>"
 #define RPL_ENDOFMOTD ":<server> 376 <client> :End of welcome msg"
 #define RPL_WHOREPLY ":<server> 352 <client> <channel> <username> <host> <server> <nick> <flags> :<hopcount> <realname>"
 #define RPL_ENDOFWHO ":<server> 315 <client> <mask> :End of WHO list"

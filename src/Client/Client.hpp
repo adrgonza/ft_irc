@@ -17,6 +17,7 @@ class Client {
 
 
 		int getFd() const;
+		void setFD(int);
 		std::string getNickname() const;
 		std::string getUsername() const;
 		std::string getjoined() const;
