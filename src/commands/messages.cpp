@@ -78,6 +78,7 @@ void Server::privMessage(std::string body, Client user)
 	else
 	{
 		int targetSocket = getClientSocketFdByNickname(lowerTarget);
+		std::cout << "socket: " << targetSocket << std::endl;
 		if (targetSocket == -1) // target user not in server
 			return;
 		// user.sendMessage(PRIVMSG_CMD, target.c_str(), body.c_str());

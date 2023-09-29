@@ -78,7 +78,7 @@ e_command parseCommandCode(std::string command);
 #define ERR_YOUREBANNEDCREEP "465 <client> :You are banned from this server."
 #define ERR_BANNEDFROMCHAN "474 <client> <channel> :Cannot join channel (+b)"
 #define ERR_USERALREADYBANNED "484 <nickname> <channel> :Cannot ban user; they are already banned (+b)"
-
+#define ERR_NICKNAMEINUSE "433 <client> <nick> :Nickname is already in use"
 
 // Command Messages
 #define USER_CMD "USER <username> 0 * <realname>"
@@ -94,7 +94,10 @@ e_command parseCommandCode(std::string command);
 #define LIST_CMD "LIST"				// [<channel>{,<channel>}] [<elistcond>{,<elistcond>}]
 #define INVITE_CMD ":<nickname>!user@host INVITE <targetNick> <channel>"
 #define KICK_CMD "KICK <channel> <user>" //<channel> <user> *( "," <user> ) [<comment>]
-#define MOTD "<client> - <server> -"
+#define QUIT_CMD ":<server> QUIT :<reason>"
+#define RPL_MOTD ":<server> 372 <client> :<text>"
+#define RPL_MOTDSTART "375 <client> : <text>"
+#define RPL_ENDOFMOTD ":<server> 376 <client> :End of welcome msg"
 #define RPL_WHOREPLY ":<server> 352 <client> <channel> <username> <host> <server> <nick> <flags> :<hopcount> <realname>"
 #define RPL_ENDOFWHO ":<server> 315 <client> <mask> :End of WHO list"
 #define RPL_WHOISUSER ":<server> 311 <client> <nick> <username> <host> * :<realname>"

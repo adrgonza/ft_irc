@@ -11,9 +11,9 @@ bool Server::run()
 
 	struct sockaddr_in serverAddress;
 	bzero(&serverAddress, sizeof(serverAddress));
-	serverAddress.sin_family = AF_INET;					// specing the family, interenet (address)
-	serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);	// responding to anything
-	serverAddress.sin_port = htons(_port);				// convert server port nb to network standart byte order (to avoid to conections use different byte order)
+	serverAddress.sin_family = AF_INET;				   // specing the family, interenet (address)
+	serverAddress.sin_addr.s_addr = htonl(INADDR_ANY); // responding to anything
+	serverAddress.sin_port = htons(_port);			   // convert server port nb to network standart byte order (to avoid to conections use different byte order)
 
 	if (bind(_socketFd, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) // set the address wher is gonna be listening
 		return (std::cout << "Error: could not bind.." << std::endl, false);
@@ -23,7 +23,7 @@ bool Server::run()
 
 	std::cout << "Waiting for a connection in '127.0.0.1' port: " << _port << std::endl; // localhost ip default = 127.0.0.1
 
-	//fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
+	// fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
 
 	_pollFd[0].fd = _socketFd;
 	_pollFd[0].events = POLLIN;
@@ -33,23 +33,46 @@ bool Server::run()
 		_pollFd[i].fd = -1;
 
 	while (true)
+	{
 		if (handleClientConnections() == false)
 			return (false);
+		time_t currentTime;
+		time(&currentTime);
+		long seconds = static_cast<long>(currentTime);
+		//std::cout << "seconds----" << seconds << std::endl;
+		for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+		{
+			long clientSeconds = static_cast<long>(it->getLastPingTime());
+			//std::cout << "Clien-seconds----" << clientSeconds << std::endl;
+			if (it->getPing() == true && seconds - clientSeconds >= 5 && clientSeconds > 0)
+			{
+				it->setPing(false);
+				quitServ("There is no pong response", *it);
+				break;
+			}
+			else if (seconds - clientSeconds >= 30 && clientSeconds > 0)
+			{
+				it->sendMessage(PING_CMD, it->getNickname().c_str());
+				it->changeLastPingTime(seconds);
+				it->setPing(true);
+			}
+		}
+	}
 }
 
 bool Server::handleClientConnections()
 {
-	if (poll(_pollFd, _clients.size() + 1, -1) < 0)
+	if (poll(_pollFd, _clients.size() + 1, 1) < 0)
 		return (std::cout << "Error: syscall poll failed.." << std::endl, false);
 
 	if (_pollFd[0].revents == POLLIN)
 	{
 		std::cout << "Incomming connecction..." << std::endl;
-		_connectionFd = accept(_socketFd, (struct sockaddr *) NULL, NULL);
+		_connectionFd = accept(_socketFd, (struct sockaddr *)NULL, NULL);
 		if (_connectionFd == -1)
 			return (std::cout << "Error accepting client's connection" << std::endl, false);
 
-		//fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
+		// fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
 
 		if (this->_clients.size() >= BACKLOG)
 			return (std::cout << "Error: max connections limit reached" << std::endl, true);
@@ -57,23 +80,30 @@ bool Server::handleClientConnections()
 		std::cout << "[SERVER]: A new connection has been made." << std::endl;
 
 		Client newClient(_connectionFd);
+
+		time_t currentTime;
+		time(&currentTime);
+		newClient.changeLastPingTime(currentTime);
+
 		_clients.push_back(newClient);
+
 
 		for (size_t i = 1; i <= _clients.size(); i++) // Saves the new connection
 		{
 			if (_pollFd[i].fd != -1)
-				continue ;
+				continue;
 
 			_pollFd[i].fd = _connectionFd;
 			_pollFd[i].events = POLLIN;
-			break ;
+			break;
 		}
 	}
 
 	for (size_t i = 1; i <= _clients.size(); i++)
+	{
 		if (_pollFd[i].fd != -1 && _pollFd[i].revents & POLLIN && handleClientCommunications(i) == false)
 			return (false);
-
+	}
 	return (true);
 }
 
@@ -87,7 +117,7 @@ bool Server::handleClientCommunications(size_t i)
 		return (std::cout << "Error: dont have access to read client fd." << std::endl, false);
 	if (readSize == 0)
 	{
-		//disconnect a client
+		// disconnect a client
 		std::cout << "[SERVER]: A Client was disconnected from the server" << std::endl;
 		std::vector<Client>::iterator it = std::find(_clients.begin(), _clients.end(), _pollFd[i].fd);
 		close(_pollFd[i].fd);
@@ -111,15 +141,7 @@ bool Server::handleClientCommunications(size_t i)
 			std::cout << "[SERVER :: WARNING]: getClientByFd() failed before executing a command" << std::endl;
 			return (true);
 		}
-		// TODO: Handle not-ended inputs (see subject)
-		// for (size_t i = 0; i < strlen(buffer); i++)
-		// {
-		// 	printf("bufer[%lu]: %c\n", i, buffer[i]);
-		// 	if (buffer[i] == '\r')
-		// 		printf("TUVIEHA");
-		// 	else if (buffer[i] == '\n')
-		// 		printf("TUVIEHAAA");
-		// }
+
 		handleClientInput(*caller, buffer);
 	}
 	return (true);
@@ -127,7 +149,9 @@ bool Server::handleClientCommunications(size_t i)
 
 bool Server::handleClientInput(Client &caller, std::string message)
 {
-	//this is for messages that are sent in two or more request
+	time_t currentTime;
+	time(&currentTime);
+	caller.changeLastPingTime(currentTime);
 	if (message.find("\r") == message.npos)
 	{
 		if (message.find("\n") != message.npos)
@@ -135,7 +159,7 @@ bool Server::handleClientInput(Client &caller, std::string message)
 			caller.sendMessage("You are a invalid Client!");
 			return (true);
 		}
-		if(caller.getjoined().empty() )
+		if (caller.getjoined().empty())
 			caller.setjoined(message);
 		else if (caller.getjoined().length() >= 1024)
 			caller.sendMessage("Msg buffer is full!");
@@ -179,8 +203,10 @@ bool Server::handleClientInput(Client &caller, std::string message)
 		else if (command == "USER")
 			return (true);
 		else
-			caller.sendMessage(ERR_PASSWDREQUIRED, caller.getNickname().c_str()); // TODO, std::cout << "Error: a password is required.." << std::endl;
+			caller.sendMessage(ERR_PASSWDREQUIRED, caller.getNickname().c_str());
 	}
+	if (caller.getPing() == true)
+		quitServ("There is no pong response", caller);
 	return (true);
 }
 
@@ -189,7 +215,7 @@ void Server::checkPassword(std::string body, Client &caller)
 	if (body == _password)
 	{
 		caller.giveKey(true);
-		caller.sendMessage(MOTD, caller.getNickname().c_str(), "\033[34mWelcome to the TONY_WARRIORS Internet Relay Chat Network\033[39m");
+		caller.sendMessage(RPL_MOTDSTART, caller.getNickname().c_str(), "Welcome to the TONY_WARRIORS Internet Relay Chat Network");
 	}
 	else
 	{

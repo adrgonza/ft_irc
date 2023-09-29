@@ -61,11 +61,17 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 		case CMD_INVITE: inviteNick(body, caller); break;
 		case CMD_TOPIC: topicChannel(body, caller); break;
 		case CMD_NOTICE: noticeMessage(body, caller); break;
+<<<<<<< HEAD
 		case CMD_BAN: banUser(body, caller); break;
 		case CMD_UNBAN: unbanUser(body, caller); break;
 		case CMD_MODE: modeHandler(body, caller); break;
+=======
+		case CMD_QUIT: quitServ(body, caller); break;
+>>>>>>> main
 
 		// Server commands
+		case CMD_PING: pingCheck(body, caller); break;
+		case CMD_PONG: pongCheck(body, caller); break;
 		case CMD_WHO: usersOnNetwork(body, caller); break;
 		case CMD_WHOIS: getUserInfo(body, caller); break;
 		case CMD_WHOWAS: getPreviouslyUsersInfo(body, caller); break;
@@ -73,11 +79,8 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 
 
 		// Commands yet to do
-		case CMD_PING:
-		case CMD_PONG:
 		case CMD_OPER:
 		case CMD_AUTH:
-		case CMD_QUIT:
 		case CMD_KILL:
 
 		// Not sure if needed
@@ -93,12 +96,20 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 	}
 }
 
-
 bool Server::userExists(std::string nickname)
 {
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+	std::string lclient;
+	std::string::size_type aux = lclient.length();
+	aux = nickname.length();
+    for (std::string::size_type i = 0; i < aux; i++)
+        nickname[i] = std::tolower(nickname[i]);
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
-		if (it->getNickname() == nickname)
+		lclient = it->getNickname();
+		aux = lclient.length();
+		for (std::string::size_type i = 0; i < aux; i++)
+			lclient[i] = std::tolower(lclient[i]);
+		if (lclient == nickname)
 			return true;
 	}
 	return false;
@@ -110,7 +121,7 @@ bool Server::channelExists(std::string channelName)
 	return false;
 }
 
-Client* Server::findClientByFd(int fd)
+Client *Server::findClientByFd(int fd)
 {
 	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 	{
@@ -122,15 +133,25 @@ Client* Server::findClientByFd(int fd)
 
 int Server::getClientSocketFdByNickname(const std::string &nickname)
 {
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+	std::string lclient;
+	std::string lnickname = nickname;
+	std::string::size_type aux;
+	aux = lnickname.length();
+	for (std::string::size_type i = 0; i < aux; i++)
+			lnickname[i] = std::tolower(nickname[i]);
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
-		if (it->getNickname() == nickname)
+		lclient = it->getNickname();
+		aux = lclient.length();
+		for (std::string::size_type i = 0; i < aux; i++)
+			lclient[i] = std::tolower(lclient[i]);
+		if (lclient == lnickname)
 			return it->getFd();
 	}
 	return -1;
 }
 
-Channel* Server::getChannelByName(std::string channelName)
+Channel *Server::getChannelByName(std::string channelName)
 {
 	std::map<std::string, Channel>::iterator it = channels.find(channelName);
 	if (it != channels.end())
@@ -139,11 +160,22 @@ Channel* Server::getChannelByName(std::string channelName)
 		return NULL;
 }
 
-Client* Server::findClientByNickname(std::string targetNickname)
+Client *Server::findClientByNickname(std::string targetNickname)
 {
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+	std::string lclient;
+	std::string lnickname = targetNickname;
+	std::string::size_type aux;
+	aux = lnickname.length();
+	for (std::string::size_type i = 0; i < aux; i++)
+			lnickname[i] = std::tolower(targetNickname[i]);
+
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
-		if (it->getNickname() == targetNickname)
+		lclient = it->getNickname();
+		aux = lclient.length();
+		for (std::string::size_type i = 0; i < aux; i++)
+			lclient[i] = std::tolower(lclient[i]);
+		if (lclient == lnickname)
 			return &(*it);
 	}
 	return NULL;
