@@ -8,6 +8,7 @@
 class Channel {
 	private:
 		std::vector<Client> participants;
+		std::vector<Client> bannedParticipants;
 		std::vector<Client> operators;
     	std::string topic;
 		std::string _name;
@@ -33,6 +34,10 @@ class Channel {
 		bool isOperator(Client user);
 
 		bool hasParticipant(Client participant);
+
+		bool isBanned(Client user);
+		void addBan(Client user);
+		void removeBan(Client user);
 };
 
 #endif

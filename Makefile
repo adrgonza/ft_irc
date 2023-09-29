@@ -11,6 +11,7 @@ SRCS	=	main.cpp \
 			src/commands/pingpong.cpp  \
 			src/commands/userInformationCommands.cpp  \
 			src/commands/notice.cpp  \
+			src/commands/handleOperatorChannelCommands.cpp
 			src/commands/userCommands.cpp  \
 
 
