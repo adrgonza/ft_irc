@@ -1,7 +1,6 @@
 #include <libraries.hpp>
 #include "Client.hpp"
 
-
 int getParameterCount(std::string errorMessage)
 {
 	int bracketCount = 0;

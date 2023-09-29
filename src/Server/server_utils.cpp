@@ -184,14 +184,18 @@ Client *Server::findClientByFd(int fd)
 int Server::getClientSocketFdByNickname(const std::string &nickname)
 {
 	std::string lclient;
-	std::string::size_type aux = lclient.length();
+	std::string lnickname = nickname;
+	std::string::size_type aux;
+	aux = lnickname.length();
+	for (std::string::size_type i = 0; i < aux; i++)
+			lnickname[i] = std::tolower(nickname[i]);
 	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
 		lclient = it->getNickname();
 		aux = lclient.length();
 		for (std::string::size_type i = 0; i < aux; i++)
 			lclient[i] = std::tolower(lclient[i]);
-		if (lclient == nickname)
+		if (lclient == lnickname)
 			return it->getFd();
 	}
 	return -1;
@@ -209,17 +213,19 @@ Channel *Server::getChannelByName(std::string channelName)
 Client *Server::findClientByNickname(std::string targetNickname)
 {
 	std::string lclient;
-	std::string::size_type aux = lclient.length();
-	aux = targetNickname.length();
-    for (std::string::size_type i = 0; i < aux; i++)
-        targetNickname[i] = std::tolower(targetNickname[i]);
+	std::string lnickname = targetNickname;
+	std::string::size_type aux;
+	aux = lnickname.length();
+	for (std::string::size_type i = 0; i < aux; i++)
+			lnickname[i] = std::tolower(targetNickname[i]);
+
 	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
 		lclient = it->getNickname();
 		aux = lclient.length();
 		for (std::string::size_type i = 0; i < aux; i++)
 			lclient[i] = std::tolower(lclient[i]);
-		if (lclient == targetNickname)
+		if (lclient == lnickname)
 			return &(*it);
 	}
 	return NULL;
