@@ -1,4 +1,5 @@
 #include <libraries.hpp>
+#include "Client.hpp"
 
 int getParameterCount(std::string errorMessage)
 {
@@ -11,7 +12,7 @@ int getParameterCount(std::string errorMessage)
 	return bracketCount;
 }
 
-std::string buildClientMessage(std::string message, va_list args)
+std::string Client::buildClientMessage(std::string message, va_list args)
 {
 	int totalParameters = getParameterCount(message);
 	std::string finalMessage = "";
