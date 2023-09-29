@@ -75,6 +75,7 @@ e_command parseCommandCode(std::string command);
 #define ERR_PASSWDREQUIRED "421 <client> :Password required"
 #define ERR_YOUREBANNEDCREEP "465 <client> :You are banned from this server."
 #define ERR_BANNEDFROMCHAN "474 <client> <channel> :Cannot join channel (+b)"
+#define ERR_NICKNAMEINUSE "433 <client> <nick> :Nickname is already in use"
 
 // Command Messages
 #define USER_CMD "USER <username> 0 * <realname>"

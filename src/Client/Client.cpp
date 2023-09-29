@@ -59,25 +59,33 @@ std::string Client::getSource() const
 
 void Client::changeNickname(std::vector<Client> clients, std::string body)
 {
-	// Assumes (for now) body is always correct. No collisions, no weird characters, and never empty
-	// TODO: Handle NICK command correctly (please)
-	bool flag = false;
+	std::string lbody;
+	std::string lclient;
+	std::string::size_type aux;
+	aux = lbody.length();
+    for (std::string::size_type i = 0; i < aux; i++)
+        lbody[i] = std::tolower(lbody[i]);
 
-	while (flag == false)
+
+
+	lbody = body;
+	aux = lbody.length();
+    for (std::string::size_type i = 0; i < aux; i++)
+    	lbody[i] = std::tolower(lbody[i]);
+	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); it++)
 	{
-		flag = true;
-		for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); it++)
+		lclient = it->getNickname();
+		aux = lclient.length();
+		for (std::string::size_type i = 0; i < aux; i++)
+       		lclient[i] = std::tolower(lclient[i]);
+		if (lclient == lbody)
 		{
-			if (it->getNickname() == body)
-			{
-				body = body + "_";
-				flag = false;
-			}
+			this->sendMessage(ERR_NICKNAMEINUSE, "", body.c_str());
+			return;
 		}
 	}
-
 	this->sendMessage("NICK <nickname>", body.c_str());
-	this->nickname = body; // Nickname is changed after the message is sent, to not affect the source of the message (see docs.)
+	this->nickname = body;
 }
 
 void Client::changeChannel(std::string channel)
