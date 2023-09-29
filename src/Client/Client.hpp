@@ -33,6 +33,7 @@ class Client {
 		void sendMessage(std::string message, ...);
 		void changeNickname(std::vector<Client> clients, std::string newNick);
 		void changeChannel(std::string channel);
+		std::string buildClientMessage(std::string message, va_list args);
 
 	private:
 		Client();

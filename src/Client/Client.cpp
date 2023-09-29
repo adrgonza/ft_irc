@@ -98,10 +98,6 @@ void Client::giveKey(bool key)
 	_passwordkey = key;
 }
 
-// client_utils.cpp
-std::string buildClientMessage(std::string message, va_list args);
-
-// message = this->getSource() + " " + buildClientMessage(message, args) + IRC_ENDLINE;
 void Client::sendMessage(std::string message, ...)
 {
 	va_list args;
