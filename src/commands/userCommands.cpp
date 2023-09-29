@@ -6,9 +6,13 @@ void Server::quitServ(std::string body, Client &user)
 		body = "";
 	user.sendMessage(QUIT_CMD, user.getNickname().c_str(), body.c_str());
 
+	int i = 0;
+	while (_pollFd[i].fd != user.getFd())
+		i++;
+
 	std::cout << "[SERVER]: A Client was disconnected from the server" << std::endl;
-	std::vector<Client>::iterator it = std::find(_clients.begin(), _clients.end(), user.getFd());
-	close(user.getFd());
+	std::vector<Client>::iterator it = std::find(_clients.begin(), _clients.end(), _pollFd[i].fd);
+	close(_pollFd[i].fd);
 	if (it != _clients.end())
 	{
 		_disconnectedClients.push_back(*it);

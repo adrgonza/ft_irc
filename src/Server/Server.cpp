@@ -44,16 +44,17 @@ bool Server::run()
 		{
 			long clientSeconds = static_cast<long>(it->getLastPingTime());
 			//std::cout << "Clien-seconds----" << clientSeconds << std::endl;
-			if (seconds - clientSeconds >= 15 && clientSeconds > 0)
+			if (it->getPing() == true && seconds - clientSeconds >= 5 && clientSeconds > 0)
+			{
+				it->setPing(false);
+				quitServ("There is no pong response", *it);
+				break;
+			}
+			else if (seconds - clientSeconds >= 30 && clientSeconds > 0)
 			{
 				it->sendMessage(PING_CMD, it->getNickname().c_str());
 				it->changeLastPingTime(seconds);
 				it->setPing(true);
-			}
-			if (it->getPing() == true && seconds - clientSeconds >= 5 && clientSeconds > 0)
-			{
-				quitServ("There is no pong response", *it);
-				
 			}
 		}
 	}

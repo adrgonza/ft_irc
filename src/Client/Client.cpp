@@ -7,13 +7,14 @@ Client::~Client() {}
 Client &Client::operator=(const Client &obj)
 {
 	this->_fd = obj.getFd();
+	_ping = obj.getPing();
 	this->nickname = obj.getNickname();
 	return *this;
 }
 
 bool Client::operator==(const Client &other) const
 {
-	if (_fd == other.getFd() && this->nickname == other.getNickname())
+	if (_fd == other.getFd() && this->nickname == other.getNickname() && _ping == other.getPing())
 		return true;
 	else
 		return false;
@@ -27,6 +28,7 @@ Client::Client(const Client &obj)
 	this->_passwordkey = obj.getKey();
 	this->channel = obj.getChannel();
 	this->username = obj.getUsername();
+	_ping = obj.getPing();
 }
 
 Client::Client(int connectionFd) : _fd(connectionFd), _ping(false), _passwordkey(false) {}
@@ -40,7 +42,12 @@ std::string Client::getjoined() const{ return _joined; }
 void Client::setjoined(std::string str) { _joined = str; }
 std::string Client::getHost() const { return this->host; }
 bool Client::getKey() const { return this->_passwordkey; }
-bool Client::getPing() const { return (_ping); }
+bool Client::getPing() const
+{
+	if(_ping == true)
+		return (true);
+	return false;
+}
 void Client::setPing(bool tof) { _ping = tof; }
 
 
