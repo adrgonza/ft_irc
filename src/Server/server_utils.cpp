@@ -61,13 +61,10 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 		case CMD_INVITE: inviteNick(body, caller); break;
 		case CMD_TOPIC: topicChannel(body, caller); break;
 		case CMD_NOTICE: noticeMessage(body, caller); break;
-<<<<<<< HEAD
 		case CMD_BAN: banUser(body, caller); break;
 		case CMD_UNBAN: unbanUser(body, caller); break;
 		case CMD_MODE: modeHandler(body, caller); break;
-=======
 		case CMD_QUIT: quitServ(body, caller); break;
->>>>>>> main
 
 		// Server commands
 		case CMD_PING: pingCheck(body, caller); break;

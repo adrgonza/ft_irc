@@ -39,11 +39,9 @@ bool Server::run()
 		time_t currentTime;
 		time(&currentTime);
 		long seconds = static_cast<long>(currentTime);
-		//std::cout << "seconds----" << seconds << std::endl;
 		for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
 		{
 			long clientSeconds = static_cast<long>(it->getLastPingTime());
-			//std::cout << "Clien-seconds----" << clientSeconds << std::endl;
 			if (it->getPing() == true && seconds - clientSeconds >= 5 && clientSeconds > 0)
 			{
 				it->setPing(false);
