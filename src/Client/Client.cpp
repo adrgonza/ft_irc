@@ -90,11 +90,11 @@ void Client::changeNickname(std::vector<Client> clients, std::string body)
        		lclient[i] = std::tolower(lclient[i]);
 		if (lclient == lbody)
 		{
-			this->sendMessage(ERR_NICKNAMEINUSE, "", body.c_str());
+			this->sendMessage(ERR_NICKNAMEINUSE("", body));
 			return;
 		}
 	}
-	this->sendMessage("NICK <nickname>", body.c_str());
+	this->sendMessage(NICK_CMD(body));
 	this->nickname = body;
 }
 
@@ -108,15 +108,10 @@ void Client::giveKey(bool key)
 	_passwordkey = key;
 }
 
-void Client::sendMessage(std::string message, ...)
+void Client::sendMessage(std::string message)
 {
-	va_list args;
-	va_start(args, message);
-	message = buildClientMessage(message, args) + IRC_ENDLINE;
-	va_end(args);
-
 	std::cout << "Sending: " << message << std::endl;
-
+	message = message + IRC_ENDLINE;
 	if (send(_fd, message.c_str(), message.size(), 0) == -1)
 		std::cout << "[SERVER] Error. Couldn't send message to FD " << _fd << ". Message: \n\t" << message << std::endl;
 }

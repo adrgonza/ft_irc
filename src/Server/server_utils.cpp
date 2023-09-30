@@ -66,7 +66,7 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 		case CMD_KICK: kickUser(body, caller); break;
 
 		case CMD_UNKNOWN:
-			caller.sendMessage(ERR_UNKNOWNCOMMAND_421, caller.getNickname().c_str(), command.c_str());
+			caller.sendMessage(ERR_UNKNOWNCOMMAND_421(caller.getNickname().c_str(), command.c_str()));
 		break;
 	}
 }

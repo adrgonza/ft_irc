@@ -22,9 +22,8 @@ void Server::noticeMessage(std::string body, Client &user)
         std::vector<Client>::iterator it;
         for (it = _clients.begin(); it != _clients.end(); ++it)
         {
-            std::string sendMessage = ":" + user.getNickname() + " " + NOTICE_CMD;
             if (it->getChannel() == lowerTarget && it->getNickname() != user.getNickname())
-                it->sendMessage(sendMessage, target.c_str(), message.c_str());
+                it->sendMessage(NOTICE_CMD(user.getNickname(), target.c_str(), message.c_str()));
         }
     }
     else
@@ -33,7 +32,7 @@ void Server::noticeMessage(std::string body, Client &user)
         if (targetSocket == -1)
             return;
         Client *receiver = findClientByNickname(lowerTarget);
-        receiver->sendMessage(NOTICE_RECEIVER_CMD, user.getNickname().c_str(), target.c_str(), message.c_str());
+        receiver->sendMessage(NOTICE_RECEIVER_CMD(user.getNickname().c_str(), target.c_str(), message.c_str()));
     }
     return;
 }

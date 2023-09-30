@@ -10,6 +10,5 @@ void Server::pingCheck(std::string body, Client &user)
 {
 	body = "" + body;
 	std::cout << "sending ping" << std::endl;
-	std::string pongMessage = "PONG :" + body + "\r\n";
-	user.sendMessage(pongMessage);
+	user.sendMessage(PONG_CMD(body));
 }

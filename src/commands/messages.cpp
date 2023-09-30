@@ -58,7 +58,7 @@ void Server::privMessage(std::string body, Client user)
 		lowerTarget[i] = std::tolower(target[i]);
 
 	if (!channelExists(lowerTarget) && !userExists(lowerTarget))
-		user.sendMessage(ERR_NOSUCHNICK, user.getNickname().c_str(), target.c_str());
+		user.sendMessage(ERR_NOSUCHNICK(user.getNickname().c_str(), target.c_str()));
 
 	std::string sendMessage;
 	if (channelExists(lowerTarget))
@@ -68,9 +68,8 @@ void Server::privMessage(std::string body, Client user)
 		std::vector<Client>::iterator it;
 		for (it = _clients.begin(); it != _clients.end(); ++it)
 		{
-			std::string sendMessage = ":" + user.getNickname() + " " + PRIVMSG_CMD;
 			if (it->getChannel() == target && it->getNickname() != user.getNickname())
-				it->sendMessage(sendMessage, target.c_str(), body.c_str());
+				it->sendMessage(PRIVMSG_CMD(user.getNickname(), target.c_str(), body.c_str()));
 		}
 	}
 	else
@@ -79,6 +78,6 @@ void Server::privMessage(std::string body, Client user)
 		if (targetSocket == -1)
 			return;
 		Client *receiver = findClientByNickname(lowerTarget);
-		receiver->sendMessage(PRIVMSG_RECEIVER_CMD, user.getNickname().c_str(), target.c_str(), body.c_str());
+		receiver->sendMessage(PRIVMSG_RECEIVER_CMD(user.getNickname().c_str(), target.c_str(), body.c_str()));
 	}
 }
