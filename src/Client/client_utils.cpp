@@ -16,16 +16,16 @@ std::string Client::buildClientMessage(std::string message, va_list args)
 {
 	int totalParameters = getParameterCount(message);
 	std::string finalMessage = "";
-	if (totalParameters == 0) // If there are no tokens in the message, do nothing about it
+	if (totalParameters == 0)
 		return (message);
 
-	for (size_t i = 0; i < message.size(); i++) // Loop through the string
+	for (size_t i = 0; i < message.size(); i++)
 	{
-		if (message[i] == '<') // Whenever you find the start of a token (<token>)
+		if (message[i] == '<')
 		{
-			finalMessage += va_arg(args, char*); // Adds the token to the finalMessage
+			finalMessage += va_arg(args, char*);
 			totalParameters--;
-			for (size_t j = 1; (i + j) < message.size(); j++) // Skips the token on the original message
+			for (size_t j = 1; (i + j) < message.size(); j++)
 			{
 				if (message[i + j] == '>')
 				{
@@ -33,9 +33,9 @@ std::string Client::buildClientMessage(std::string message, va_list args)
 					break ;
 				}
 			}
-			if (totalParameters <= 0) // If, once skipped, there are no more tokens to replace
+			if (totalParameters <= 0) 
 			{
-				finalMessage += message.substr(i + 1, message.size()); // Adds the rest of the message
+				finalMessage += message.substr(i + 1, message.size());
 				break ;
 			}
 		}

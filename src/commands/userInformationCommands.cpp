@@ -18,7 +18,7 @@ void Server::usersOnNetwork(std::string body, Client &user)
         std::vector<Client> channelMembers = targetChannel->getParticipants();
         for (std::vector<Client>::iterator it = channelMembers.begin(); it != channelMembers.end(); ++it)
         {
-            std::string username = "username"; // Replace with the username if available, or use an empty strin
+            std::string username = "username"; 
             std::string nickname = it->getNickname();
             std::string host = nickname + "!user@host";
             user.sendMessage(RPL_WHOREPLY, serverName.c_str(), nickname.c_str(), target.c_str(), username.c_str(), host.c_str(), serverName.c_str(), user.getNickname().c_str(), "H", "1", user.getNickname().c_str());
@@ -29,9 +29,9 @@ void Server::usersOnNetwork(std::string body, Client &user)
     {
         Client *targetClient = findClientByNickname(target);
         std::string nickname = targetClient->getNickname();
-        std::string username = "username"; // Replace with the username if available, or use an empty string
-        std::string hostname = "";         // Replace with the hostname if available, or use an empty string
-        std::string realname = "realname"; // Replace with the realname if available, or use an empty string
+        std::string username = "username";
+        std::string hostname = "";        
+        std::string realname = "realname";
         std::string host = nickname + "!user@host";
         user.sendMessage(RPL_WHOREPLY, serverName.c_str(), nickname.c_str(), "", username.c_str(), host.c_str(), serverName.c_str(), user.getNickname().c_str(), "H", "0", user.getNickname().c_str());
     }

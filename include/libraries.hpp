@@ -19,13 +19,11 @@
 
 typedef enum
 {
-	CMD_UNKNOWN, // Unknown command
+	CMD_UNKNOWN,
 	CMD_NICK,
 	CMD_USER,
 	CMD_PING,
 	CMD_PONG,
-	CMD_OPER,
-	CMD_AUTH,
 	CMD_QUIT,
 	CMD_JOIN,
 	CMD_PART,
@@ -35,21 +33,13 @@ typedef enum
 	CMD_KICK,
 	CMD_PRIVMSG,
 	CMD_NOTICE,
-	CMD_KILL,
 	CMD_SAY,
-	// I'm not sure if the commands below are needed
-	CMD_ERROR,
 	CMD_PASS,
-	CMD_CAP,
 	CMD_INVITE,
-	CMD_TIME,
 	CMD_MODE,
 	CMD_WHO,
 	CMD_WHOIS,
 	CMD_WHOWAS,
-	CMD_REHASH,
-	CMD_RESTART,
-	CMD_SQUIT,
 	CMD_BAN,
 	CMD_UNBAN
 } e_command;
@@ -83,17 +73,17 @@ e_command parseCommandCode(std::string command);
 // Command Messages
 #define USER_CMD "USER <username> 0 * <realname>"
 #define NICK_CMD "NICK <nickname>"
-#define PRIVMSG_CMD "PRIVMSG <target> <text>" // PRIVMSG Parameters: <target>{,<target>} <text to be sent>
+#define PRIVMSG_CMD "PRIVMSG <target> <text>" 
 #define NOTICE_CMD "NOTICE <target> <text>"
 #define NOTICE_RECEIVER_CMD ":<sender> NOTICE <target> <text>"
-#define PRIVMSG_RECEIVER_CMD ":<sender> PRIVMSG <target> <text>" // PRIVMSG Parameters: <target>{,<target>} <text to be sent>
-#define JOIN_CMD "JOIN <channel>"								 // <channel>{,<channel>} [<key>{,<key>}]
-#define PART_CMD ":<nickname>!user@host PART <channel>"			 // <channel>{,<channel>} [<reason>]
+#define PRIVMSG_RECEIVER_CMD ":<sender> PRIVMSG <target> <text>" 
+#define JOIN_CMD "JOIN <channel>"								
+#define PART_CMD ":<nickname>!user@host PART <channel>"			 
 #define TOPIC_CMD "TOPIC <channel> <topic>"
-#define NAMES_CMD "NAMES <channel>" // <channel>{,<channel>}
-#define LIST_CMD "LIST"				// [<channel>{,<channel>}] [<elistcond>{,<elistcond>}]
+#define NAMES_CMD "NAMES <channel>" 
+#define LIST_CMD "LIST"				
 #define INVITE_CMD ":<nickname>!user@host INVITE <targetNick> <channel>"
-#define KICK_CMD "KICK <channel> <user>" //<channel> <user> *( "," <user> ) [<comment>]
+#define KICK_CMD "KICK <channel> <user>" 
 #define QUIT_CMD ":<server> QUIT :<reason>"
 #define RPL_MOTD ":<server> 372 <client> :<text>"
 #define RPL_MOTDSTART "375 <client> : <text>"

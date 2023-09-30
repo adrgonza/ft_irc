@@ -38,8 +38,6 @@ void Server::sayMsg(std::string body, Client &user)
 	}
 }
 
-// Check body, if no text, ERR_NOTEXTTOSEND
-// Check body, if no target, ERR_NORECIPIENT
 void Server::privMessage(std::string body, Client user)
 {
 	std::size_t newlinePos = body.find('\n');
@@ -78,11 +76,8 @@ void Server::privMessage(std::string body, Client user)
 	else
 	{
 		int targetSocket = getClientSocketFdByNickname(lowerTarget);
-		std::cout << "socket: " << targetSocket << std::endl;
-		if (targetSocket == -1) // target user not in server
+		if (targetSocket == -1)
 			return;
-		// user.sendMessage(PRIVMSG_CMD, target.c_str(), body.c_str());
-
 		Client *receiver = findClientByNickname(lowerTarget);
 		receiver->sendMessage(PRIVMSG_RECEIVER_CMD, user.getNickname().c_str(), target.c_str(), body.c_str());
 	}

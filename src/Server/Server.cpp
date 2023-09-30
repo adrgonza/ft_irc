@@ -58,7 +58,7 @@ bool Server::run()
 
 bool Server::handleClientConnections()
 {
-	if (poll(_pollFd, _clients.size() + 1, 1) < 0)
+	if (poll(_pollFd, _clients.size() + 1, INT32_MAX) < 0)
 		return (std::cout << "Error: syscall poll failed.." << std::endl, false);
 
 	if (_pollFd[0].revents == POLLIN)
@@ -68,7 +68,7 @@ bool Server::handleClientConnections()
 		if (_connectionFd == -1)
 			return (std::cout << "Error accepting client's connection" << std::endl, false);
 
-		fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
+		//fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
 
 		if (this->_clients.size() >= BACKLOG)
 			return (std::cout << "Error: max connections limit reached" << std::endl, true);
@@ -180,7 +180,7 @@ bool Server::handleClientInput(Client &caller, std::string message)
 		body = IRC_ENDLINE;
 
 	size_t endlinePosition = body.find("\r");
-	if (endlinePosition != std::string::npos) // If the message does not end with '\r\n' should be ignored, but for now we accept it. TODO: change this
+	if (endlinePosition != std::string::npos)
 		body = body.substr(0, endlinePosition);
 	else
 	{

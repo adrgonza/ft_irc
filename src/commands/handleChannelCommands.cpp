@@ -139,14 +139,12 @@ void Server::getNamesInChannel(std::string body, Client &user)
 	std::string channel = "#" + body;
 	if (user.getChannel() != channel)
 	{
-		// std::string errorMessage = ":" + network + " 442 " + user.getNickname() + " " + user.getNickname() + channel + " :You are not in the channel" + "\r\n";
 		std::string errorMessage = ": 442 " + user.getNickname() + " " + user.getNickname() + channel + " :You are not in the channel" + "\r\n";
 		int retValue = send(user.getFd(), errorMessage.c_str(), errorMessage.size(), 0);
 		if (retValue == -1)
 			std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
 		return;
 	}
-	// std::string startOfNamesMessage = ":" + network + " 353 " + it->getNickname() + " = " + channel + " :";
 	std::string startOfNamesMessage = ": 353 " + user.getNickname() + " = " + channel + " :";
 	int retValue = send(user.getFd(), startOfNamesMessage.c_str(), startOfNamesMessage.size(), 0);
 	if (retValue == -1)
@@ -162,8 +160,6 @@ void Server::getNamesInChannel(std::string body, Client &user)
 		{
 			const Client &client = *it;
 			std::cout << "wach " << client.getChannel() << std::endl;
-			// Aca habria que agregar @ or + dependiendo si es operador o no
-			// namesInChannelMessage += "@";
 			namesInChannelMessage += client.getNickname() + " ";
 		}
 		std::cout << "names in channel " << namesInChannelMessage << std::endl;
@@ -173,7 +169,6 @@ void Server::getNamesInChannel(std::string body, Client &user)
 			std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
 	}
 	std::cout << "asdas" << std::endl;
-	// std::string endOfNamesMessage = ":" + network + " 366 " + it->getNickname() + " " + channel + " :End of NAMES list\r\n";
 	std::string endOfNamesMessage = ": 366 " + user.getNickname() + " " + channel + " :End of NAMES list\r\n";
 	retValue = send(user.getFd(), endOfNamesMessage.c_str(), endOfNamesMessage.size(), 0);
 	if (retValue == -1)
