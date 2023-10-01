@@ -58,7 +58,7 @@ bool Server::run()
 
 bool Server::handleClientConnections()
 {
-	if (poll(_pollFd, _clients.size() + 1, INT32_MAX) < 0)
+	if (poll(_pollFd, _clients.size() + 1, INT_MAX) < 0)
 		return (std::cout << "Error: syscall poll failed.." << std::endl, false);
 
 	if (_pollFd[0].revents == POLLIN)

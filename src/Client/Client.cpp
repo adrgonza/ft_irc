@@ -74,14 +74,13 @@ void Client::changeNickname(std::vector<Client> clients, std::string body)
 	std::string::size_type aux;
 	aux = lbody.length();
     for (std::string::size_type i = 0; i < aux; i++)
+	{
         lbody[i] = std::tolower(lbody[i]);
-
-
-
+	}
 	lbody = body;
 	aux = lbody.length();
     for (std::string::size_type i = 0; i < aux; i++)
-    	lbody[i] = std::tolower(lbody[i]);
+		lbody[i] = std::tolower(lbody[i]);
 	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); it++)
 	{
 		lclient = it->getNickname();
