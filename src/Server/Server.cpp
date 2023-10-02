@@ -48,7 +48,7 @@ bool Server::run()
 			}
 			else if (seconds - clientSeconds >= 30 && clientSeconds > 0)
 			{
-				it->sendMessage(PING_CMD, it->getNickname().c_str());
+				it->sendMessage(PING_CMD(it->getNickname()));
 				it->changeLastPingTime(seconds);
 				it->setPing(true);
 			}
@@ -199,7 +199,10 @@ bool Server::handleClientInput(Client &caller, std::string message)
 		else if (command == "USER")
 			return (true);
 		else
-			caller.sendMessage(ERR_PASSWDREQUIRED, caller.getNickname().c_str());
+		{
+			std::string send = ERR_PASSWDREQUIRED(caller.getNickname());
+			caller.sendMessage(send);
+		}
 	}
 	if (caller.getPing() == true)
 		quitServ("There is no pong response", caller);
@@ -211,11 +214,12 @@ void Server::checkPassword(std::string body, Client &caller)
 	if (body == _password)
 	{
 		caller.giveKey(true);
-		caller.sendMessage(RPL_MOTDSTART, caller.getNickname().c_str(), "Welcome to the TONY_WARRIORS Internet Relay Chat Network");
+		std::string send = RPL_MOTDSTART(caller.getNickname(), "Welcome to the TONY_WARRIORS Internet Relay Chat Network");
+		caller.sendMessage(send);
 	}
 	else
 	{
-		caller.sendMessage(ERR_PASSWDMISMATCH, caller.getNickname().c_str());
+		caller.sendMessage(ERR_PASSWDMISMATCH(caller.getNickname()));
 		caller.giveKey(false);
 	}
 }

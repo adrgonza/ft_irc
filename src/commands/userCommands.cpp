@@ -4,7 +4,7 @@ void Server::quitServ(std::string body, Client &user)
 {
 	if (body == ":")
 		body = "";
-	user.sendMessage(QUIT_CMD, user.getNickname().c_str(), body.c_str());
+	user.sendMessage(QUIT_CMD(user.getNickname(), body));
 
 	int i = 0;
 	while (_pollFd[i].fd != user.getFd())
