@@ -19,17 +19,15 @@ class Client {
 
 
 		int getFd() const;
-		void setFD(int);
 		std::string getNickname() const;
 		std::string getUsername() const;
 		std::string getjoined() const;
-		void setjoined(std::string);
 		std::string getHost() const;
 		std::string getChannel() const;
 		bool getKey() const;
+		bool getFirsTime() const;
 		std::string getSource() const;
 
-		void giveKey(bool);
 
 		// Commands
 		void sendMessage(std::string message, ...);
@@ -37,6 +35,10 @@ class Client {
 		void changeChannel(std::string channel);
 		void changeUserName(std::string name);
 		std::string buildClientMessage(std::string message, va_list args);
+		void giveKey(bool);
+		void setjoined(std::string);
+		void setFD(int);
+		void setFirstTime(bool);
 
 	private:
 		Client();
@@ -47,6 +49,7 @@ class Client {
 		std::string host;
 		std::string channel;
 		bool _passwordkey;
+		bool _firstTime;
 };
 
 #endif

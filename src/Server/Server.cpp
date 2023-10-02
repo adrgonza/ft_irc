@@ -158,14 +158,13 @@ bool Server::handleClientInput(Client &caller, std::string message)
 		caller.sendMessage("You are a invalid Client!");
 		return (true);
 	}
-
 	if (command == "PASS")
 		checkPassword(body, caller);
 	else if (command == "NICK")
 		caller.changeNickname(_clients, body);
 	else if (command == "USER")
 		caller.changeUserName(body);
-	else if (caller.getKey() == true && caller.getNickname().empty() && caller.getUsername().empty())
+	else if (caller.getKey() == true && !caller.getNickname().empty() && !caller.getUsername().empty())
 		handleCommand(caller, command, body);
 	else
 	{

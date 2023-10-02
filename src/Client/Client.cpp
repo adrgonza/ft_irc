@@ -7,6 +7,7 @@ Client::~Client() {}
 Client &Client::operator=(const Client &obj)
 {
 	this->_fd = obj.getFd();
+	this->_firstTime = obj.getFirsTime();
 	this->nickname = obj.getNickname();
 	return *this;
 }
@@ -27,12 +28,14 @@ Client::Client(const Client &obj)
 	this->_passwordkey = obj.getKey();
 	this->channel = obj.getChannel();
 	this->_username = obj.getUsername();
+	this->_firstTime = obj.getFirsTime();
 }
 
-Client::Client(int connectionFd) : _fd(connectionFd), _passwordkey(false) {}
+Client::Client(int connectionFd) : _fd(connectionFd), _passwordkey(false), _firstTime(false) {}
 
 int Client::getFd() const { return this->_fd; }
 void Client::setFD(int newFD) { _fd = newFD; }
+void Client::setFirstTime(bool ho) { _firstTime = ho; }
 std::string Client::getNickname() const { return this->nickname; }
 std::string Client::getChannel() const { return this->channel; }
 std::string Client::getUsername() const { return this->_username; }
@@ -98,7 +101,7 @@ void Client::changeUserName(std::string user)
 	int count = 0;
 	while (iss >> arg)
 		count++;
-	if (count > 3)
+	if (count > 2)
 	{
 		_username = name;
 	}
@@ -109,15 +112,11 @@ void Client::changeUserName(std::string user)
 	}
 }
 
-void Client::changeChannel(std::string channel)
-{
-	this->channel = channel;
-}
+void Client::changeChannel(std::string channel) { this->channel = channel; }
 
-void Client::giveKey(bool key)
-{
-	_passwordkey = key;
-}
+void Client::giveKey(bool key) { _passwordkey = key; }
+
+bool Client::getFirsTime() const { return(_firstTime); }
 
 void Client::sendMessage(std::string message, ...)
 {

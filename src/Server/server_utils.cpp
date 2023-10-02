@@ -32,7 +32,11 @@ e_command parseCommandCode(std::string command)
 
 void Server::handleCommand(Client &caller, std::string command, std::string body)
 {
-	caller.sendMessage(RPL_MOTDSTART, caller.getNickname().c_str(), "Welcome to the TONY_WARRIORS Internet Relay Chat Network");
+	if (caller.getFirsTime() == false)
+	{
+		caller.setFirstTime(true);
+		caller.sendMessage(RPL_MOTDSTART, caller.getNickname().c_str(), "Welcome to the TONY_WARRIORS Internet Relay Chat Network");
+	}
 
 	std::cout << "cmd: " << command << ", " << body << std::endl;
 	e_command commandCode = parseCommandCode(command);
