@@ -31,29 +31,8 @@ bool Server::run()
 		_pollFd[i].fd = -1;
 
 	while (true)
-	{
 		if (handleClientConnections() == false)
 			return (false);
-		time_t currentTime;
-		time(&currentTime);
-		long seconds = static_cast<long>(currentTime);
-		for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
-		{
-			long clientSeconds = static_cast<long>(it->getLastPingTime());
-			if (it->getPing() == true && seconds - clientSeconds >= 5 && clientSeconds > 0)
-			{
-				it->setPing(false);
-				quitServ("There is no pong response", *it);
-				break;
-			}
-			else if (seconds - clientSeconds >= 30 && clientSeconds > 0)
-			{
-				it->sendMessage(PING_CMD, it->getNickname().c_str());
-				it->changeLastPingTime(seconds);
-				it->setPing(true);
-			}
-		}
-	}
 }
 
 bool Server::handleClientConnections()
@@ -68,18 +47,12 @@ bool Server::handleClientConnections()
 		if (_connectionFd == -1)
 			return (std::cout << "Error accepting client's connection" << std::endl, false);
 
-		//fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
-
 		if (this->_clients.size() >= BACKLOG)
 			return (std::cout << "Error: max connections limit reached" << std::endl, true);
 
 		std::cout << "[SERVER]: A new connection has been made." << std::endl;
 
 		Client newClient(_connectionFd);
-
-		time_t currentTime;
-		time(&currentTime);
-		newClient.changeLastPingTime(currentTime);
 
 		_clients.push_back(newClient);
 
@@ -145,9 +118,6 @@ bool Server::handleClientCommunications(size_t i)
 
 bool Server::handleClientInput(Client &caller, std::string message)
 {
-	time_t currentTime;
-	time(&currentTime);
-	caller.changeLastPingTime(currentTime);
 	if (message.find("\r") == message.npos)
 	{
 		if (message.find("\n") != message.npos)
@@ -201,8 +171,6 @@ bool Server::handleClientInput(Client &caller, std::string message)
 		else
 			caller.sendMessage(ERR_PASSWDREQUIRED, caller.getNickname().c_str());
 	}
-	if (caller.getPing() == true)
-		quitServ("There is no pong response", caller);
 	return (true);
 }
 

@@ -28,10 +28,6 @@ class Client {
 		std::string getChannel() const;
 		bool getKey() const;
 		std::string getSource() const;
-		time_t		getLastPingTime() const;
-		bool getPing() const;
-		void setPing(bool);
-
 
 		void giveKey(bool);
 
@@ -45,14 +41,12 @@ class Client {
 	private:
 		Client();
 		int _fd;
-		bool _ping;
 		std::string _joined;
 		std::string nickname;
 		std::string username;
 		std::string host;
 		std::string channel;
 		bool _passwordkey;
-		time_t		lastPingTime;
 };
 
 #endif

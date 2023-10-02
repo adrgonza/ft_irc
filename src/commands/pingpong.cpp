@@ -3,7 +3,7 @@
 void Server::pongCheck(std::string body, Client &user)
 {
 	(void)body;
-	user.setPing(false);
+	(void)user;
 }
 
 void Server::pingCheck(std::string body, Client &user)
