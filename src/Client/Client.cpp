@@ -90,7 +90,8 @@ void Client::changeNickname(std::vector<Client> clients, std::string body)
        		lclient[i] = std::tolower(lclient[i]);
 		if (lclient == lbody)
 		{
-			this->sendMessage(ERR_NICKNAMEINUSE("", body));
+			std::string oneS = "";
+			this->sendMessage(ERR_NICKNAMEINUSE(oneS, body));
 			return;
 		}
 	}

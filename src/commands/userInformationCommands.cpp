@@ -5,7 +5,7 @@ void Server::usersOnNetwork(std::string body, Client &user)
     std::string target = getWord(body, 1);
     if (target.empty() || (!channelExists(target) && !userExists(target)))
     {
-        user.sendMessage(ERR_NOSUCHNICK(target.c_str(), user.getNickname().c_str()));
+        user.sendMessage(ERR_NOSUCHNICK(target, user.getNickname()));
         return;
     }
 
@@ -21,7 +21,7 @@ void Server::usersOnNetwork(std::string body, Client &user)
             std::string username = "username"; 
             std::string nickname = it->getNickname();
             std::string host = nickname + "!user@host";
-            user.sendMessage(RPL_WHOREPLY(serverName.c_str(), nickname.c_str(), target.c_str(), username.c_str(), host.c_str(), serverName.c_str(), user.getNickname().c_str(), "H", "1", user.getNickname().c_str()));
+            user.sendMessage(RPL_WHOREPLY(serverName, nickname, target, username, host, serverName, user.getNickname(), "H", "1", user.getNickname()));
         }
     }
 
@@ -33,9 +33,9 @@ void Server::usersOnNetwork(std::string body, Client &user)
         std::string hostname = "";        
         std::string realname = "realname";
         std::string host = nickname + "!user@host";
-        user.sendMessage(RPL_WHOREPLY(serverName.c_str(), nickname.c_str(), "", username.c_str(), host.c_str(), serverName.c_str(), user.getNickname().c_str(), "H", "0", user.getNickname().c_str()));
+        user.sendMessage(RPL_WHOREPLY(serverName, nickname, "", username, host, serverName, user.getNickname(), "H", "0", user.getNickname()));
     }
-    user.sendMessage(RPL_ENDOFWHO(serverName.c_str(), user.getNickname().c_str(), target.c_str()));
+    user.sendMessage(RPL_ENDOFWHO(serverName, user.getNickname(), target));
 }
 
 void Server::getUserInfo(std::string body, Client &user)
@@ -43,7 +43,7 @@ void Server::getUserInfo(std::string body, Client &user)
     std::string target = getWord(body, 1);
     if (!userExists(target))
     {
-        user.sendMessage(ERR_NOSUCHNICK(target.c_str(), user.getNickname().c_str()));
+        user.sendMessage(ERR_NOSUCHNICK(target, user.getNickname()));
         return;
     }
 
@@ -54,8 +54,8 @@ void Server::getUserInfo(std::string body, Client &user)
     Client *clientObj = findClientByNickname(target);
     if (clientObj)
     {
-        user.sendMessage(RPL_WHOISUSER(serverName.c_str(), invitingUser.c_str(), target.c_str(), "", host.c_str(), invitingUser.c_str()));
-        user.sendMessage(RPL_ENDOFWHOIS(serverName.c_str(), invitingUser.c_str(), target.c_str()));
+        user.sendMessage(RPL_WHOISUSER(serverName, invitingUser, target, "", host, invitingUser));
+        user.sendMessage(RPL_ENDOFWHOIS(serverName, invitingUser, target));
     }
 }
 
@@ -74,10 +74,10 @@ void Server::getPreviouslyUsersInfo(std::string body, Client &user)
     
     std::string host = target + "!user@host";
     if (!oldClientTarget)
-        user.sendMessage(ERR_NOSUCHNICK(target.c_str(), user.getNickname().c_str()));
+        user.sendMessage(ERR_NOSUCHNICK(target, user.getNickname()));
     else
     {
-        user.sendMessage(RPL_WHOWASUSER(serverName.c_str(), target.c_str(), user.getNickname().c_str(), "", host.c_str(), user.getNickname().c_str()));
-        user.sendMessage(RPL_ENDOFWHOWAS(serverName.c_str(),  target.c_str(), user.getNickname().c_str()));
+        user.sendMessage(RPL_WHOWASUSER(serverName, target, user.getNickname(), "", host, user.getNickname()));
+        user.sendMessage(RPL_ENDOFWHOWAS(serverName,  target, user.getNickname()));
     }
 }

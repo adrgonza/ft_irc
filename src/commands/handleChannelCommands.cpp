@@ -26,7 +26,7 @@ void Server::listChannels(std::string body, Client &user)
 	}
 	channelListMsg += ":" + user.getNickname() + "!user@host 323 * :End of channel list\r\n";
 
-	int retValue = send(user.getFd(), channelListMsg.c_str(), channelListMsg.size(), 0);
+	int retValue = send(user.getFd(), channelListMsg, channelListMsg.size(), 0);
 	if (retValue == -1)
 		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
 }
@@ -109,7 +109,7 @@ void Server::topicChannel(std::string body, Client &user)
 		channel = "#" + channel;
 	if (!channelExists(channel))
 	{
-		user.sendMessage(ERR_NOSUCHCHANNEL(user.getNickname().c_str(), channel.c_str()));
+		user.sendMessage(ERR_NOSUCHCHANNEL(user.getNickname(), channel));
 		return;
 	}
 	Channel *channelObj = getChannelByName(channel);
@@ -126,11 +126,11 @@ void Server::topicChannel(std::string body, Client &user)
 	std::string network = "";
 	if (!channelObj->hasParticipant(user))
 	{
-		user.sendMessage(ERR_NOTONCHANNEL(user.getNickname().c_str(), channel.c_str()));
+		user.sendMessage(ERR_NOTONCHANNEL(user.getNickname(), channel));
 		return;
 	}
 	channelObj->setTopic(newTopic);
-	user.sendMessage(TOPIC_CMD(channel.c_str(), newTopic.c_str()));
+	user.sendMessage(TOPIC_CMD(channel, newTopic));
 }
 
 void Server::getNamesInChannel(std::string body, Client &user)
@@ -139,13 +139,14 @@ void Server::getNamesInChannel(std::string body, Client &user)
 	if (user.getChannel() != channel)
 	{
 		std::string errorMessage = ": 442 " + user.getNickname() + " " + user.getNickname() + channel + " :You are not in the channel" + "\r\n";
-		int retValue = send(user.getFd(), errorMessage.c_str(), errorMessage.size(), 0);
+		user.sendMessage();
+		int retValue = send(user.getFd(), errorMessage, errorMessage.size(), 0);
 		if (retValue == -1)
 			std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
 		return;
 	}
 	std::string startOfNamesMessage = ": 353 " + user.getNickname() + " = " + channel + " :";
-	int retValue = send(user.getFd(), startOfNamesMessage.c_str(), startOfNamesMessage.size(), 0);
+	int retValue = send(user.getFd(), startOfNamesMessage, startOfNamesMessage.size(), 0);
 	if (retValue == -1)
 		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
 	std::map<std::string, Channel>::iterator channelIt = channels.find(channel);
@@ -163,13 +164,13 @@ void Server::getNamesInChannel(std::string body, Client &user)
 		}
 		std::cout << "names in channel " << namesInChannelMessage << std::endl;
 		namesInChannelMessage += "\r\n";
-		retValue = send(user.getFd(), namesInChannelMessage.c_str(), namesInChannelMessage.size(), 0);
+		retValue = send(user.getFd(), namesInChannelMessage, namesInChannelMessage.size(), 0);
 		if (retValue == -1)
 			std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
 	}
 	std::cout << "asdas" << std::endl;
 	std::string endOfNamesMessage = ": 366 " + user.getNickname() + " " + channel + " :End of NAMES list\r\n";
-	retValue = send(user.getFd(), endOfNamesMessage.c_str(), endOfNamesMessage.size(), 0);
+	retValue = send(user.getFd(), endOfNamesMessage, endOfNamesMessage.size(), 0);
 	if (retValue == -1)
 		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
 }
@@ -184,25 +185,25 @@ void Server::inviteNick(std::string body, Client &user)
 	std::string invitingUser = user.getNickname();
 	if (!userExists(targetUser))
 	{
-		user.sendMessage(ERR_NOSUCHNICK(user.getNickname().c_str(), targetUser.c_str()));
+		user.sendMessage(ERR_NOSUCHNICK(user.getNickname(), targetUser));
 		return;
 	}
 	if (!channelExists(channel))
 	{
-		user.sendMessage(ERR_NOSUCHCHANNEL(user.getNickname().c_str(), channel.c_str()));
+		user.sendMessage(ERR_NOSUCHCHANNEL(user.getNickname(), channel));
 		return;
 	}
 	Channel *channelObj = getChannelByName(channel);
 	if (!channelObj->hasParticipant(user))
 	{
-		user.sendMessage(ERR_NOTONCHANNEL(user.getNickname().c_str(), channel.c_str()));
+		user.sendMessage(ERR_NOTONCHANNEL(user.getNickname(), channel));
 		return;
 	}
 	Client* targetClient = findClientByNickname(targetUser);
 	if (channelObj->hasParticipant(*targetClient))
 	{
-		user.sendMessage(ERR_USERONCHANNEL(user.getNickname().c_str(), targetUser.c_str(), channel.c_str()));
+		user.sendMessage(ERR_USERONCHANNEL(user.getNickname(), targetUser, channel));
 		return ;
 	}
-	targetClient->sendMessage(INVITE_CMD(user.getNickname().c_str(), targetUser.c_str(), channel.c_str()));
+	targetClient->sendMessage(INVITE_CMD(user.getNickname(), targetUser, channel));
 }

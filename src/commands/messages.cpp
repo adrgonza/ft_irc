@@ -29,7 +29,7 @@ void Server::sayMsg(std::string body, Client &user)
 	{
 		if (it->getChannel() == toChannel)
 		{
-			int retValue = send(it->getFd(), sendMessage.c_str(), sendMessage.size(), 0);
+			int retValue = send(it->getFd(), sendMessage, sendMessage.size(), 0);
 			if (retValue == -1)
 			{
 				std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
@@ -58,7 +58,7 @@ void Server::privMessage(std::string body, Client user)
 		lowerTarget[i] = std::tolower(target[i]);
 
 	if (!channelExists(lowerTarget) && !userExists(lowerTarget))
-		user.sendMessage(ERR_NOSUCHNICK(user.getNickname().c_str(), target.c_str()));
+		user.sendMessage(ERR_NOSUCHNICK(user.getNickname(), target));
 
 	std::string sendMessage;
 	if (channelExists(lowerTarget))
@@ -69,7 +69,7 @@ void Server::privMessage(std::string body, Client user)
 		for (it = _clients.begin(); it != _clients.end(); ++it)
 		{
 			if (it->getChannel() == target && it->getNickname() != user.getNickname())
-				it->sendMessage(PRIVMSG_CMD(user.getNickname(), target.c_str(), body.c_str()));
+				it->sendMessage(PRIVMSG_CMD(user.getNickname(), target, body));
 		}
 	}
 	else
@@ -78,6 +78,6 @@ void Server::privMessage(std::string body, Client user)
 		if (targetSocket == -1)
 			return;
 		Client *receiver = findClientByNickname(lowerTarget);
-		receiver->sendMessage(PRIVMSG_RECEIVER_CMD(user.getNickname().c_str(), target.c_str(), body.c_str()));
+		receiver->sendMessage(PRIVMSG_RECEIVER_CMD(user.getNickname(), target, body));
 	}
 }
