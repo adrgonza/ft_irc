@@ -82,7 +82,7 @@ e_command parseCommandCode(std::string command);
 #define NAMES_CMD(channel) ("NAMES " + (channel))
 #define LIST_CMD "LIST"
 #define INVITE_CMD(nickname, targetNick, channel) (":" + (nickname) + "!user@host INVITE " + (targetNick) + " " + (channel))
-#define KICK_CMD(channel, user) ("KICK " + (channel) + " " + (user))
+#define KICK_CMD(user, channel, target) (":" + user + "KICK " + (channel) + " " + (target))
 #define QUIT_CMD(server, reason) (":" + (server) + " QUIT :" + (reason))
 #define RPL_MOTD(server, client, text) (":" + (server) + " 372 " + (client) + " :" + (text))
 #define RPL_MOTDSTART(client, text) ("375 " + (client) + " : " + (text))
