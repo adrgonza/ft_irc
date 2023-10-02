@@ -26,7 +26,7 @@ Client::Client(const Client &obj)
 	this->host = obj.getHost();
 	this->_passwordkey = obj.getKey();
 	this->channel = obj.getChannel();
-	this->username = obj.getUsername();
+	this->_username = obj.getUsername();
 }
 
 Client::Client(int connectionFd) : _fd(connectionFd), _passwordkey(false) {}
@@ -35,7 +35,7 @@ int Client::getFd() const { return this->_fd; }
 void Client::setFD(int newFD) { _fd = newFD; }
 std::string Client::getNickname() const { return this->nickname; }
 std::string Client::getChannel() const { return this->channel; }
-std::string Client::getUsername() const { return this->username; }
+std::string Client::getUsername() const { return this->_username; }
 std::string Client::getjoined() const{ return _joined; }
 void Client::setjoined(std::string str) { _joined = str; }
 std::string Client::getHost() const { return this->host; }
@@ -48,8 +48,8 @@ std::string Client::getSource() const
 
 	std::string source = ":" + this->nickname;
 
-	if (!this->username.empty())
-		source += "!" + this->username;
+	if (!this->_username.empty())
+		source += "!" + this->_username;
 
 	if (!this->host.empty())
 		source += "@" + this->host;
@@ -63,20 +63,20 @@ void Client::changeNickname(std::vector<Client> clients, std::string body)
 	std::string lclient;
 	std::string::size_type aux;
 	aux = lbody.length();
-    for (std::string::size_type i = 0; i < aux; i++)
+	for (std::string::size_type i = 0; i < aux; i++)
 	{
-        lbody[i] = std::tolower(lbody[i]);
+		lbody[i] = std::tolower(lbody[i]);
 	}
 	lbody = body;
 	aux = lbody.length();
-    for (std::string::size_type i = 0; i < aux; i++)
+	for (std::string::size_type i = 0; i < aux; i++)
 		lbody[i] = std::tolower(lbody[i]);
 	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); it++)
 	{
 		lclient = it->getNickname();
 		aux = lclient.length();
 		for (std::string::size_type i = 0; i < aux; i++)
-       		lclient[i] = std::tolower(lclient[i]);
+			lclient[i] = std::tolower(lclient[i]);
 		if (lclient == lbody)
 		{
 			this->sendMessage(ERR_NICKNAMEINUSE, "", body.c_str());
@@ -85,6 +85,28 @@ void Client::changeNickname(std::vector<Client> clients, std::string body)
 	}
 	this->sendMessage("NICK <nickname>", body.c_str());
 	this->nickname = body;
+}
+
+void Client::changeUserName(std::string user)
+{
+	std::istringstream iss(user);
+	std::string arg;
+	std::string name;
+
+	iss >> name;
+
+	int count = 0;
+	while (iss >> arg)
+		count++;
+	if (count > 3)
+	{
+		_username = name;
+	}
+	else
+	{
+		std::cout << "too few arguments" << std::endl;
+		//send few argumment
+	}
 }
 
 void Client::changeChannel(std::string channel)

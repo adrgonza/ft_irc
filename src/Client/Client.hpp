@@ -35,15 +35,15 @@ class Client {
 		void sendMessage(std::string message, ...);
 		void changeNickname(std::vector<Client> clients, std::string newNick);
 		void changeChannel(std::string channel);
+		void changeUserName(std::string name);
 		std::string buildClientMessage(std::string message, va_list args);
-		void changeLastPingTime(time_t newPingTime);
 
 	private:
 		Client();
 		int _fd;
 		std::string _joined;
 		std::string nickname;
-		std::string username;
+		std::string _username;
 		std::string host;
 		std::string channel;
 		bool _passwordkey;

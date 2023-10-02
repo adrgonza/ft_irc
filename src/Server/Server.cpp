@@ -11,9 +11,9 @@ bool Server::run()
 
 	struct sockaddr_in serverAddress;
 	bzero(&serverAddress, sizeof(serverAddress));
-	serverAddress.sin_family = AF_INET;				   // specing the family, interenet (address)
-	serverAddress.sin_addr.s_addr = htonl(INADDR_ANY); // responding to anything
-	serverAddress.sin_port = htons(_port);			   // convert server port nb to network standart byte order (to avoid to conections use different byte order)
+	serverAddress.sin_family = AF_INET;					// specing the family, interenet (address)
+	serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);	// responding to anything
+	serverAddress.sin_port = htons(_port);				// convert server port nb to network standart byte order (to avoid to conections use different byte order)
 
 	if (bind(_socketFd, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) // set the address wher is gonna be listening
 		return (std::cout << "Error: could not bind.." << std::endl, false);
@@ -54,6 +54,8 @@ bool Server::handleClientConnections()
 
 		Client newClient(_connectionFd);
 
+		newClient.sendMessage("NOTICE AUTH :*** Checking Ident");
+
 		_clients.push_back(newClient);
 
 
@@ -86,7 +88,6 @@ bool Server::handleClientCommunications(size_t i)
 		return (std::cout << "Error: dont have access to read client fd." << std::endl, false);
 	if (readSize == 0)
 	{
-		// disconnect a client
 		std::cout << "[SERVER]: A Client was disconnected from the server" << std::endl;
 		std::vector<Client>::iterator it = std::find(_clients.begin(), _clients.end(), _pollFd[i].fd);
 		close(_pollFd[i].fd);
@@ -160,15 +161,17 @@ bool Server::handleClientInput(Client &caller, std::string message)
 
 	if (command == "PASS")
 		checkPassword(body, caller);
-	else if (caller.getKey() == true)
+	else if (command == "NICK")
+		caller.changeNickname(_clients, body);
+	else if (command == "USER")
+		caller.changeUserName(body);
+	else if (caller.getKey() == true && caller.getNickname().empty() && caller.getUsername().empty())
 		handleCommand(caller, command, body);
 	else
 	{
-		if (command == "NICK")
-			caller.changeNickname(_clients, body);
-		else if (command == "USER")
-			return (true);
-		else
+		if (caller.getNickname().empty() || caller.getUsername().empty())
+			caller.sendMessage("NOTICE AUTH :*** Checking Ident");
+		else if (caller.getKey() == false)
 			caller.sendMessage(ERR_PASSWDREQUIRED, caller.getNickname().c_str());
 	}
 	return (true);
@@ -177,10 +180,7 @@ bool Server::handleClientInput(Client &caller, std::string message)
 void Server::checkPassword(std::string body, Client &caller)
 {
 	if (body == _password)
-	{
 		caller.giveKey(true);
-		caller.sendMessage(RPL_MOTDSTART, caller.getNickname().c_str(), "Welcome to the TONY_WARRIORS Internet Relay Chat Network");
-	}
 	else
 	{
 		caller.sendMessage(ERR_PASSWDMISMATCH, caller.getNickname().c_str());
