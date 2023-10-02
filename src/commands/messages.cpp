@@ -16,7 +16,7 @@ void Server::sayMsg(std::string body, Client &user)
 	std::size_t newlinePos = body.find('\n');
 	body = body.substr(0, newlinePos);
 	if (!body.empty() && body[body.size() - 1] == '\r')
-    	body.erase(body.size() - 1);
+		body.erase(body.size() - 1);
 
 	nickname = user.getNickname();
 	toChannel = user.getChannel();
@@ -46,7 +46,7 @@ void Server::privMessage(std::string body, Client user)
 	body = body.substr(0, newlinePos);
 
 	if (!body.empty() && body[body.size() - 1] == '\r')
-    	body.erase(body.size() - 1);
+		body.erase(body.size() - 1);
 
 	std::string target = getWord(body, 1);
 	std::size_t spacePos = body.find(' ') + 1;
