@@ -28,13 +28,7 @@ void Server::sayMsg(std::string body, Client &user)
 	for (it = _clients.begin(); it != _clients.end(); ++it)
 	{
 		if (it->getChannel() == toChannel)
-		{
-			int retValue = send(it->getFd(), sendMessage, sendMessage.size(), 0);
-			if (retValue == -1)
-			{
-				std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
-			}
-		}
+			user.sendMessage(sendMessage);
 	}
 }
 

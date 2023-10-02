@@ -24,11 +24,8 @@ void Server::listChannels(std::string body, Client &user)
 		}
 		channelListMsg += "\r\n";
 	}
-	channelListMsg += ":" + user.getNickname() + "!user@host 323 * :End of channel list\r\n";
-
-	int retValue = send(user.getFd(), channelListMsg, channelListMsg.size(), 0);
-	if (retValue == -1)
-		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+	channelListMsg += ":" + user.getNickname() + "!user@host 323 * :End of channel list";
+	user.sendMessage(channelListMsg);
 }
 
 // When the last user of a channels parts from it, should the channel be deleted ?
@@ -139,16 +136,11 @@ void Server::getNamesInChannel(std::string body, Client &user)
 	if (user.getChannel() != channel)
 	{
 		std::string errorMessage = ": 442 " + user.getNickname() + " " + user.getNickname() + channel + " :You are not in the channel" + "\r\n";
-		user.sendMessage();
-		int retValue = send(user.getFd(), errorMessage, errorMessage.size(), 0);
-		if (retValue == -1)
-			std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+		user.sendMessage(errorMessage);
 		return;
 	}
 	std::string startOfNamesMessage = ": 353 " + user.getNickname() + " = " + channel + " :";
-	int retValue = send(user.getFd(), startOfNamesMessage, startOfNamesMessage.size(), 0);
-	if (retValue == -1)
-		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+	user.sendMessage(startOfNamesMessage);
 	std::map<std::string, Channel>::iterator channelIt = channels.find(channel);
 	if (channelIt != channels.end())
 	{
@@ -163,16 +155,11 @@ void Server::getNamesInChannel(std::string body, Client &user)
 			namesInChannelMessage += client.getNickname() + " ";
 		}
 		std::cout << "names in channel " << namesInChannelMessage << std::endl;
-		namesInChannelMessage += "\r\n";
-		retValue = send(user.getFd(), namesInChannelMessage, namesInChannelMessage.size(), 0);
-		if (retValue == -1)
-			std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+		user.sendMessage(namesInChannelMessage);
 	}
 	std::cout << "asdas" << std::endl;
 	std::string endOfNamesMessage = ": 366 " + user.getNickname() + " " + channel + " :End of NAMES list\r\n";
-	retValue = send(user.getFd(), endOfNamesMessage, endOfNamesMessage.size(), 0);
-	if (retValue == -1)
-		std::cerr << "[SERVER-error]: send failed " << errno << strerror(errno) << std::endl;
+	user.sendMessage(endOfNamesMessage);
 }
 
 void Server::inviteNick(std::string body, Client &user)
