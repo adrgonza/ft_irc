@@ -110,6 +110,7 @@ e_command parseCommandCode(std::string command);
 #define BAN_CMD(server, channel, host) (":localhost MODE " + (channel) + " +b " + (host))
 #define UNBAN_CMD(server, channel, host) (":localhost MODE " + (channel) + " -b " + (host))
 #define RPL_NAMREPLY(client, symbol, channel, list) (":localhost 353 " + client + " " + symbol + " " + channel + " :" + list)
+# define RPL_ENDOFNAMES(client, channel) (":localhost 366 " + client + " " + channel + " :End of /NAMES list.\r\n")
 
 
 #endif

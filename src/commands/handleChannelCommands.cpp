@@ -103,6 +103,8 @@ void Server::handleJoin(std::string body, Client &user)
 		{
 			it->sendMessage(JOIN_CMD(nick, nick, channel));
 			it->sendMessage(MODE_CMD(nick, channel, "+o"));
+			it->sendMessage(RPL_NAMREPLY(nick, "=", channel, ("@" + nick)));
+			it->sendMessage(RPL_ENDOFNAMES(nick, channel));
 		}
 	}
 	else
@@ -132,6 +134,7 @@ void Server::handleJoin(std::string body, Client &user)
 			if (!toChan->getTopic().empty() && toChan->getTopic() != "")
 				it->sendMessage(TOPIC_CMD(channel, toChan->getTopic()));
 			it->sendMessage(RPL_NAMREPLY(nick, "=", channel, listNames));
+			it->sendMessage(RPL_ENDOFNAMES(nick, channel));
 		}
 	}
 }
