@@ -145,6 +145,9 @@ bool Server::handleClientInput(Client &caller, std::string message)
 	std::string command;
 	splitted >> command;
 
+	for(std::string::iterator it = command.begin(); it != command.end(); ++it)
+		*it = std::toupper(*it);
+
 	std::string body;
 	std::getline(splitted >> std::ws, body);
 	if (body.empty())
