@@ -101,15 +101,10 @@ void Client::changeUserName(std::string user)
 	int count = 0;
 	while (iss >> arg)
 		count++;
-	if (count > 4)
-	{
+	if (count > 2)
 		_username = name;
-	}
 	else
-	{
-		std::cout << "too few arguments" << std::endl;
 		sendMessage("Error: too few argummets");
-	}
 }
 
 void Client::changeChannel(std::string channel) { this->channel = channel; }
