@@ -9,9 +9,8 @@ void Server::usersOnNetwork(std::string body, Client &user)
         return;
     }
 
-    std::string serverName = "ToniWarrior's";
-    std::string userNickname = user.getNickname();
-
+	std::string serverName = "ToniWarrior's";
+	std::string userNickname = user.getNickname();
     if (channelExists(target))
     {
         Channel *targetChannel = getChannelByName(target);
@@ -47,9 +46,9 @@ void Server::getUserInfo(std::string body, Client &user)
         return;
     }
 
-    std::string serverName = "ToniWarrior's";
-    std::string invitingUser = user.getNickname();
-    std::string host = invitingUser + "!user@host";
+	std::string serverName = "ToniWarrior's";
+	std::string invitingUser = user.getNickname();
+	std::string host = invitingUser + "!user@host";
 
     Client *clientObj = findClientByNickname(target);
     if (clientObj)
@@ -57,10 +56,12 @@ void Server::getUserInfo(std::string body, Client &user)
         user.sendMessage(RPL_WHOISUSER(serverName, invitingUser, target, "", host, invitingUser));
         user.sendMessage(RPL_ENDOFWHOIS(serverName, invitingUser, target));
     }
+
 }
 
 void Server::getPreviouslyUsersInfo(std::string body, Client &user)
 {
+
     std::string serverName = "ToniWarrior's";
     std::string target = getWord(body, 2);
     
@@ -80,4 +81,5 @@ void Server::getPreviouslyUsersInfo(std::string body, Client &user)
         user.sendMessage(RPL_WHOWASUSER(serverName, target, user.getNickname(), "", host, user.getNickname()));
         user.sendMessage(RPL_ENDOFWHOWAS(serverName,  target, user.getNickname()));
     }
+
 }

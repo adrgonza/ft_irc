@@ -14,7 +14,12 @@ void Server::listChannels(std::string body, Client &user)
 	for (std::map<std::string, Channel>::iterator it = channels.begin(); it != channels.end(); ++it)
 	{
 		std::string channelName = it->first;
-		channelListMsg += ":" + user.getNickname() + "!user@host 322 * " + channelName + " " + std::to_string(it->second.getParticipants().size()) + " :";
+		
+		std::stringstream participantCount;
+		participantCount << it->second.getParticipants().size();
+
+		channelListMsg += ":" + user.getNickname() + "!user@host 322 * " + channelName + " " + participantCount.str() + " :";
+		//channelListMsg += ":" + user.getNickname() + "!user@host 322 * " + channelName + " " + std::to_string(it->second.getParticipants().size()) + " :";
 		std::vector<Client> participants = it->second.getParticipants();
 		for (size_t i = 0; i < participants.size(); ++i)
 		{
@@ -119,7 +124,7 @@ void Server::topicChannel(std::string body, Client &user)
 	}
 
     if (!newTopic.empty() && newTopic[0] == ' ')
-        newTopic = newTopic.substr(1);
+		newTopic = newTopic.substr(1);
 	std::string network = "";
 	if (!channelObj->hasParticipant(user))
 	{

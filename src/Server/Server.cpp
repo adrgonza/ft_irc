@@ -11,9 +11,9 @@ bool Server::run()
 
 	struct sockaddr_in serverAddress;
 	bzero(&serverAddress, sizeof(serverAddress));
-	serverAddress.sin_family = AF_INET;				   // specing the family, interenet (address)
-	serverAddress.sin_addr.s_addr = htonl(INADDR_ANY); // responding to anything
-	serverAddress.sin_port = htons(_port);			   // convert server port nb to network standart byte order (to avoid to conections use different byte order)
+	serverAddress.sin_family = AF_INET;					// specing the family, interenet (address)
+	serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);	// responding to anything
+	serverAddress.sin_port = htons(_port);				// convert server port nb to network standart byte order (to avoid to conections use different byte order)
 
 	if (bind(_socketFd, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) // set the address wher is gonna be listening
 		return (std::cout << "Error: could not bind.." << std::endl, false);
@@ -31,34 +31,13 @@ bool Server::run()
 		_pollFd[i].fd = -1;
 
 	while (true)
-	{
 		if (handleClientConnections() == false)
 			return (false);
-		time_t currentTime;
-		time(&currentTime);
-		long seconds = static_cast<long>(currentTime);
-		for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
-		{
-			long clientSeconds = static_cast<long>(it->getLastPingTime());
-			if (it->getPing() == true && seconds - clientSeconds >= 5 && clientSeconds > 0)
-			{
-				it->setPing(false);
-				quitServ("There is no pong response", *it);
-				break;
-			}
-			else if (seconds - clientSeconds >= 30 && clientSeconds > 0)
-			{
-				it->sendMessage(PING_CMD(it->getNickname()));
-				it->changeLastPingTime(seconds);
-				it->setPing(true);
-			}
-		}
-	}
 }
 
 bool Server::handleClientConnections()
 {
-	if (poll(_pollFd, _clients.size() + 1, INT32_MAX) < 0)
+	if (poll(_pollFd, _clients.size() + 1, INT_MAX) < 0)
 		return (std::cout << "Error: syscall poll failed.." << std::endl, false);
 
 	if (_pollFd[0].revents == POLLIN)
@@ -68,8 +47,6 @@ bool Server::handleClientConnections()
 		if (_connectionFd == -1)
 			return (std::cout << "Error accepting client's connection" << std::endl, false);
 
-		//fcntl(_socketFd, F_SETFL, O_NONBLOCK); // avoid system differences
-
 		if (this->_clients.size() >= BACKLOG)
 			return (std::cout << "Error: max connections limit reached" << std::endl, true);
 
@@ -77,9 +54,7 @@ bool Server::handleClientConnections()
 
 		Client newClient(_connectionFd);
 
-		time_t currentTime;
-		time(&currentTime);
-		newClient.changeLastPingTime(currentTime);
+		newClient.sendMessage("NOTICE AUTH :*** Checking Ident");
 
 		_clients.push_back(newClient);
 
@@ -113,21 +88,20 @@ bool Server::handleClientCommunications(size_t i)
 		return (std::cout << "Error: dont have access to read client fd." << std::endl, false);
 	if (readSize == 0)
 	{
-		// disconnect a client
 		std::cout << "[SERVER]: A Client was disconnected from the server" << std::endl;
-		std::vector<Client>::iterator it = std::find(_clients.begin(), _clients.end(), _pollFd[i].fd);
-		close(_pollFd[i].fd);
-		if (it != _clients.end())
+		Client *delet = findClientByFd(_pollFd[i].fd);
+		close(delet->getFd());
+		for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
 		{
-			_disconnectedClients.push_back(*it);
-			_clients.erase(it);
+			if (it->getFd() == delet->getFd())
+			{
+				_disconnectedClients.push_back(*delet);
+				_clients.erase(it);
+				break;
+			}
 		}
-		for (size_t i = 0; i < BACKLOG; i++)
-		{
-			if (_pollFd[i + 1].fd == _pollFd[i].fd)
-				_pollFd[i + 1].fd = -1;
-			_pollFd[i].revents = 0;
-		}
+		_pollFd[i].fd = -1;
+		_pollFd[i].revents = 0;
 	}
 	else
 	{
@@ -145,9 +119,6 @@ bool Server::handleClientCommunications(size_t i)
 
 bool Server::handleClientInput(Client &caller, std::string message)
 {
-	time_t currentTime;
-	time(&currentTime);
-	caller.changeLastPingTime(currentTime);
 	if (message.find("\r") == message.npos)
 	{
 		if (message.find("\n") != message.npos)
@@ -174,6 +145,9 @@ bool Server::handleClientInput(Client &caller, std::string message)
 	std::string command;
 	splitted >> command;
 
+	for(std::string::iterator it = command.begin(); it != command.end(); ++it)
+		*it = std::toupper(*it);
+
 	std::string body;
 	std::getline(splitted >> std::ws, body);
 	if (body.empty())
@@ -187,36 +161,34 @@ bool Server::handleClientInput(Client &caller, std::string message)
 		caller.sendMessage("You are a invalid Client!");
 		return (true);
 	}
-
-	if (command == "PASS")
-		checkPassword(body, caller);
-	else if (caller.getKey() == true)
+	if (caller.getKey() == true && !caller.getNickname().empty() && !caller.getUsername().empty())
 		handleCommand(caller, command, body);
+	else if (command == "PASS")
+		checkPassword(body, caller);
+	else if (command == "NICK")
+		caller.changeNickname(_clients, body);
+	else if (command == "USER")
+		caller.changeUserName(body);
 	else
 	{
-		if (command == "NICK")
-			caller.changeNickname(_clients, body);
-		else if (command == "USER")
-			return (true);
-		else
-		{
-			std::string send = ERR_PASSWDREQUIRED(caller.getNickname());
-			caller.sendMessage(send);
-		}
+		if (caller.getNickname().empty() || caller.getUsername().empty())
+			caller.sendMessage("NOTICE AUTH :*** Checking Ident");
+		else if (caller.getKey() == false)
+			caller.sendMessage(ERR_PASSWDREQUIRED, caller.getNickname().c_str());
 	}
-	if (caller.getPing() == true)
-		quitServ("There is no pong response", caller);
+
+	if (caller.getKey() == true && !caller.getNickname().empty() && !caller.getUsername().empty() && caller.getFirsTime() == false)
+	{
+		caller.setFirstTime(true);
+		caller.sendMessage(RPL_MOTDSTART, caller.getNickname().c_str(), "Welcome to the TONY_WARRIORS Internet Relay Chat Network");
+	}
 	return (true);
 }
 
 void Server::checkPassword(std::string body, Client &caller)
 {
 	if (body == _password)
-	{
 		caller.giveKey(true);
-		std::string send = RPL_MOTDSTART(caller.getNickname(), "Welcome to the TONY_WARRIORS Internet Relay Chat Network");
-		caller.sendMessage(send);
-	}
 	else
 	{
 		caller.sendMessage(ERR_PASSWDMISMATCH(caller.getNickname()));

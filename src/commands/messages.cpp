@@ -1,4 +1,6 @@
 #include "../Server/Server.hpp"
+#include <iostream>
+#include <string>
 
 void Server::sayMsg(std::string body, Client &user)
 {
@@ -13,7 +15,7 @@ void Server::sayMsg(std::string body, Client &user)
 
 	std::size_t newlinePos = body.find('\n');
 	body = body.substr(0, newlinePos);
-	if (!body.empty() && body.back() == '\r')
+	if (!body.empty() && body[body.size() - 1] == '\r')
 		body.erase(body.size() - 1);
 
 	nickname = user.getNickname();
@@ -37,7 +39,7 @@ void Server::privMessage(std::string body, Client user)
 	std::size_t newlinePos = body.find('\n');
 	body = body.substr(0, newlinePos);
 
-	if (!body.empty() && body.back() == '\r')
+	if (!body.empty() && body[body.size() - 1] == '\r')
 		body.erase(body.size() - 1);
 
 	std::string target = getWord(body, 1);

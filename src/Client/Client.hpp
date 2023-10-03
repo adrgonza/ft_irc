@@ -1,6 +1,8 @@
 #ifndef CLIENT_HPP_
 #define CLIENT_HPP_
 
+#include <libraries.hpp>
+
 # define RESET "\e[0m"
 # define RED "\e[1;91m"
 # define BLUE "\e[1;34m"
@@ -17,40 +19,37 @@ class Client {
 
 
 		int getFd() const;
-		void setFD(int);
 		std::string getNickname() const;
 		std::string getUsername() const;
 		std::string getjoined() const;
-		void setjoined(std::string);
 		std::string getHost() const;
 		std::string getChannel() const;
 		bool getKey() const;
+		bool getFirsTime() const;
 		std::string getSource() const;
-		time_t		getLastPingTime() const;
-		bool getPing() const;
-		void setPing(bool);
 
-
-		void giveKey(bool);
 
 		// Commands
 		void sendMessage(std::string message);
 		void changeNickname(std::vector<Client> clients, std::string newNick);
 		void changeChannel(std::string channel);
+		void changeUserName(std::string name);
 		std::string buildClientMessage(std::string message, va_list args);
-		void changeLastPingTime(time_t newPingTime);
+		void giveKey(bool);
+		void setjoined(std::string);
+		void setFD(int);
+		void setFirstTime(bool);
 
 	private:
 		Client();
 		int _fd;
-		bool _ping;
 		std::string _joined;
 		std::string nickname;
-		std::string username;
+		std::string _username;
 		std::string host;
 		std::string channel;
 		bool _passwordkey;
-		time_t		lastPingTime;
+		bool _firstTime;
 };
 
 #endif

@@ -1,18 +1,28 @@
 #ifndef LIBRARIES_HPP
 #define LIBRARIES_HPP
 
-// 
+// c++
+#include <cstdlib>
 #include <iostream>
 #include <sstream>
+#include <algorithm>
+#include <cstdarg>
 #include <vector>
 #include <map>
 
+
 // c
+#include <strings.h>
 #include <unistd.h>
 #include <poll.h>
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <cerrno>
 #include <sys/socket.h>
+#include <limits.h>
 #include <sys/types.h>
 #include <fcntl.h>
 #include <arpa/inet.h>
