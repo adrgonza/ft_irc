@@ -32,7 +32,7 @@ void Server::noticeMessage(std::string body, Client &user)
         if (targetSocket == -1)
             return;
         Client *receiver = findClientByNickname(lowerTarget);
-        receiver->sendMessage(NOTICE_RECEIVER_CMD(user.getNickname(), target, message));
+        receiver->sendMessage(NOTICE_RECEIVER_CMD(user.getNickname(), user.getNickname(), target, message));
     }
     return;
 }

@@ -63,7 +63,7 @@ void Server::handleJoin(std::string body, Client &user)
 	std::string channel = body;
 	if (channel == user.getChannel() || channel.empty())
 		return;
-	
+	bool oper = false;
 	if (channels.find(channel) != channels.end())
 	{
 		Channel *targetChannel = getChannelByName(channel);
@@ -85,22 +85,59 @@ void Server::handleJoin(std::string body, Client &user)
 		newChannel.setTopic("");
 		channels[channel] = newChannel;
 		std::cout << "User " << user.getNickname() << " created and joined channel " << channel << std::endl;
+		oper = true;
 	}
 	user.changeChannel(channel);
 
 	Channel *toChan = getChannelByName(channel);
 	std::vector<Client> clientsInChannel = toChan->getParticipants();
-	for (std::vector<Client>::iterator it = clientsInChannel.begin(); it != clientsInChannel.end(); ++it)
-		it->sendMessage(JOIN_CMD(channel));
+	std::string nick = user.getNickname();
+	if (oper == true)
+	{
+		for (std::vector<Client>::iterator it = clientsInChannel.begin(); it != clientsInChannel.end(); ++it)
+		{
+			it->sendMessage(JOIN_CMD(nick, nick, channel));
+			it->sendMessage(MODE_CMD(nick, channel, "+o"));
+		}
+	}
+	else
+	{
+		std::vector<Client> clientOperatorsInChan = toChan->getOperators();
+		std::string listNames = "";
+		for (std::vector<Client>::iterator it = clientOperatorsInChan.begin(); it != clientOperatorsInChan.end(); ++it)
+			listNames += "@" + it->getNickname() + " ";
+		for (std::vector<Client>::iterator it = clientsInChannel.begin(); it != clientsInChannel.end(); ++it)
+		{
+			bool addClient = true;
+			for (std::vector<Client>::iterator operatorIt = clientOperatorsInChan.begin(); operatorIt != clientOperatorsInChan.end(); ++operatorIt)
+			{
+				if (operatorIt->getNickname() == it->getNickname())
+				{
+					addClient = false;
+					break;
+				}
+			}
+			if (addClient)
+				listNames += it->getNickname() + " ";
+		}
+		
+		for (std::vector<Client>::iterator it = clientsInChannel.begin(); it != clientsInChannel.end(); ++it)
+		{
+			it->sendMessage(JOIN_CMD(nick, nick, channel));
+			if (!toChan->getTopic().empty() && toChan->getTopic() != "")
+				it->sendMessage(TOPIC_CMD(channel, toChan->getTopic()));
+			it->sendMessage(RPL_NAMREPLY(nick, "=", channel, listNames));
+		}
+	}
 }
 
 void Server::topicChannel(std::string body, Client &user)
 {
 	std::istringstream iss(body);
 	std::string channel;
-    iss >> channel;
+	iss >> channel;
 	std::string newTopic;
-    std::getline(iss, newTopic);
+	std::getline(iss, newTopic);
 
 	if (!channel.empty() && channel[0] != '#')
 		channel = "#" + channel;
@@ -115,11 +152,11 @@ void Server::topicChannel(std::string body, Client &user)
 		std::string sendMsg = "332 TOPIC: " + channelObj->getTopic() + IRC_ENDLINE;
 		sendMsg = "332 " + user.getNickname() + " " + channel + " :" + channelObj->getTopic() + IRC_ENDLINE;
 		user.sendMessage(sendMsg);
-		return ;
+		return;
 	}
 
-    if (!newTopic.empty() && newTopic[0] == ' ')
-        newTopic = newTopic.substr(1);
+	if (!newTopic.empty() && newTopic[0] == ' ')
+		newTopic = newTopic.substr(1);
 	std::string network = "";
 	if (!channelObj->hasParticipant(user))
 	{
@@ -186,11 +223,11 @@ void Server::inviteNick(std::string body, Client &user)
 		user.sendMessage(ERR_NOTONCHANNEL(user.getNickname(), channel));
 		return;
 	}
-	Client* targetClient = findClientByNickname(targetUser);
+	Client *targetClient = findClientByNickname(targetUser);
 	if (channelObj->hasParticipant(*targetClient))
 	{
 		user.sendMessage(ERR_USERONCHANNEL(user.getNickname(), targetUser, channel));
-		return ;
+		return;
 	}
 	targetClient->sendMessage(INVITE_CMD(user.getNickname(), targetUser, channel));
 }

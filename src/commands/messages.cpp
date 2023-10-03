@@ -44,8 +44,6 @@ void Server::privMessage(std::string body, Client user)
 	std::size_t spacePos = body.find(' ') + 1;
 	if (spacePos != std::string::npos)
 		body = body.substr(spacePos);
-	if (!body.empty() && body[0] != ':')
-		body = ":" + body;
 
 	std::string lowerTarget = target;
 	for (std::string::size_type i = 0; i < target.length(); i++)
@@ -72,6 +70,6 @@ void Server::privMessage(std::string body, Client user)
 		if (targetSocket == -1)
 			return;
 		Client *receiver = findClientByNickname(lowerTarget);
-		receiver->sendMessage(PRIVMSG_RECEIVER_CMD(user.getNickname(), target, body));
+		receiver->sendMessage(PRIVMSG_RECEIVER_CMD(user.getNickname(), user.getNickname(), target, body));
 	}
 }

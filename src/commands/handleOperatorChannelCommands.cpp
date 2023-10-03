@@ -17,13 +17,19 @@ void Server::kickUser(std::string body, Client &user)
     }
     Channel *chan = getChannelByName(channel);
     std::string nick = user.getNickname();
+    std::string restOfBody;
+    int i = 2;
+    while (!getWord(body, ++i).empty())
+        restOfBody += getWord(body, i) + " ";
     if (chan->isOperator(user))
     {
-        user.sendMessage(KICK_CMD(nick, channel, targetUser));
+        Channel *toChan = getChannelByName(channel);
+        std::vector<Client> clientsInChannel = toChan->getParticipants();
+        for (std::vector<Client>::iterator it = clientsInChannel.begin(); it != clientsInChannel.end(); ++it)
+            it->sendMessage(KICK_CMD(nick, nick, channel, targetUser, restOfBody));
         Client *tarUser = findClientByNickname(targetUser);
         chan->removeParticipant(*tarUser);
         tarUser->changeChannel("");
-        tarUser->sendMessage(KICK_CMD(nick, channel, targetUser));
     }
     else
         user.sendMessage(ERR_CHANOPRIVSNEEDED(nick, channel));
@@ -71,7 +77,7 @@ void Server::banUser(std::string body, Client &user)
             chan->addBan(*targetClient);
             std::string serverName = "ToniWarrior's";
             std::string host = targetUser + "!user@host";
-            user.sendMessage(BAN_CMD(serverName, channel, host));
+            user.sendMessage(MODE_CMD(nick, channel, "+b"));
         }
         else
             user.sendMessage(ERR_BANNEDFROMCHAN(targetUser, channel));
@@ -100,7 +106,7 @@ void Server::unbanUser(std::string body, Client &user)
             chan->removeBan(*targetClient);
             std::string serverName = "ToniWarrior's";
             std::string host = targetUser + "!user@host";
-            user.sendMessage(UNBAN_CMD(serverName, channel, host));
+            user.sendMessage(MODE_CMD(nick, channel, "-b"));
         }
         else
             user.sendMessage(ERR_USERALREADYBANNED(targetUser, channel));
