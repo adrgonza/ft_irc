@@ -66,10 +66,8 @@ void Client::changeNickname(std::vector<Client> clients, std::string body)
 	std::string lclient;
 	std::string::size_type aux;
 	aux = lbody.length();
-	for (std::string::size_type i = 0; i < aux; i++)
-	{
-		lbody[i] = std::tolower(lbody[i]);
-	}
+    for (std::string::size_type i = 0; i < aux; i++)
+        lbody[i] = std::tolower(lbody[i]);
 	lbody = body;
 	aux = lbody.length();
 	for (std::string::size_type i = 0; i < aux; i++)
@@ -87,7 +85,7 @@ void Client::changeNickname(std::vector<Client> clients, std::string body)
 			return;
 		}
 	}
-	this->sendMessage(NICK_CMD(body));
+	this->sendMessage(NICK_CMD(nickname, nickname, body));
 	this->nickname = body;
 }
 
