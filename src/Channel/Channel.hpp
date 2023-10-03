@@ -10,7 +10,7 @@ class Channel {
 		std::vector<Client> participants;
 		std::vector<Client> bannedParticipants;
 		std::vector<Client> operators;
-    	std::string topic;
+		std::string topic;
 		std::string _name;
 
 	public:

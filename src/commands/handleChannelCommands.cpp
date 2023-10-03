@@ -14,7 +14,7 @@ void Server::listChannels(std::string body, Client &user)
 	for (std::map<std::string, Channel>::iterator it = channels.begin(); it != channels.end(); ++it)
 	{
 		std::string channelName = it->first;
-		
+
 		std::stringstream participantCount;
 		participantCount << it->second.getParticipants().size();
 
@@ -68,7 +68,7 @@ void Server::handleJoin(std::string body, Client &user)
 	std::string channel = body;
 	if (channel == user.getChannel() || channel.empty())
 		return;
-	
+
 	if (channels.find(channel) != channels.end())
 	{
 		Channel *targetChannel = getChannelByName(channel);
@@ -103,9 +103,9 @@ void Server::topicChannel(std::string body, Client &user)
 {
 	std::istringstream iss(body);
 	std::string channel;
-    iss >> channel;
+	iss >> channel;
 	std::string newTopic;
-    std::getline(iss, newTopic);
+	std::getline(iss, newTopic);
 
 	if (!channel.empty() && channel[0] != '#')
 		channel = "#" + channel;

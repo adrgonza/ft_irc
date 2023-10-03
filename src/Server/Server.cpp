@@ -174,13 +174,13 @@ bool Server::handleClientInput(Client &caller, std::string message)
 		if (caller.getNickname().empty() || caller.getUsername().empty())
 			caller.sendMessage("NOTICE AUTH :*** Checking Ident");
 		else if (caller.getKey() == false)
-			caller.sendMessage(ERR_PASSWDREQUIRED, caller.getNickname().c_str());
+			caller.sendMessage(ERR_PASSWDREQUIRED(caller.getNickname()));
 	}
 
 	if (caller.getKey() == true && !caller.getNickname().empty() && !caller.getUsername().empty() && caller.getFirsTime() == false)
 	{
 		caller.setFirstTime(true);
-		caller.sendMessage(RPL_MOTDSTART, caller.getNickname().c_str(), "Welcome to the TONY_WARRIORS Internet Relay Chat Network");
+		caller.sendMessage(RPL_MOTDSTART(caller.getNickname(), "Welcome to the TONY_WARRIORS Internet Relay Chat Network"));
 	}
 	return (true);
 }

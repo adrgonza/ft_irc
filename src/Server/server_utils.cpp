@@ -76,9 +76,9 @@ bool Server::userExists(std::string nickname)
 	std::string lclient;
 	std::string::size_type aux = lclient.length();
 	aux = nickname.length();
-    for (std::string::size_type i = 0; i < aux; i++)
+	for (std::string::size_type i = 0; i < aux; i++)
 	{
-    	nickname[i] = std::tolower(nickname[i]);
+		nickname[i] = std::tolower(nickname[i]);
 	}
 	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
