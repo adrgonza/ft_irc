@@ -30,7 +30,7 @@ class Client {
 
 
 		// Commands
-		void sendMessage(std::string message, ...);
+		void sendMessage(std::string message);
 		void changeNickname(std::vector<Client> clients, std::string newNick);
 		void changeChannel(std::string channel);
 		void changeUserName(std::string name);

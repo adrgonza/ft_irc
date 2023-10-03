@@ -191,7 +191,7 @@ void Server::checkPassword(std::string body, Client &caller)
 		caller.giveKey(true);
 	else
 	{
-		caller.sendMessage(ERR_PASSWDMISMATCH, caller.getNickname().c_str());
+		caller.sendMessage(ERR_PASSWDMISMATCH(caller.getNickname()));
 		caller.giveKey(false);
 	}
 }

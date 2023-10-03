@@ -16,24 +16,22 @@ void Server::noticeMessage(std::string body, Client &user)
 	lowerTarget = target;
 	for (std::string::size_type i = 0; i < target.length(); i++)
 		lowerTarget[i] = std::tolower(target[i]);
-
-	if (lowerTarget[0] == '#')
-	{
-		std::vector<Client>::iterator it;
-		for (it = _clients.begin(); it != _clients.end(); ++it)
-		{
-			std::string sendMessage = ":" + user.getNickname() + " " + NOTICE_CMD;
-			if (it->getChannel() == lowerTarget && it->getNickname() != user.getNickname())
-				it->sendMessage(sendMessage, target.c_str(), message.c_str());
-		}
-	}
-	else
-	{
-		int targetSocket = getClientSocketFdByNickname(lowerTarget);
-		if (targetSocket == -1)
-			return;
-		Client *receiver = findClientByNickname(lowerTarget);
-		receiver->sendMessage(NOTICE_RECEIVER_CMD, user.getNickname().c_str(), target.c_str(), message.c_str());
-	}
-	return;
+  if (lowerTarget[0] == '#')
+    {
+        std::vector<Client>::iterator it;
+        for (it = _clients.begin(); it != _clients.end(); ++it)
+        {
+            if (it->getChannel() == lowerTarget && it->getNickname() != user.getNickname())
+                it->sendMessage(NOTICE_CMD(user.getNickname(), target, message));
+        }
+    }
+    else
+    {
+        int targetSocket = getClientSocketFdByNickname(lowerTarget);
+        if (targetSocket == -1)
+            return;
+        Client *receiver = findClientByNickname(lowerTarget);
+        receiver->sendMessage(NOTICE_RECEIVER_CMD(user.getNickname(), target, message));
+    }
+    return;
 }

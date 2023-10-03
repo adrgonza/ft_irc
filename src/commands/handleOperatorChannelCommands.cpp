@@ -7,26 +7,26 @@ void Server::kickUser(std::string body, Client &user)
 
     if (!channelExists(channel))
     {
-        user.sendMessage(ERR_NOSUCHCHANNEL, user.getNickname().c_str(), channel.c_str());
+        user.sendMessage(ERR_NOSUCHCHANNEL(user.getNickname(), channel));
         return;
     }
     if (!userExists(targetUser))
     {
-        user.sendMessage(ERR_NOSUCHNICK, user.getNickname().c_str(), targetUser.c_str());
+        user.sendMessage(ERR_NOSUCHNICK(user.getNickname(), targetUser));
         return;
     }
     Channel *chan = getChannelByName(channel);
     std::string nick = user.getNickname();
     if (chan->isOperator(user))
     {
-        user.sendMessage(KICK_CMD, nick.c_str(), channel.c_str(), targetUser.c_str());
+        user.sendMessage(KICK_CMD(nick, channel, targetUser));
         Client *tarUser = findClientByNickname(targetUser);
         chan->removeParticipant(*tarUser);
         tarUser->changeChannel("");
-        tarUser->sendMessage(KICK_CMD, nick.c_str(), channel.c_str(), targetUser.c_str());
+        tarUser->sendMessage(KICK_CMD(nick, channel, targetUser));
     }
     else
-        user.sendMessage(ERR_CHANOPRIVSNEEDED, nick.c_str(), channel.c_str());
+        user.sendMessage(ERR_CHANOPRIVSNEEDED(nick, channel));
 }
 
 void Server::modeHandler(std::string body, Client &user)
@@ -53,12 +53,12 @@ void Server::banUser(std::string body, Client &user)
     std::string targetUser = getWord(body, 2);
     if (!channelExists(channel))
     {
-        user.sendMessage(ERR_NOSUCHCHANNEL, user.getNickname().c_str(), channel.c_str());
+        user.sendMessage(ERR_NOSUCHCHANNEL(user.getNickname(), channel));
         return;
     }
     if (!userExists(targetUser))
     {
-        user.sendMessage(ERR_NOSUCHNICK, user.getNickname().c_str(), targetUser.c_str());
+        user.sendMessage(ERR_NOSUCHNICK(user.getNickname(), targetUser));
         return;
     }
     Channel *chan = getChannelByName(channel);
@@ -71,13 +71,13 @@ void Server::banUser(std::string body, Client &user)
             chan->addBan(*targetClient);
             std::string serverName = "ToniWarrior's";
             std::string host = targetUser + "!user@host";
-            user.sendMessage(BAN_CMD, serverName.c_str(), channel.c_str(), host.c_str());
+            user.sendMessage(BAN_CMD(serverName, channel, host));
         }
         else
-            user.sendMessage(ERR_BANNEDFROMCHAN, targetUser.c_str(), channel.c_str());
+            user.sendMessage(ERR_BANNEDFROMCHAN(targetUser, channel));
     }
     else
-        user.sendMessage(ERR_CHANOPRIVSNEEDED, nick.c_str(), channel.c_str());
+        user.sendMessage(ERR_CHANOPRIVSNEEDED(nick, channel));
 }
 
 void Server::unbanUser(std::string body, Client &user)
@@ -87,7 +87,7 @@ void Server::unbanUser(std::string body, Client &user)
 
     if (!channelExists(channel))
     {
-        user.sendMessage(ERR_NOSUCHCHANNEL, user.getNickname().c_str(), channel.c_str());
+        user.sendMessage(ERR_NOSUCHCHANNEL(user.getNickname(), channel));
         return;
     }
     Channel *chan = getChannelByName(channel);
@@ -100,11 +100,11 @@ void Server::unbanUser(std::string body, Client &user)
             chan->removeBan(*targetClient);
             std::string serverName = "ToniWarrior's";
             std::string host = targetUser + "!user@host";
-            user.sendMessage(UNBAN_CMD, serverName.c_str(), channel.c_str(), host.c_str());
+            user.sendMessage(UNBAN_CMD(serverName, channel, host));
         }
         else
-            user.sendMessage(ERR_USERALREADYBANNED, targetUser.c_str(), channel.c_str());
+            user.sendMessage(ERR_USERALREADYBANNED(targetUser, channel));
     }
     else
-        user.sendMessage(ERR_CHANOPRIVSNEEDED, nick.c_str(), channel.c_str());
+        user.sendMessage(ERR_CHANOPRIVSNEEDED(nick, channel));
 }

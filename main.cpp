@@ -10,16 +10,15 @@ int main(int argc, char **argv)
 	for (size_t i = 0; i < port.length(); i++)
 		if (!std::isdigit(port[i]))
 			return (std::cout << "ERROR: invalid port.." << std::endl, 1);
-	if (atoi(port.c_str()) > 65535)
+	if (std::atoi(port.c_str()) > 65535)
 		return (std::cout << "\033[0;31mERROR: Invalid Port.." << std::endl, 1);
-
 	std::string password = argv[2];
 	if (password.length() < 4)
 		return (std::cout << "\033[0;31mERROR: Password too short.." << std::endl, 1);
 
 	try
 	{
-		Server IRC = Server(atoi(port.c_str()), password);
+		Server IRC = Server(std::atoi(port.c_str()), password);
 
 		if (IRC.run() == false)
 			return (1);
