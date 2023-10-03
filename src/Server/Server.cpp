@@ -161,20 +161,26 @@ bool Server::handleClientInput(Client &caller, std::string message)
 		caller.sendMessage("You are a invalid Client!");
 		return (true);
 	}
-	if (command == "PASS")
+	if (caller.getKey() == true && !caller.getNickname().empty() && !caller.getUsername().empty())
+		handleCommand(caller, command, body);
+	else if (command == "PASS")
 		checkPassword(body, caller);
 	else if (command == "NICK")
 		caller.changeNickname(_clients, body);
 	else if (command == "USER")
 		caller.changeUserName(body);
-	else if (caller.getKey() == true && !caller.getNickname().empty() && !caller.getUsername().empty())
-		handleCommand(caller, command, body);
 	else
 	{
 		if (caller.getNickname().empty() || caller.getUsername().empty())
 			caller.sendMessage("NOTICE AUTH :*** Checking Ident");
 		else if (caller.getKey() == false)
 			caller.sendMessage(ERR_PASSWDREQUIRED, caller.getNickname().c_str());
+	}
+
+	if (caller.getKey() == true && !caller.getNickname().empty() && !caller.getUsername().empty() && caller.getFirsTime() == false)
+	{
+		caller.setFirstTime(true);
+		caller.sendMessage(RPL_MOTDSTART, caller.getNickname().c_str(), "Welcome to the TONY_WARRIORS Internet Relay Chat Network");
 	}
 	return (true);
 }

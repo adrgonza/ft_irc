@@ -101,14 +101,14 @@ void Client::changeUserName(std::string user)
 	int count = 0;
 	while (iss >> arg)
 		count++;
-	if (count > 2)
+	if (count > 4)
 	{
 		_username = name;
 	}
 	else
 	{
 		std::cout << "too few arguments" << std::endl;
-		//send few argumment
+		sendMessage("Error: too few argummets");
 	}
 }
 
