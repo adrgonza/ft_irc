@@ -1,46 +1,25 @@
 #include <libraries.hpp>
 #include "Client.hpp"
 
-int getParameterCount(std::string errorMessage)
+std::string Client::getWord(const std::string &str, int wordNumber)
 {
-	int bracketCount = 0;
-	for (size_t i = 0; i < errorMessage.size(); i++)
-	{
-		if (errorMessage[i] == '>')
-			bracketCount++;
-	}
-	return bracketCount;
-}
+	if (str.empty())
+		return "";
 
-std::string Client::buildClientMessage(std::string message, va_list args)
-{
-	int totalParameters = getParameterCount(message);
-	std::string finalMessage = "";
-	if (totalParameters == 0)
-		return (message);
+	std::string::size_type startPos = 0;
+	std::string::size_type endPos = 0;
+	int currentWord = 0;
 
-	for (size_t i = 0; i < message.size(); i++)
+	while (currentWord < wordNumber)
 	{
-		if (message[i] == '<')
-		{
-			finalMessage += va_arg(args, char*);
-			totalParameters--;
-			for (size_t j = 1; (i + j) < message.size(); j++)
-			{
-				if (message[i + j] == '>')
-				{
-					i += j;
-					break ;
-				}
-			}
-			if (totalParameters <= 0) 
-			{
-				finalMessage += message.substr(i + 1, message.size());
-				break ;
-			}
-		}
-		else
-			finalMessage += message[i];
+		startPos = str.find_first_not_of(' ', endPos);
+		if (startPos == std::string::npos)
+			return "";
+		endPos = str.find(' ', startPos);
+		if (endPos == std::string::npos)
+			endPos = str.length();
+		currentWord++;
 	}
-	return (finalMessage);
+
+	return str.substr(startPos, endPos - startPos);
 }

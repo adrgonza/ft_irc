@@ -29,6 +29,7 @@ Client::Client(const Client &obj)
 	this->channel = obj.getChannel();
 	this->_username = obj.getUsername();
 	this->_firstTime = obj.getFirsTime();
+	this->_realname = obj.getRealName();
 }
 
 Client::Client(int connectionFd) : _fd(connectionFd), _passwordkey(false), _firstTime(false) {}
@@ -39,6 +40,7 @@ void Client::setFirstTime(bool ho) { _firstTime = ho; }
 std::string Client::getNickname() const { return this->nickname; }
 std::string Client::getChannel() const { return this->channel; }
 std::string Client::getUsername() const { return this->_username; }
+std::string Client::getRealName() const { return this->_realname; }
 std::string Client::getjoined() const{ return _joined; }
 void Client::setjoined(std::string str) { _joined = str; }
 std::string Client::getHost() const { return this->host; }
@@ -91,19 +93,26 @@ void Client::changeNickname(std::vector<Client> clients, std::string body)
 
 void Client::changeUserName(std::string user)
 {
-	std::istringstream iss(user);
-	std::string arg;
-	std::string name;
-
-	iss >> name;
-
-	int count = 0;
-	while (iss >> arg)
-		count++;
-	if (count > 2)
-		_username = name;
-	else
-		sendMessage("Error: too few argummets");
+	if (!_username.empty())
+	{
+		this->sendMessage(ERR_ALREADYREGISTERED(nickname));
+		return ;
+	}
+	std::string username = getWord(user, 1);
+	std::string shouldBeZero = getWord(user, 2);
+	std::string shouldBeAsteric = getWord(user, 3);
+	std::string realname;
+	int i = 3;
+    while (!getWord(user, ++i).empty())
+        realname += getWord(user, i) + " ";
+	if (username.empty())
+	{
+		this->sendMessage(ERR_NEEDMOREPARAMS(nickname, "USER"));
+		return ;
+	}
+	_username = username;
+	if (!realname.empty())
+		_realname = realname;
 }
 
 void Client::changeChannel(std::string channel) { this->channel = channel; }

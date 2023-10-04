@@ -10,7 +10,6 @@
 #include <vector>
 #include <map>
 
-
 // c
 #include <strings.h>
 #include <unistd.h>
@@ -78,6 +77,8 @@ e_command parseCommandCode(std::string command);
 #define ERR_YOUREBANNEDCREEP(client) (":localhost 465 " + (client) + " :You are banned from this server.")
 #define ERR_BANNEDFROMCHAN(client, channel) (":localhost 474 " + (client) + " " + (channel) + " :Cannot join channel (+b)")
 #define ERR_USERALREADYBANNED(nickname, channel) (":localhost 484 " + (nickname) + " " + (channel) + " :Cannot ban user; they are already banned (+b)")
+#define ERR_NEEDMOREPARAMS(client, command) (":localhost " + client + " " + command " :Not enough parameters")
+#define ERR_ALREADYREGISTERED(client) (":localhost 462 " + client + " :You may not reregister")
 
 // Command Messages
 #define USER_CMD(username, realname) ("USER " + (username) + " 0 * " + (realname))
@@ -95,7 +96,7 @@ e_command parseCommandCode(std::string command);
 #define KICK_CMD(nickname, username, channel, kicked, message) (":" + nickname + "!~" + username + "@localhost KICK " + channel + " " + kicked + " " + message)
 #define QUIT_CMD(nickname, username, message) (":" + nickname + "!~" + username + "@localhost QUIT :Quit: " + message)
 #define RPL_MOTD(server, client, text) (":localhost 372 " + (client) + " :" + (text))
-#define RPL_MOTDSTART(client, text) ("375 " + (client) + " : " + (text))
+#define RPL_MOTDSTART(client, text) (":localhost 375 " + (client) + " : " + (text))
 #define RPL_ENDOFMOTD(server, client) (":localhost 376 " + (client) + " :End of welcome msg")
 #define RPL_WHOREPLY(server, client, channel, username, host, serverName, nick, flags, hopcount, realname) (":localhost 352 " + (client) + " " + (channel) + " " + (username) + " " + (host) + " " + (serverName) + " " + (nick) + " " + (flags) + " :" + (hopcount) + " " + (realname))
 #define RPL_ENDOFWHO(server, client, mask) (":localhost 315 " + (client) + " " + (mask) + " :End of WHO list")
@@ -110,7 +111,6 @@ e_command parseCommandCode(std::string command);
 #define BAN_CMD(server, channel, host) (":localhost MODE " + (channel) + " +b " + (host))
 #define UNBAN_CMD(server, channel, host) (":localhost MODE " + (channel) + " -b " + (host))
 #define RPL_NAMREPLY(client, symbol, channel, list) (":localhost 353 " + client + " " + symbol + " " + channel + " :" + list)
-# define RPL_ENDOFNAMES(client, channel) (":localhost 366 " + client + " " + channel + " :End of /NAMES list.\r\n")
-
+#define RPL_ENDOFNAMES(client, channel) (":localhost 366 " + client + " " + channel + " :End of /NAMES list.\r\n")
 
 #endif

@@ -102,7 +102,6 @@ void Server::handleJoin(std::string body, Client &user)
 		for (std::vector<Client>::iterator it = clientsInChannel.begin(); it != clientsInChannel.end(); ++it)
 		{
 			it->sendMessage(JOIN_CMD(nick, nick, channel));
-			it->sendMessage(MODE_CMD(nick, channel, "+o"));
 			it->sendMessage(RPL_NAMREPLY(nick, "=", channel, ("@" + nick)));
 			it->sendMessage(RPL_ENDOFNAMES(nick, channel));
 		}
