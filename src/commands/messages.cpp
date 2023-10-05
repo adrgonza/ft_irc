@@ -57,9 +57,18 @@ void Server::privMessage(std::string body, Client user)
 	std::string sendMessage;
 	if (channelExists(lowerTarget))
 	{
+		Channel *chanObj = getChannelByName(lowerTarget);
+		std::vector<Client> clientVec = chanObj->getParticipants();
+		std::vector<Client>::iterator it;
+		it = find(clientVec.begin(), clientVec.end(), user); 
+		if (it == clientVec.end())
+		{
+			user.sendMessage(ERR_NOTONCHANNEL(user.getNickname(), lowerTarget));
+			return;
+		}
+
 		if (!target.empty() && target[0] != '#')
 			target = "#" + target;
-		std::vector<Client>::iterator it;
 		for (it = _clients.begin(); it != _clients.end(); ++it)
 		{
 			if (it->getChannel() == target && it->getNickname() != user.getNickname())
