@@ -33,14 +33,10 @@ void Server::listChannels(std::string body, Client &user)
 	user.sendMessage(channelListMsg);
 }
 
-// When the last user of a channels parts from it, should the channel be deleted ?
 void Server::partChannel(std::string body, Client &user)
 {
-	// check body
 	std::string channel = getWord(body, 1);
-	if (!channel.empty() && channel[0] != '#')
-		channel = "#" + channel;
-	if (!channelExists(channel))
+	if ((!channel.empty() && channel[0] != '#') || (!channelExists(channel)))
 	{
 		user.sendMessage(ERR_NOSUCHCHANNEL(user.getNickname(), channel));
 		return;
@@ -53,11 +49,15 @@ void Server::partChannel(std::string body, Client &user)
 	}
 	std::vector<Client> clientsInChannel = channelObj->getParticipants();
 	for (size_t i = 0; i < clientsInChannel.size(); ++i)
-	{
 		clientsInChannel[i].sendMessage(PART_CMD(user.getNickname(), channel));
-	}
 	channelObj->removeParticipant(user);
 	user.changeChannel("");
+	if (channelObj->getParticipants().empty())
+	{
+		std::map<std::string, Channel>::iterator it;
+		it = this->channels.find(channel);
+		channels.erase(it);
+	}
 }
 
 void Server::handleJoin(std::string body, Client &user)
