@@ -19,7 +19,6 @@ void Server::listChannels(std::string body, Client &user)
 		participantCount << it->second.getParticipants().size();
 
 		channelListMsg += ":" + user.getNickname() + "!user@host 322 * " + channelName + " " + participantCount.str() + " :";
-		//channelListMsg += ":" + user.getNickname() + "!user@host 322 * " + channelName + " " + std::to_string(it->second.getParticipants().size()) + " :";
 		std::vector<Client> participants = it->second.getParticipants();
 		for (size_t i = 0; i < participants.size(); ++i)
 		{
@@ -56,13 +55,13 @@ void Server::partChannel(std::string body, Client &user)
 	{
 		std::map<std::string, Channel>::iterator it;
 		it = this->channels.find(channel);
-		channels.erase(it);
+		if (it != channels.end())
+			channels.erase(it);
 	}
 }
 
 void Server::handleJoin(std::string body, Client &user)
 {
-	// check body
 	if (body == "#")
 		return;
 	std::string channel = body;
@@ -82,7 +81,6 @@ void Server::handleJoin(std::string body, Client &user)
 	}
 	else
 	{
-		// When a user creates a channel, should it be the admin/operator ?
 		Channel newChannel;
 		newChannel.addParticipant(user);
 		newChannel.addOperator(user);
