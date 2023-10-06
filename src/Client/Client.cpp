@@ -62,15 +62,21 @@ std::string Client::getSource() const
 	return source;
 }
 
-void Client::changeNickname(std::vector<Client> clients, std::string body)
+void Client::changeNickname(std::vector<Client> clients, std::string newNickname)
 {
+	
+	if (newNickname.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_") != std::string::npos)
+    {
+        this->sendMessage(ERR_ERRONEUSNICKNAME(this->getNickname(), newNickname));
+        return;
+    }
 	std::string lbody;
 	std::string lclient;
 	std::string::size_type aux;
 	aux = lbody.length();
     for (std::string::size_type i = 0; i < aux; i++)
         lbody[i] = std::tolower(lbody[i]);
-	lbody = body;
+	lbody = newNickname;
 	aux = lbody.length();
 	for (std::string::size_type i = 0; i < aux; i++)
 		lbody[i] = std::tolower(lbody[i]);
@@ -83,12 +89,12 @@ void Client::changeNickname(std::vector<Client> clients, std::string body)
 		if (lclient == lbody)
 		{
 			std::string oneS = "";
-			this->sendMessage(ERR_NICKNAMEINUSE(oneS, body));
+			this->sendMessage(ERR_NICKNAMEINUSE(oneS, newNickname));
 			return;
 		}
 	}
-	this->sendMessage(NICK_CMD(nickname, nickname, body));
-	this->nickname = body;
+	this->sendMessage(NICK_CMD(nickname, nickname, newNickname));
+	this->nickname = newNickname;
 }
 
 void Client::changeUserName(std::string user)

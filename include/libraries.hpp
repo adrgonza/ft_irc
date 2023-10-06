@@ -79,6 +79,7 @@ e_command parseCommandCode(std::string command);
 #define ERR_USERALREADYBANNED(nickname, channel) (":localhost 484 " + (nickname) + " " + (channel) + " :Cannot ban user; they are already banned (+b)")
 #define ERR_NEEDMOREPARAMS(client, command) (":localhost " + client + " " + command " :Not enough parameters")
 #define ERR_ALREADYREGISTERED(client) (":localhost 462 " + client + " :You may not reregister")
+#define ERR_ERRONEUSNICKNAME(client, nick) (":localhost 432 " + client + " " + nick + " :Erroneus nickname")
 
 // Command Messages
 #define USER_CMD(username, realname) ("USER " + (username) + " 0 * " + (realname))
