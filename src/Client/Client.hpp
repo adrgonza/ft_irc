@@ -41,7 +41,7 @@ class Client {
 		void setFirstTime(bool);
 
 		std::string getWord(const std::string &str, int wordNumber);
-	private:
+	protected:
 		Client();
 		int _fd;
 		std::string _joined;

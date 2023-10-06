@@ -50,7 +50,7 @@ typedef enum
 	CMD_WHOIS,
 	CMD_WHOWAS,
 	CMD_BAN,
-	CMD_UNBAN
+	CMD_UNBAN,
 } e_command;
 
 e_command parseCommandCode(std::string command);

@@ -26,7 +26,6 @@ e_command parseCommandCode(std::string command)
 	if (command == "WHOWAS") return CMD_WHOWAS;
 	if (command == "BAN") return CMD_BAN;
 	if (command == "UNBAN") return CMD_UNBAN;
-
 	return CMD_UNKNOWN;
 }
 

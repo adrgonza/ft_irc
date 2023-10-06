@@ -1,4 +1,5 @@
 NAME = ircserv
+NAMEB = ircbot
 
 SRCS	=	main.cpp \
 			src/Server/Server.cpp \
@@ -14,16 +15,23 @@ SRCS	=	main.cpp \
 			src/commands/handleOperatorChannelCommands.cpp \
 			src/commands/userCommands.cpp  \
 
+BOTSRCS = src/Bot/Bot.cpp
 
 OBJS = $(SRCS:%.cpp=bin/%.o)
 
+BOTOBJS = $(BOTSRCS:%.cpp=bin/%.o)
+
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -I include -fsanitize=address -g3
+LDFLAGS = -lcurl
 
 all: $(NAME)
 
 $(NAME): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS)
+
+bonus: $(BOTOBJS)
+		$(CXX) $(CXXFLAGS) -o $(NAMEB) $(BOTOBJS) $(LDFLAGS)
 
 bin/%.o: %.cpp
 	@mkdir -p $(dir $@)
@@ -34,6 +42,7 @@ clean:
 
 fclean: clean
 	rm -f $(NAME)
+	rm -f $(NAMEB)
 	rm -rf bin
 
 re: fclean all
