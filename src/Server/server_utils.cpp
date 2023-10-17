@@ -93,7 +93,7 @@ bool Server::userExists(std::string nickname)
 }
 bool Server::channelExists(std::string channelName)
 {
-	if (channels.find(channelName) != channels.end())
+	if (_channels.find(channelName) != _channels.end())
 		return true;
 	return false;
 }
@@ -130,8 +130,8 @@ int Server::getClientSocketFdByNickname(const std::string &nickname)
 
 Channel *Server::getChannelByName(std::string channelName)
 {
-	std::map<std::string, Channel>::iterator it = channels.find(channelName);
-	if (it != channels.end())
+	std::map<std::string, Channel>::iterator it = _channels.find(channelName);
+	if (it != _channels.end())
 		return &(it->second);
 	else
 		return NULL;
@@ -179,4 +179,25 @@ std::string Server::getWord(const std::string &str, int wordNumber)
 	}
 
 	return str.substr(startPos, endPos - startPos);
+}
+
+void Server::disconnectClient(const int &i)
+{
+	std::cout << "[SERVER]: A Client was disconnected from the server" << std::endl;
+	Client* deletedClient = findClientByFd(_pollFds[i].fd);
+	if (deletedClient)
+	{
+		close(deletedClient->getFd());
+		for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+		{
+			if (it->getFd() == deletedClient->getFd())
+			{
+				_disconnectedClients.push_back(*deletedClient);
+				_clients.erase(it);
+				break;
+			}
+		}
+	}
+	_pollFds[i].fd = -1;
+	_pollFds[i].revents = 0;
 }

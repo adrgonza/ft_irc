@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-Server::Server(const int &port, const std::string &password) : _port(port), _password(password) {}
+Server::Server(const int &port, const std::string &password) : _port(port), _password(password), _pollFds(BACKLOG + 1) {}
 
 Server::~Server() {}
 
@@ -23,12 +23,12 @@ bool Server::run()
 
 	std::cout << "Waiting for a connection in '127.0.0.1' port: " << _port << std::endl; // localhost ip default = 127.0.0.1
 
-	_pollFd[0].fd = _socketFd;
-	_pollFd[0].events = POLLIN;
-	_pollFd[0].revents = 0;
+	_pollFds[0].fd = _socketFd;
+	_pollFds[0].events = POLLIN;
+	_pollFds[0].revents = 0;
 
 	for (int i = 1; i <= BACKLOG; i++)
-		_pollFd[i].fd = -1;
+		_pollFds[i].fd = -1;
 
 	while (true)
 		if (handleClientConnections() == false)
@@ -37,10 +37,10 @@ bool Server::run()
 
 bool Server::handleClientConnections()
 {
-	if (poll(_pollFd, _clients.size() + 1, INT_MAX) < 0)
+	if (poll(_pollFds.data(), _clients.size() + 1, INT_MAX) < 0)
 		return (std::cout << "Error: syscall poll failed.." << std::endl, false);
 
-	if (_pollFd[0].revents == POLLIN)
+	if (_pollFds[0].revents & POLLIN)
 	{
 		std::cout << "Incomming connecction..." << std::endl;
 		_connectionFd = accept(_socketFd, (struct sockaddr *)NULL, NULL);
@@ -58,60 +58,41 @@ bool Server::handleClientConnections()
 
 		_clients.push_back(newClient);
 
-
 		for (size_t i = 1; i <= _clients.size(); i++) // Saves the new connection
 		{
-			if (_pollFd[i].fd != -1)
-				continue;
-
-			_pollFd[i].fd = _connectionFd;
-			_pollFd[i].events = POLLIN;
-			break;
+			if (_pollFds[i].fd == -1)
+			{
+				_pollFds[i].fd = _connectionFd;
+				_pollFds[i].events = POLLIN;
+				break;
+			}
 		}
 	}
 
 	for (size_t i = 1; i <= _clients.size(); i++)
-	{
-		if (_pollFd[i].fd != -1 && _pollFd[i].revents & POLLIN && handleClientCommunications(i) == false)
+		if (_pollFds[i].fd != -1 && _pollFds[i].revents & POLLIN && handleClientCommunications(i) == false)
 			return (false);
-	}
 	return (true);
 }
 
-bool Server::handleClientCommunications(size_t i)
+bool Server::handleClientCommunications(const size_t &i)
 {
 	char buffer[BUFFER_SIZE + 1];
 	bzero(&buffer, sizeof(buffer));
 
-	int readSize = read(_pollFd[i].fd, buffer, BUFFER_SIZE);
+	int readSize = read(_pollFds[i].fd, buffer, BUFFER_SIZE);
 	if (readSize == -1)
 		return (std::cout << "Error: dont have access to read client fd." << std::endl, false);
 	if (readSize == 0)
-	{
-		std::cout << "[SERVER]: A Client was disconnected from the server" << std::endl;
-		Client *delet = findClientByFd(_pollFd[i].fd);
-		close(delet->getFd());
-		for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
-		{
-			if (it->getFd() == delet->getFd())
-			{
-				_disconnectedClients.push_back(*delet);
-				_clients.erase(it);
-				break;
-			}
-		}
-		_pollFd[i].fd = -1;
-		_pollFd[i].revents = 0;
-	}
+		disconnectClient(i);
 	else
 	{
-		std::vector<Client>::iterator caller = getClientByFd(_pollFd[i].fd);
+		std::vector<Client>::iterator caller = getClientByFd(_pollFds[i].fd);
 		if (caller == _clients.end())
 		{
 			std::cout << "[SERVER :: WARNING]: getClientByFd() failed before executing a command" << std::endl;
-			return (true);
+			return (false);
 		}
-
 		handleClientInput(*caller, buffer);
 	}
 	return (true);
@@ -185,7 +166,7 @@ bool Server::handleClientInput(Client &caller, std::string message)
 	return (true);
 }
 
-void Server::checkPassword(std::string body, Client &caller)
+void Server::checkPassword(const std::string &body, Client &caller)
 {
 	if (body == _password)
 		caller.giveKey(true);
@@ -202,7 +183,7 @@ void Server::checkPassword(std::string body, Client &caller)
 	}
 }
 
-std::vector<Client>::iterator Server::getClientByFd(int fd)
+std::vector<Client>::iterator Server::getClientByFd(const int &fd)
 {
 	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{

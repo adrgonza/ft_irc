@@ -5,13 +5,13 @@ void Server::listChannels(std::string body, Client &user)
 	body = "";
 	std::string channelListMsg = "Channel List:\r\n";
 
-	if (channels.empty())
+	if (_channels.empty())
 	{
 		user.sendMessage(ERR_NOCHANNELS(user.getNickname()));
 		return;
 	}
 	channelListMsg = ":" + user.getNickname() + "!user@host 321 * Channel :Users Name\r\n";
-	for (std::map<std::string, Channel>::iterator it = channels.begin(); it != channels.end(); ++it)
+	for (std::map<std::string, Channel>::iterator it = _channels.begin(); it != _channels.end(); ++it)
 	{
 		std::string channelName = it->first;
 
@@ -54,9 +54,9 @@ void Server::partChannel(std::string body, Client &user)
 	if (channelObj->getParticipants().empty())
 	{
 		std::map<std::string, Channel>::iterator it;
-		it = this->channels.find(channel);
-		if (it != channels.end())
-			channels.erase(it);
+		it = _channels.find(channel);
+		if (it != _channels.end())
+			_channels.erase(it);
 	}
 }
 
@@ -68,7 +68,7 @@ void Server::handleJoin(std::string body, Client &user)
 	if (channel == user.getChannel() || channel.empty())
 		return;
 	bool oper = false;
-	if (channels.find(channel) != channels.end())
+	if (_channels.find(channel) != _channels.end())
 	{
 		Channel *targetChannel = getChannelByName(channel);
 		if (targetChannel->isBanned(user))
@@ -76,7 +76,7 @@ void Server::handleJoin(std::string body, Client &user)
 			user.sendMessage(ERR_YOUREBANNEDCREEP(user.getNickname()));
 			return;
 		}
-		channels[channel].addParticipant(user);
+		_channels[channel].addParticipant(user);
 		std::cout << "User " << user.getNickname() << " joined channel " << channel << std::endl;
 	}
 	else
@@ -86,7 +86,7 @@ void Server::handleJoin(std::string body, Client &user)
 		newChannel.addOperator(user);
 		newChannel.setName(channel);
 		newChannel.setTopic("");
-		channels[channel] = newChannel;
+		_channels[channel] = newChannel;
 		std::cout << "User " << user.getNickname() << " created and joined channel " << channel << std::endl;
 		oper = true;
 	}
@@ -124,7 +124,7 @@ void Server::handleJoin(std::string body, Client &user)
 			if (addClient)
 				listNames += it->getNickname() + " ";
 		}
-		
+
 		for (std::vector<Client>::iterator it = clientsInChannel.begin(); it != clientsInChannel.end(); ++it)
 		{
 			it->sendMessage(JOIN_CMD(nick, nick, channel));
@@ -183,8 +183,8 @@ void Server::getNamesInChannel(std::string body, Client &user)
 	}
 	std::string startOfNamesMessage = ": 353 " + user.getNickname() + " = " + channel + " :";
 	user.sendMessage(startOfNamesMessage);
-	std::map<std::string, Channel>::iterator channelIt = channels.find(channel);
-	if (channelIt != channels.end())
+	std::map<std::string, Channel>::iterator channelIt = _channels.find(channel);
+	if (channelIt != _channels.end())
 	{
 		std::vector<Client> clientsInChannel = channelIt->second.getParticipants();
 		std::string namesInChannelMessage;

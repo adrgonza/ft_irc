@@ -21,20 +21,21 @@ class Server {
 		int _port;
 		int _socketFd;
 		int _connectionFd;
-		struct pollfd _pollFd[BACKLOG + 1];
 		std::string _password;
 
+		std::vector<pollfd> _pollFds;
 		std::vector<Client> _clients;
 		std::vector<Client> _disconnectedClients;
-		std::map<std::string, Channel> channels;
+		std::map<std::string, Channel> _channels;
 
 		bool handleClientConnections();
-		bool handleClientCommunications(size_t);
-		bool handleClientInput(Client &caller, std::string message);
-		void checkPassword(std::string, Client &);
-		std::vector<Client>::iterator getClientByFd(int fd);
+		bool handleClientCommunications(const size_t &);
+		bool handleClientInput(Client &, std::string);
+		void checkPassword(const std::string &, Client &);
+		std::vector<Client>::iterator getClientByFd(const int &);
 
 		// Utils
+		void disconnectClient(const int &);
 		void handleCommand(Client &caller, std::string command, std::string body);
 		bool	userExists(std::string nickname);
 		bool	channelExists(std::string channelName);
