@@ -2,8 +2,8 @@
 #define SERVER_HPP_
 
 #include <libraries.hpp>
-#include "../Client/Client.hpp"
-#include "../Channel/Channel.hpp"
+#include <poll.h>
+
 
 #define BACKLOG 10		// Nº of clients pending to connect w/ server
 #define BUFFER_SIZE 512 // Max size of each message (Docs: https://modern.ircdocs.horse/#message-format)
@@ -24,15 +24,15 @@ class Server {
 		struct pollfd _pollFd[BACKLOG + 1];
 		std::string _password;
 
-		std::vector<Client> _clients;
-		std::vector<Client> _disconnectedClients;
-		std::map<std::string, Channel> channels;
+		std::vector<Client*> _clients;
+		std::vector<Client*> _disconnectedClients;
+		std::map<std::string, Channel*> channels;
 
 		bool handleClientConnections();
 		bool handleClientCommunications(size_t);
 		bool handleClientInput(Client &caller, std::string message);
 		void checkPassword(std::string, Client &);
-		std::vector<Client>::iterator getClientByFd(int fd);
+		std::vector<Client*>::iterator getClientByFd(int fd);
 
 		// Utils
 		void handleCommand(Client &caller, std::string command, std::string body);

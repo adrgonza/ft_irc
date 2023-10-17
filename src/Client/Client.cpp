@@ -1,5 +1,6 @@
 #include <libraries.hpp>
 #include "Client.hpp"
+#include "../Channel/Channel.hpp"
 
 Client::Client() {}
 Client::~Client() {}
@@ -62,7 +63,7 @@ std::string Client::getSource() const
 	return source;
 }
 
-void Client::changeNickname(std::vector<Client> clients, std::string newNickname)
+void Client::changeNickname(std::vector<Client*> clients, std::map<std::string, Channel*> channels, std::string newNickname, Client user)
 {
 	
 	if (newNickname.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_") != std::string::npos)
@@ -70,30 +71,28 @@ void Client::changeNickname(std::vector<Client> clients, std::string newNickname
         this->sendMessage(ERR_ERRONEUSNICKNAME(this->getNickname(), newNickname));
         return;
     }
-	std::string lbody;
-	std::string lclient;
+	std::string lower_target_client;
 	std::string::size_type aux;
-	aux = lbody.length();
-    for (std::string::size_type i = 0; i < aux; i++)
-        lbody[i] = std::tolower(lbody[i]);
-	lbody = newNickname;
-	aux = lbody.length();
+	std::string lower_nick;
+	aux = newNickname.length();
 	for (std::string::size_type i = 0; i < aux; i++)
-		lbody[i] = std::tolower(lbody[i]);
-	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); it++)
+		lower_nick[i] = std::tolower(newNickname[i]);
+	for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); it++)
 	{
-		lclient = it->getNickname();
-		aux = lclient.length();
+		lower_target_client = (*it)->getNickname();
+		aux = lower_target_client.length();
 		for (std::string::size_type i = 0; i < aux; i++)
-			lclient[i] = std::tolower(lclient[i]);
-		if (lclient == lbody)
+			lower_target_client[i] = std::tolower(lower_target_client[i]);
+		if (lower_target_client == lower_nick)
 		{
+			if (lower_target_client != newNickname)
+				break ;
 			std::string oneS = "";
 			this->sendMessage(ERR_NICKNAMEINUSE(oneS, newNickname));
 			return;
 		}
 	}
-	this->sendMessage(NICK_CMD(nickname, nickname, newNickname));
+	this->sendToAllClientsWithinChanOfUser(NICK_CMD(nickname, nickname, newNickname), channels, user);
 	this->nickname = newNickname;
 }
 

@@ -26,10 +26,10 @@ void Server::sayMsg(std::string body, Client &user)
 	else
 		sendMessage = "PRIVMSG " + toChannel + " :" + body + " " + nickname + "\r\n";
 
-	std::vector<Client>::iterator it;
+	std::vector<Client *>::iterator it;
 	for (it = _clients.begin(); it != _clients.end(); ++it)
 	{
-		if (it->getChannel() == toChannel)
+		if ((*it)->getChannel() == toChannel)
 			user.sendMessage(sendMessage);
 	}
 }
@@ -58,10 +58,7 @@ void Server::privMessage(std::string body, Client user)
 	if (channelExists(lowerTarget))
 	{
 		Channel *chanObj = getChannelByName(lowerTarget);
-		std::vector<Client> clientVec = chanObj->getParticipants();
-		std::vector<Client>::iterator it;
-		it = find(clientVec.begin(), clientVec.end(), user); 
-		if (it == clientVec.end())
+		if (!chanObj->hasParticipant(user))
 		{
 			user.sendMessage(ERR_NOTONCHANNEL(user.getNickname(), lowerTarget));
 			return;
@@ -69,10 +66,11 @@ void Server::privMessage(std::string body, Client user)
 
 		if (!target.empty() && target[0] != '#')
 			target = "#" + target;
-		for (it = _clients.begin(); it != _clients.end(); ++it)
+
+		for (std::vector<Client *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 		{
-			if (it->getChannel() == target && it->getNickname() != user.getNickname())
-				it->sendMessage(PRIVMSG_CMD(user.getNickname(), target, body));
+			if ((*it)->getChannel() == target && (*it)->getNickname() != user.getNickname())
+				(*it)->sendMessage(PRIVMSG_CMD(user.getNickname(), target, body));
 		}
 	}
 	else

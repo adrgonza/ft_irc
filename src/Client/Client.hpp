@@ -1,7 +1,13 @@
 #ifndef CLIENT_HPP_
-#define CLIENT_HPP_
+# define CLIENT_HPP_
 
 #include <libraries.hpp>
+#include <iostream>
+#include <vector>
+#include <map>
+
+class Channel;
+
 
 # define RESET "\e[0m"
 # define RED "\e[1;91m"
@@ -32,7 +38,7 @@ class Client {
 
 		// Commands
 		void sendMessage(std::string message);
-		void changeNickname(std::vector<Client> clients, std::string newNick);
+		void changeNickname(std::vector<Client*> clients, std::map<std::string, Channel*> channels, std::string newNick, Client me);
 		void changeChannel(std::string channel);
 		void changeUserName(std::string name);
 		void giveKey(bool);
@@ -41,6 +47,8 @@ class Client {
 		void setFirstTime(bool);
 
 		std::string getWord(const std::string &str, int wordNumber);
+		void sendToAllClientsWithinChanOfUser(std::string msg, std::map<std::string, Channel*> channels, Client me);
+	
 	private:
 		Client();
 		int _fd;

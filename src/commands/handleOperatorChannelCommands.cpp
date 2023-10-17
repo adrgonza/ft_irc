@@ -24,9 +24,9 @@ void Server::kickUser(std::string body, Client &user)
     if (chan->isOperator(user))
     {
         Channel *toChan = getChannelByName(channel);
-        std::vector<Client> clientsInChannel = toChan->getParticipants();
-        for (std::vector<Client>::iterator it = clientsInChannel.begin(); it != clientsInChannel.end(); ++it)
-            it->sendMessage(KICK_CMD(nick, nick, channel, targetUser, restOfBody));
+        std::vector<Client*> clientsInChannel = toChan->getParticipants();
+        for (std::vector<Client*>::iterator it = clientsInChannel.begin(); it != clientsInChannel.end(); ++it)
+            (*it)->sendMessage(KICK_CMD(nick, nick, channel, targetUser, restOfBody));
         Client *tarUser = findClientByNickname(targetUser);
         chan->removeParticipant(*tarUser);
         tarUser->changeChannel("");

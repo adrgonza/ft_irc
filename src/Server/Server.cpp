@@ -1,4 +1,7 @@
+
 #include "Server.hpp"
+#include <libraries.hpp>
+
 
 Server::Server(int port, std::string password) : _port(port), _password(password) {}
 
@@ -52,9 +55,9 @@ bool Server::handleClientConnections()
 
 		std::cout << "[SERVER]: A new connection has been made." << std::endl;
 
-		Client newClient(_connectionFd);
+		Client *newClient = new Client(_connectionFd);
 
-		newClient.sendMessage("NOTICE AUTH :*** Checking Ident");
+		newClient->sendMessage("NOTICE AUTH :*** Checking Ident");
 
 		_clients.push_back(newClient);
 
@@ -91,11 +94,11 @@ bool Server::handleClientCommunications(size_t i)
 		std::cout << "[SERVER]: A Client was disconnected from the server" << std::endl;
 		Client *delet = findClientByFd(_pollFd[i].fd);
 		close(delet->getFd());
-		for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+		for (std::vector<Client*>::iterator it = _clients.begin(); it != _clients.end(); it++)
 		{
-			if (it->getFd() == delet->getFd())
+			if ((*it)->getFd() == delet->getFd())
 			{
-				_disconnectedClients.push_back(*delet);
+				_disconnectedClients.push_back(delet);
 				_clients.erase(it);
 				break;
 			}
@@ -105,14 +108,14 @@ bool Server::handleClientCommunications(size_t i)
 	}
 	else
 	{
-		std::vector<Client>::iterator caller = getClientByFd(_pollFd[i].fd);
+		std::vector<Client*>::iterator caller = getClientByFd(_pollFd[i].fd);
 		if (caller == _clients.end())
 		{
 			std::cout << "[SERVER :: WARNING]: getClientByFd() failed before executing a command" << std::endl;
 			return (true);
 		}
-
-		handleClientInput(*caller, buffer);
+		Client &toPass = *(*caller);
+		handleClientInput(toPass, buffer);
 	}
 	return (true);
 }
@@ -166,7 +169,7 @@ bool Server::handleClientInput(Client &caller, std::string message)
 	else if (command == "PASS")
 		checkPassword(body, caller);
 	else if (command == "NICK")
-		caller.changeNickname(_clients, body);
+		caller.changeNickname(_clients, channels, body, caller);
 	else if (command == "USER")
 		caller.changeUserName(body);
 	else
@@ -202,11 +205,11 @@ void Server::checkPassword(std::string body, Client &caller)
 	}
 }
 
-std::vector<Client>::iterator Server::getClientByFd(int fd)
+std::vector<Client*>::iterator Server::getClientByFd(int fd)
 {
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+	for (std::vector<Client*>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
-		if (it->getFd() == fd)
+		if ((*it)->getFd() == fd)
 			return it;
 	}
 	return _clients.end();

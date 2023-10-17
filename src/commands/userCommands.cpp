@@ -12,7 +12,7 @@ void Server::quitServ(std::string body, Client &user)
 		i++;
 
 	std::cout << "[SERVER]: A Client was disconnected from the server" << std::endl;
-	std::vector<Client>::iterator it = std::find(_clients.begin(), _clients.end(), _pollFd[i].fd);
+	std::vector<Client*>::iterator it = std::find(_clients.begin(), _clients.end(), &user);
 	close(_pollFd[i].fd);
 	if (it != _clients.end())
 	{
