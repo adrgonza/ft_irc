@@ -11,7 +11,7 @@
 
 class Server {
 	public:
-		Server(int, std::string);
+		Server(const int &, const std::string &);
 		~Server();
 
 		bool run();

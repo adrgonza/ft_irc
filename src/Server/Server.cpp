@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-Server::Server(int port, std::string password) : _port(port), _password(password) {}
+Server::Server(const int &port, const std::string &password) : _port(port), _password(password) {}
 
 Server::~Server() {}
 
@@ -192,7 +192,7 @@ void Server::checkPassword(std::string body, Client &caller)
 	else
 	{
 		if (caller.getNickname().empty())
-		{	
+		{
 			std::string aString = "*";
 			caller.sendMessage(ERR_PASSWDMISMATCH(aString));
 		}
