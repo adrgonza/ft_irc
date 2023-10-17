@@ -47,21 +47,13 @@ void Server::partChannel(std::string body, Client &user)
 		return;
 	}
 	const std::vector<Client*> clientsInChannel = channelObj->getParticipants();
-	std::cout << "Names: " << std::endl;
 	for (size_t i = 0; i < clientsInChannel.size(); ++i)
 	{
 		Client *client = clientsInChannel[i];
-		std::cout << client->getNickname() << std::endl;
 		client->sendMessage(PART_CMD(user.getNickname(), channel));
 	}
 	channelObj->removeParticipant(user);
 	const std::vector<Client*> clientsInChannell = channelObj->getParticipants();
-	std::cout << "After Names: " << std::endl;
-	for (size_t i = 0; i < clientsInChannell.size(); ++i)
-	{
-		Client *client = clientsInChannell[i];
-		std::cout << client->getNickname() << std::endl;
-	}
 	user.changeChannel("");
 	if (channelObj->getParticipants().empty())
 	{
@@ -114,16 +106,16 @@ void Server::handleJoin(std::string body, Client &user)
 	{
 		std::vector<Client *> clientsInChannel = toChan->getParticipants();
 		std::string nick = user.getNickname();
-		std::vector<Client> clientOperatorsInChan = toChan->getOperators();
+		std::vector<Client*> clientOperatorsInChan = toChan->getOperators();
 		std::string listNames = "";
-		for (std::vector<Client>::iterator it = clientOperatorsInChan.begin(); it != clientOperatorsInChan.end(); ++it)
-			listNames += "@" + it->getNickname() + " ";
+		for (std::vector<Client*>::iterator it = clientOperatorsInChan.begin(); it != clientOperatorsInChan.end(); ++it)
+			listNames += "@" + (*it)->getNickname() + " ";
 		for (std::vector<Client *>::const_iterator it = clientsInChannel.begin(); it != clientsInChannel.end(); ++it)
 		{
 			bool addClient = true;
-			for (std::vector<Client>::iterator operatorIt = clientOperatorsInChan.begin(); operatorIt != clientOperatorsInChan.end(); ++operatorIt)
+			for (std::vector<Client*>::iterator operatorIt = clientOperatorsInChan.begin(); operatorIt != clientOperatorsInChan.end(); ++operatorIt)
 			{
-				if ((*operatorIt).getNickname() == (*(*it)).getNickname())
+				if ((*operatorIt)->getNickname() == (*(*it)).getNickname())
 				{
 					addClient = false;
 					break;

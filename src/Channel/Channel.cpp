@@ -55,30 +55,38 @@ bool Channel::hasParticipant(Client participant)
 	return false;
 }
 
-std::vector<Client> Channel::getOperators() const
+std::vector<Client*> Channel::getOperators() const
 {
 	return this->operators;
 }
 
-void Channel::addOperator(Client newOper)
+void Channel::addOperator(Client &newOper)
 {
-	operators.push_back(newOper);
+	operators.push_back(&newOper);
 }
 
 void Channel::removeOperator(Client oper)
 {
-	std::vector<Client>::iterator userIt = std::find(operators.begin(), operators.end(), oper);
-	if (userIt != operators.end())
-		operators.erase(userIt);
+	std::vector<Client *>::iterator userIt;
+	for (userIt = operators.begin(); userIt != operators.end(); ++userIt)
+	{
+		if ((*userIt)->getNickname() == oper.getNickname())
+		{
+			operators.erase(userIt);
+			return ;
+		}
+	}
 }
 
 bool Channel::isOperator(Client user)
 {
-	std::vector<Client>::iterator userIt = std::find(operators.begin(), operators.end(), user);
-	if (userIt != operators.end())
-		return true;
-	else
-		return false;
+	std::vector<Client *>::iterator userIt;
+	for (userIt = operators.begin(); userIt != operators.end(); ++userIt)
+	{
+		if ((*userIt)->getNickname() == user.getNickname())
+			return true;
+	}
+	return false;
 }
 
 std::string Channel::getName() const

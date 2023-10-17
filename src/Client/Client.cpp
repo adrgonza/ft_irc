@@ -65,7 +65,6 @@ std::string Client::getSource() const
 
 void Client::changeNickname(std::vector<Client*> clients, std::map<std::string, Channel*> channels, std::string newNickname, Client user)
 {
-	
 	if (newNickname.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_") != std::string::npos)
     {
         this->sendMessage(ERR_ERRONEUSNICKNAME(this->getNickname(), newNickname));
@@ -73,7 +72,7 @@ void Client::changeNickname(std::vector<Client*> clients, std::map<std::string, 
     }
 	std::string lower_target_client;
 	std::string::size_type aux;
-	std::string lower_nick;
+	std::string lower_nick = newNickname;
 	aux = newNickname.length();
 	for (std::string::size_type i = 0; i < aux; i++)
 		lower_nick[i] = std::tolower(newNickname[i]);
@@ -85,7 +84,7 @@ void Client::changeNickname(std::vector<Client*> clients, std::map<std::string, 
 			lower_target_client[i] = std::tolower(lower_target_client[i]);
 		if (lower_target_client == lower_nick)
 		{
-			if (lower_target_client != newNickname)
+			if (lower_target_client != newNickname )
 				break ;
 			std::string oneS = "";
 			this->sendMessage(ERR_NICKNAMEINUSE(oneS, newNickname));
