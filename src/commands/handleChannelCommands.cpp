@@ -35,7 +35,9 @@ void Server::listChannels(std::string body, Client &user)
 void Server::partChannel(std::string body, Client &user)
 {
 	std::string channel = getWord(body, 1);
-	if ((!channel.empty() && channel[0] != '#') || (!channelExists(channel)))
+	if (!channel.empty() && channel[0] != '#')
+		return;
+	if (!channelExists(channel))
 	{
 		user.sendMessage(ERR_NOSUCHCHANNEL(user.getNickname(), channel));
 		return;
@@ -66,10 +68,10 @@ void Server::partChannel(std::string body, Client &user)
 
 void Server::handleJoin(std::string body, Client &user)
 {
-	if (body == "#")
-		return;
-	std::string channel = body;
+	std::string channel = getWord(body, 1);
 	if (channel == user.getChannel() || channel.empty())
+		return;
+	if (channel[0] != '#')
 		return;
 	if (channels.find(channel) != channels.end())
 	{
@@ -146,7 +148,7 @@ void Server::topicChannel(std::string body, Client &user)
 	std::getline(iss, newTopic);
 
 	if (!channel.empty() && channel[0] != '#')
-		channel = "#" + channel;
+		return;
 	if (!channelExists(channel))
 	{
 		user.sendMessage(ERR_NOSUCHCHANNEL(user.getNickname(), channel));
@@ -175,7 +177,9 @@ void Server::topicChannel(std::string body, Client &user)
 
 void Server::getNamesInChannel(std::string body, Client &user)
 {
-	std::string channel = "#" + body;
+	std::string channel = getWord(body, 1);
+	if (!channel.empty() && channel[0] != '#')
+		return;
 	if (user.getChannel() != channel)
 	{
 		std::string errorMessage = ": 442 " + user.getNickname() + " " + user.getNickname() + channel + " :You are not in the channel" + "\r\n";
@@ -211,7 +215,7 @@ void Server::inviteNick(std::string body, Client &user)
 	std::string targetUser = getWord(body, 1);
 	std::string channel = getWord(body, 2);
 	if (!channel.empty() && channel[0] != '#')
-		channel = "#" + channel;
+		return;
 	std::string invitingUser = user.getNickname();
 	if (!userExists(targetUser))
 	{

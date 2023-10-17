@@ -5,6 +5,8 @@ void Server::kickUser(std::string body, Client &user)
 	std::string channel = getWord(body, 1);
 	std::string targetUser = getWord(body, 2);
 
+    if (!channel.empty() && channel[0] != '#')
+		return;
     if (!channelExists(channel))
     {
         user.sendMessage(ERR_NOSUCHCHANNEL(user.getNickname(), channel));
