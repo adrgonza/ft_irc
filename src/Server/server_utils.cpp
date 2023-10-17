@@ -137,6 +137,16 @@ Channel *Server::getChannelByName(std::string channelName)
 		return NULL;
 }
 
+std::vector<Client>::iterator Server::getClientByFd(const int &fd)
+{
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+	{
+		if (it->getFd() == fd)
+			return it;
+	}
+	return _clients.end();
+}
+
 Client *Server::findClientByNickname(std::string targetNickname)
 {
 	std::string lclient;

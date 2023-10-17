@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-Server::Server(const int &port, const std::string &password) : _port(port), _password(password), _pollFds(BACKLOG + 1) {}
+Server::Server(const int &port, const std::string &password) : _password(password), _port(port), _pollFds(BACKLOG + 1) {}
 
 Server::~Server() {}
 
@@ -54,7 +54,7 @@ bool Server::handleClientConnections()
 
 		Client newClient(_connectionFd);
 
-		newClient.sendMessage("NOTICE AUTH :*** Checking Ident");
+		newClient.sendMessage("NOTICE AUTH :*** Checking Ident... -> Please Introduce Nick, User and Password");
 
 		_clients.push_back(newClient);
 
@@ -153,7 +153,7 @@ bool Server::handleClientInput(Client &caller, std::string message)
 	else
 	{
 		if (caller.getNickname().empty() || caller.getUsername().empty())
-			caller.sendMessage("NOTICE AUTH :*** Checking Ident");
+			caller.sendMessage("NOTICE AUTH :*** Checking Ident... -> Please Introduce Nick, User and Password");
 		else if (caller.getKey() == false)
 			caller.sendMessage(ERR_PASSWDREQUIRED(caller.getNickname()));
 	}
@@ -161,7 +161,7 @@ bool Server::handleClientInput(Client &caller, std::string message)
 	if (caller.getKey() == true && !caller.getNickname().empty() && !caller.getUsername().empty() && caller.getFirsTime() == false)
 	{
 		caller.setFirstTime(true);
-		caller.sendMessage(RPL_MOTDSTART(caller.getNickname(), "Welcome to the TONY_WARRIORS Internet Relay Chat Network"));
+		caller.sendMessage(RPL_MOTDSTART(caller.getNickname(), "\033[0;33mWelcome to the TONY_WARRIORS Internet Relay Chat Network\033[0m"));
 	}
 	return (true);
 }
@@ -181,14 +181,4 @@ void Server::checkPassword(const std::string &body, Client &caller)
 			caller.sendMessage(ERR_PASSWDMISMATCH(caller.getNickname()));
 		caller.giveKey(false);
 	}
-}
-
-std::vector<Client>::iterator Server::getClientByFd(const int &fd)
-{
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
-	{
-		if (it->getFd() == fd)
-			return it;
-	}
-	return _clients.end();
 }

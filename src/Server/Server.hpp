@@ -18,10 +18,10 @@ class Server {
 
 	private:
 		std::string	_network;
+		std::string _password;
 		int _port;
 		int _socketFd;
 		int _connectionFd;
-		std::string _password;
 
 		std::vector<pollfd> _pollFds;
 		std::vector<Client> _clients;
@@ -32,9 +32,9 @@ class Server {
 		bool handleClientCommunications(const size_t &);
 		bool handleClientInput(Client &, std::string);
 		void checkPassword(const std::string &, Client &);
-		std::vector<Client>::iterator getClientByFd(const int &);
 
-		// Utils
+		/* utils */
+		std::vector<Client>::iterator getClientByFd(const int &);
 		void disconnectClient(const int &);
 		void handleCommand(Client &caller, std::string command, std::string body);
 		bool	userExists(std::string nickname);
@@ -45,7 +45,7 @@ class Server {
 		Client* findClientByNickname(std::string targetNickname);
 		std::string getWord(const std::string &str, int wordNumber);
 
-		// Commands
+		/* commands */
 		void privMessage(std::string body, Client user);
 		void sayMsg(std::string body, Client &user);
 		void listChannels(std::string body, Client &user);
