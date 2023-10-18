@@ -75,7 +75,7 @@ void Client::changeNickname(std::vector<Client> clients, std::string newNickname
 	std::string::size_type aux;
 	aux = lbody.length();
     for (std::string::size_type i = 0; i < aux; i++)
-        lbody[i] = std::tolower(lbody[i]);
+		lbody[i] = std::tolower(lbody[i]);
 	lbody = newNickname;
 	aux = lbody.length();
 	for (std::string::size_type i = 0; i < aux; i++)
@@ -110,7 +110,7 @@ void Client::changeUserName(std::string user)
 	std::string realname;
 	int i = 3;
     while (!getWord(user, ++i).empty())
-        realname += getWord(user, i) + " ";
+		realname += getWord(user, i) + " ";
 	if (username.empty())
 	{
 		this->sendMessage(ERR_NEEDMOREPARAMS(nickname, "USER"));
