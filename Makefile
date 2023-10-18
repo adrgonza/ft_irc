@@ -15,7 +15,7 @@ SRCS	=	main.cpp \
 			src/commands/handleOperatorChannelCommands.cpp \
 			src/commands/userCommands.cpp  \
 
-BOTSRCS = src/Bot/Bot.cpp
+BOTSRCS = src/Bot/Bot.cpp src/Bot/bot_utils.cpp src/Bot/BotClass.cpp
 
 OBJS = $(SRCS:%.cpp=bin/%.o)
 

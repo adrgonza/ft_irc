@@ -1,45 +1,7 @@
-#include <curl/curl.h>
-#include <iostream>
-#include <string>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
 #include <libraries.hpp>
+#include "Bot.hpp"
 
-std::string apiKey = "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";
-
-std::string extractContent(const std::string &jsonResponse)
-{
-	std::string contentKey = "\"content\": \"";
-	size_t contentStart = jsonResponse.find(contentKey);
-
-	if (contentStart == std::string::npos)
-	{
-		return "Content not found.";
-	}
-
-	contentStart += contentKey.length();
-
-	size_t contentEnd = jsonResponse.find("\"", contentStart);
-
-	if (contentEnd == std::string::npos)
-	{
-		return "Invalid JSON format.";
-	}
-
-	std::string content = jsonResponse.substr(contentStart, contentEnd - contentStart);
-	return content;
-}
-
-size_t WriteCallback(void *data, size_t size, size_t nmemb, std::string *response_data)
-{
-	size_t total_size = size * nmemb;
-	response_data->append(static_cast<char *>(data), total_size);
-	return total_size;
-}
-
-std::string sendMessageToChatbot(std::string userMessage) {
+std::string sendMessageToChatbot(std::string userMessage, bool isFirstMsg) {
 	CURL* curl = curl_easy_init();
     if (!curl) {
         std::cerr << "Failed to initialize CURL." << std::endl;
@@ -47,7 +9,7 @@ std::string sendMessageToChatbot(std::string userMessage) {
     }
 
     struct curl_slist* headers = NULL;
-    headers = curl_slist_append(headers, ("Authorization: Bearer " + std::string(apiKey)).c_str());
+    headers = curl_slist_append(headers, ("Authorization: Bearer " + std::string(OPENAI_API_KEY)).c_str());
     headers = curl_slist_append(headers, "Content-Type: application/json");
 
     std::string response_data;
@@ -55,10 +17,13 @@ std::string sendMessageToChatbot(std::string userMessage) {
     // Construct a JSON request object
     std::string json_request = "{"
         "\"model\": \"gpt-3.5-turbo\","
-        "\"messages\": [{\"role\": \"system\", \"content\": \"You: " + userMessage + "\"}],"
+        "\"messages\": [{\"role\": \"user\", \"content\": \"You: " + userMessage + "\"}],"
         "\"temperature\": 0.5,"
         "\"max_tokens\": 256"
     "}";
+
+	if (isFirstMsg)
+		json_request = userMessage;
 
     curl_easy_setopt(curl, CURLOPT_URL, "https://api.openai.com/v1/chat/completions");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
@@ -85,8 +50,24 @@ std::string sendMessageToChatbot(std::string userMessage) {
     return response_data;
 }
 
-void analyzeMessage(const std::string &buffer, int sock)
+// int checkWhaToSendToChatbot(std::string buffer, Bot *myBot)
+// {
+// 	std::string userJoined = isJoinCommand(buffer, myBot->getChannel());
+// 	if (!userJoined.empty())
+// 	{
+// 		std::string text = responseToJoinCommand(buffer);
+// 		std::string message = PRIVMSG_CMD(myBot->getNick(), myBot->getChannel(), text);
+// 		send(myBot->getSocket(), message.c_str(), message.length(), 0);
+// 		return -1;
+// 	}
+// 	return 1;
+// }
+
+void analyzeMessage(const std::string &buffer, Bot *myBot)
 {
+	std::cout << "buf: " << std::endl << "-" << buffer << "-" << std::endl;
+	// if (checkWhaToSendToChatbot(buffer, myBot) == -1)
+	// 	return;
 	const std::string NICK = "bot";
 	size_t firstSpace = buffer.find(' ');
 	if (firstSpace != std::string::npos)
@@ -113,58 +94,30 @@ void analyzeMessage(const std::string &buffer, int sock)
 				std::cout << "Username: " << username << std::endl;
 				std::cout << "Channel: " << chan << std::endl;
 				std::cout << "Message: " << cleaned_message << std::endl;
-				std::string response = sendMessageToChatbot(cleaned_message.c_str());
+				std::string response = sendMessageToChatbot(cleaned_message.c_str(), false);
+				std::cout << "response: " << response << std::endl;
 				response = extractContent(response);
 				std::string msgResponse = "PRIVMSG " + chan + " :" + std::string(username) + " " + response + IRC_ENDLINE;
 				std::cout << "sending: " << msgResponse << std::endl;
-				send(sock, msgResponse.c_str(), msgResponse.length(), 0);
+				send(myBot->getSocket(), msgResponse.c_str(), msgResponse.length(), 0);
 			}
 		}
 	}
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-	const std::string SERVER = "127.0.0.1";
-	const int PORT = 6667;
-	const std::string CHANNEL = "#pepe";
-	const std::string NICK = "bot";
-	const std::string USER = "bot 0 * :bot";
-	const std::string PASSWORD = "hola";
-	int sock = socket(AF_INET, SOCK_STREAM, 0);
-	if (sock == -1)
-	{
-		std::cerr << "Error creating socket" << std::endl;
+	if (checkArgs(argc) == -1)
 		return 1;
-	}
-	sockaddr_in serverAddr;
-	serverAddr.sin_family = AF_INET;
-	serverAddr.sin_port = htons(PORT);
-	serverAddr.sin_addr.s_addr = inet_addr(SERVER.c_str());
-	if (connect(sock, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) == -1)
-	{
-		std::cerr << "Error connecting to server" << std::endl;
-		return 1;
-	}
+	Bot newBot = sendConfigServer(argv);
+	if (newBot.getSocket() == -1)
+		return 2;
+	sendConfigOpenAIMessage();
 	std::string buffer(4096, '\0');
-	std::string message;
-	usleep(500000);
-	message = "PASS " + PASSWORD + "\r\n";
-	send(sock, message.c_str(), message.length(), 0);
-	usleep(500000);
-	message = "USER " + USER + "\r\n";
-	send(sock, message.c_str(), message.length(), 0);
-	usleep(500000);
-	message = "NICK " + NICK + "\r\n";
-	send(sock, message.c_str(), message.length(), 0);
-	usleep(1000000);
-	message = "JOIN " + CHANNEL + "\r\n";
-	send(sock, message.c_str(), message.length(), 0);
-	std::cout << "Information sent to the server" << std::endl;
 	while (1)
 	{
 		memset(&buffer[0], 0, buffer.size());
-		int bytesReceived = recv(sock, &buffer[0], buffer.size(), 0);
+		int bytesReceived = recv(newBot.getSocket(), &buffer[0], buffer.size(), 0);
 		if (bytesReceived == -1)
 		{
 			std::cerr << "Error receiving data from server" << std::endl;
@@ -175,8 +128,8 @@ int main()
 			std::cerr << "The server closed the connection" << std::endl;
 			break;
 		}
-		analyzeMessage(buffer, sock);
+		analyzeMessage(buffer, &newBot);
 	}
-	close(sock);
+	close(newBot.getSocket());
 	return 0;
 }
