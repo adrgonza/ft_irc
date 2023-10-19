@@ -27,13 +27,13 @@ class Bot {
 
 		void setSocket(const int &);
 
-		std::string getServer();
-		int getPort();
-		std::string getChannel();
-		std::string getNick();
-		std::string getUserCmd();
-		std::string getPassword();
-		int  getSocket();
+		const std::string getServer() const;
+		int getPort() const;
+		const std::string getChannel() const;
+		const std::string getNick() const;
+		const std::string getUserCmd() const;
+		const std::string getPassword() const;
+		int getSocket() const;
 
 };
 

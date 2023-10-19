@@ -15,49 +15,50 @@ class Channel;
 
 class Client {
 	public:
-		Client(int connectionFd);
+		Client(const int &);
+		Client(const Client &);
 
 		~Client();
 
-		bool operator==(const Client& other) const;
-		Client& operator=(const Client& obj);
-		Client(const Client &obj);
+		bool operator==(const Client&) const;
+		Client& operator=(const Client&);
 
 
 		int getFd() const;
-		std::string getNickname() const;
-		std::string getUsername() const;
-		std::string getRealName() const;
-		std::string getjoined() const;
-		std::string getHost() const;
-		std::string getChannel() const;
+		const std::string getNickname() const;
+		const std::string getUsername() const;
+		const std::string getRealName() const;
+		const std::string getjoined() const;
+		const std::string getHost() const;
+		const std::string getChannel() const;
 		bool getKey() const;
 		bool getFirsTime() const;
-		std::string getSource() const;
+		const std::string getSource() const;
+		const std::string getWord(const std::string &, const int &) const;
 
 
 		// Commands
-		void sendMessage(std::string message);
-		void changeNickname(std::vector<Client*> clients, std::map<std::string, Channel*> channels, std::string newNick, Client me);
-		void changeChannel(std::string channel);
-		void changeUserName(std::string name);
-		void giveKey(bool);
-		void setjoined(std::string);
-		void setFD(int);
-		void setFirstTime(bool);
+		void sendMessage(std::string);
+		void changeNickname(std::vector<Client*> &, std::map<std::string, Channel*> &, const std::string &, Client &);
+		void changeChannel(const std::string &);
+		void changeUserName(const std::string &);
+		void giveKey(const bool &);
+		void setjoined(const std::string &);
+		void setFD(const int &);
+		void setFirstTime(const bool &);
 
-		std::string getWord(const std::string &str, int wordNumber);
-		void sendToAllClientsWithinChanOfUser(std::string msg, std::map<std::string, Channel*> channels, Client me);
-	
+		void sendToAllClientsWithinChanOfUser(const std::string &, std::map<std::string, Channel*> &, Client &);
+
 	private:
 		Client();
+
 		int _fd;
 		std::string _joined;
-		std::string nickname;
+		std::string _nickname;
 		std::string _username;
 		std::string _realname;
-		std::string host;
-		std::string channel;
+		std::string _host;
+		std::string _channel;
 		bool _passwordkey;
 		bool _firstTime;
 };

@@ -6,37 +6,37 @@
 
 class Channel {
 	private:
-		std::vector<Client*> participants;
-		std::vector<Client> bannedParticipants;
-		std::vector<Client*> operators;
-		std::string topic;
+		std::vector<Client*> _participants;
+		std::vector<Client> _bannedParticipants;
+		std::vector<Client*> _operators;
+		std::string _topic;
 		std::string _name;
 
 	public:
-		Channel(std::vector<Client*> clients);
-		Channel(const Channel &obj);
+		Channel(const std::vector<Client*> &);
+		Channel(const Channel &);
 		~Channel();
 
 		const std::vector<Client*> getParticipants() const;
-		std::vector<Client*> getOperators() const;
-		std::string getTopic() const;
-		std::string getName() const;
+		const std::vector<Client*> getOperators() const;
+		const std::string getTopic() const;
+		const std::string getName() const;
 
-		void setTopic(std::string newTopic);
-		void setName(std::string name);
+		void setTopic(const std::string &);
+		void setName(const std::string &);
 
-		void addParticipant(Client& participant);
-		void removeParticipant(Client participant);
-		void addOperator(Client& oper);
-		void removeOperator(Client oper);
+		void addParticipant(Client &);
+		void removeParticipant(const Client &);
+		void addOperator(Client &);
+		void removeOperator(const Client &);
 
-		bool isOperator(Client user);
+		bool isOperator(const Client &);
 
-		bool hasParticipant(Client participant);
+		bool hasParticipant(const Client &);
 
-		bool isBanned(Client user);
-		void addBan(Client user);
-		void removeBan(Client user);
+		bool isBanned(const Client &);
+		void addBan(const Client &);
+		void removeBan(const Client &);
 };
 
 #endif

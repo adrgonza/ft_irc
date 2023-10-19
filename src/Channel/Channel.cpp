@@ -1,53 +1,53 @@
 #include "Channel.hpp"
 
-Channel::Channel(std::vector<Client *> clients) : participants(clients), topic("") {}
+Channel::Channel(const std::vector<Client *> &clients) : _participants(clients), _topic("") {}
 
 Channel::~Channel() {}
 
-Channel::Channel(const Channel &obj) : participants(obj.participants), topic(obj.topic)
+Channel::Channel(const Channel &obj) : _participants(obj._participants), _topic(obj._topic)
 {
-	this->operators = obj.operators;
+	this->_operators = obj._operators;
 	this->_name = obj._name;
-	this->bannedParticipants = obj.bannedParticipants;
+	this->_bannedParticipants = obj._bannedParticipants;
 }
 
 const std::vector<Client *> Channel::getParticipants() const
 {
-	return this->participants;
+	return this->_participants;
 }
 
-std::string Channel::getTopic() const
+const std::string Channel::getTopic() const
 {
-	return this->topic;
+	return this->_topic;
 }
 
-void Channel::setTopic(std::string newTopic)
+void Channel::setTopic(const std::string &newTopic)
 {
-	this->topic = newTopic;
+	this->_topic = newTopic;
 }
 
 void Channel::addParticipant(Client &newParticipant)
 {
-	participants.push_back(&newParticipant);
+	_participants.push_back(&newParticipant);
 }
 
-void Channel::removeParticipant(Client participant)
+void Channel::removeParticipant(const Client &participant)
 {
 	std::vector<Client *>::iterator userIt;
-	for (userIt = participants.begin(); userIt != participants.end(); ++userIt)
+	for (userIt = _participants.begin(); userIt != _participants.end(); ++userIt)
 	{
 		if ((*userIt)->getNickname() == participant.getNickname())
 		{
-			participants.erase(userIt);
+			_participants.erase(userIt);
 			return ;
 		}
 	}
 }
 
-bool Channel::hasParticipant(Client participant)
+bool Channel::hasParticipant(const Client &participant)
 {
 	std::vector<Client *>::iterator userIt;
-	for (userIt = participants.begin(); userIt != participants.end(); ++userIt)
+	for (userIt = _participants.begin(); userIt != _participants.end(); ++userIt)
 	{
 		if ((*userIt)->getNickname() == participant.getNickname())
 			return true;
@@ -55,33 +55,33 @@ bool Channel::hasParticipant(Client participant)
 	return false;
 }
 
-std::vector<Client*> Channel::getOperators() const
+const std::vector<Client*> Channel::getOperators() const
 {
-	return this->operators;
+	return this->_operators;
 }
 
 void Channel::addOperator(Client &newOper)
 {
-	operators.push_back(&newOper);
+	_operators.push_back(&newOper);
 }
 
-void Channel::removeOperator(Client oper)
+void Channel::removeOperator(const Client &oper)
 {
 	std::vector<Client *>::iterator userIt;
-	for (userIt = operators.begin(); userIt != operators.end(); ++userIt)
+	for (userIt = _operators.begin(); userIt != _operators.end(); ++userIt)
 	{
 		if ((*userIt)->getNickname() == oper.getNickname())
 		{
-			operators.erase(userIt);
+			_operators.erase(userIt);
 			return ;
 		}
 	}
 }
 
-bool Channel::isOperator(Client user)
+bool Channel::isOperator(const Client &user)
 {
 	std::vector<Client *>::iterator userIt;
-	for (userIt = operators.begin(); userIt != operators.end(); ++userIt)
+	for (userIt = _operators.begin(); userIt != _operators.end(); ++userIt)
 	{
 		if ((*userIt)->getNickname() == user.getNickname())
 			return true;
@@ -89,33 +89,33 @@ bool Channel::isOperator(Client user)
 	return false;
 }
 
-std::string Channel::getName() const
+const std::string Channel::getName() const
 {
 	return this->_name;
 }
 
-void Channel::setName(std::string name)
+void Channel::setName(const std::string &name)
 {
 	this->_name = name;
 }
 
-bool Channel::isBanned(Client user)
+bool Channel::isBanned(const Client &user)
 {
-	std::vector<Client>::iterator userIt = std::find(bannedParticipants.begin(), bannedParticipants.end(), user);
-	if (userIt != bannedParticipants.end())
+	std::vector<Client>::iterator userIt = std::find(_bannedParticipants.begin(), _bannedParticipants.end(), user);
+	if (userIt != _bannedParticipants.end())
 		return true;
 	else
 		return false;
 }
 
-void Channel::addBan(Client user)
+void Channel::addBan(const Client &user)
 {
-	bannedParticipants.push_back(user);
+	_bannedParticipants.push_back(user);
 }
 
-void Channel::removeBan(Client user)
+void Channel::removeBan(const Client &user)
 {
-	std::vector<Client>::iterator userIt = std::find(bannedParticipants.begin(), bannedParticipants.end(), user);
-	if (userIt != bannedParticipants.end())
-		bannedParticipants.erase(userIt);
+	std::vector<Client>::iterator userIt = std::find(_bannedParticipants.begin(), _bannedParticipants.end(), user);
+	if (userIt != _bannedParticipants.end())
+		_bannedParticipants.erase(userIt);
 }

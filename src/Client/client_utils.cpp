@@ -1,7 +1,7 @@
 #include <libraries.hpp>
 #include "Client.hpp"
 
-std::string Client::getWord(const std::string &str, int wordNumber)
+const std::string Client::getWord(const std::string &str, const int &wordNumber) const
 {
 	if (str.empty())
 		return "";
@@ -24,7 +24,7 @@ std::string Client::getWord(const std::string &str, int wordNumber)
 	return str.substr(startPos, endPos - startPos);
 }
 
-void Client::sendToAllClientsWithinChanOfUser(std::string msg, std::map<std::string, Channel*> channels, Client me)
+void Client::sendToAllClientsWithinChanOfUser(const std::string &msg, std::map<std::string, Channel*> &channels, Client &me)
 {
 	std::vector<Client*> clientsToSendMsg;
 	clientsToSendMsg.push_back(&me);

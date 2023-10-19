@@ -10,37 +10,37 @@ void Bot::setSocket(const int &sock)
 	this->_sock = sock;
 }
 
-int Bot::getSocket()
+int Bot::getSocket() const
 {
 	return this->_sock;
 }
 
-std::string Bot::getServer()
+const std::string Bot::getServer() const
 {
 	return this->_server;
 }
 
-int Bot::getPort()
+int Bot::getPort() const
 {
 	return this->_port;
 }
 
-std::string Bot::getChannel()
+const std::string Bot::getChannel() const
 {
 	return this->_channel;
 }
 
-std::string Bot::getNick()
+const std::string Bot::getNick() const
 {
 	return this->_nick;
 }
 
-std::string Bot::getUserCmd()
+const std::string Bot::getUserCmd() const
 {
 	return this->_userCmd;
 }
 
-std::string Bot::getPassword()
+const std::string Bot::getPassword() const
 {
 	return this->_password;
 }
