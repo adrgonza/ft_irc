@@ -1,4 +1,3 @@
-
 #include "Server.hpp"
 #include <libraries.hpp>
 
@@ -57,7 +56,7 @@ bool Server::handleClientConnections()
 
 		Client *newClient = new Client(_connectionFd);
 
-		newClient->sendMessage("NOTICE AUTH :*** Checking Ident");
+		newClient->sendMessage("NOTICE AUTH :*** Checking Ident... -> Please Introduce Nick, User and Password");
 
 		_clients.push_back(newClient);
 
@@ -165,7 +164,7 @@ bool Server::handleClientInput(Client &caller, std::string message)
 	if (caller.getKey() == true && !caller.getNickname().empty() && !caller.getUsername().empty() && caller.getFirsTime() == false)
 	{
 		caller.setFirstTime(true);
-		caller.sendMessage(RPL_MOTDSTART(caller.getNickname(), "\033[0;33mWelcome to the TONY_WARRIORS Internet Relay Chat Network\033[0m"));
+		caller.sendMessage(RPL_MOTDSTART(caller.getNickname(), "Welcome to the TONY_WARRIORS Internet Relay Chat Network"));
 	}
 	return (true);
 }
@@ -186,4 +185,3 @@ void Server::checkPassword(const std::string &body, Client &caller)
 		caller.giveKey(false);
 	}
 }
-
