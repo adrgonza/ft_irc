@@ -12,37 +12,37 @@
 #define OPENAI_API_KEY "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"
 
 class Bot {
-    private:
-        const std::string _server;
-        const int _port;
-        std::string _channel;
-        std::string _nick;
-        std::string _userCmd;
-        std::string _password;
-        int _sock;
+	private:
+		const std::string _server;
+		const int _port;
+		std::string _channel;
+		std::string _nick;
+		std::string _userCmd;
+		std::string _password;
+		int _sock;
 
-    public:
-        Bot(std::string server, int port, std::string channel, std::string nick, std::string user, std::string password);
-        ~Bot();
+	public:
+		Bot(const std::string &, const int &, const std::string &, const std::string &, const std::string &, const std::string &);
+		~Bot();
 
-        void setSocket(int sock);
+		void setSocket(const int &);
 
-        std::string getServer();
-        int getPort();
-        std::string getChannel();
-        std::string getNick();
-        std::string getUserCmd();
-        std::string getPassword();
-        int  getSocket();
-    
+		std::string getServer();
+		int getPort();
+		std::string getChannel();
+		std::string getNick();
+		std::string getUserCmd();
+		std::string getPassword();
+		int  getSocket();
+
 };
 
-int checkArgs(int argc);
+int checkArgs(const int &);
 void sendConfigOpenAIMessage();
 Bot sendConfigServer(char *argv[]);
-std::string extractContent(const std::string &jsonResponse);
-size_t WriteCallback(void *data, size_t size, size_t nmemb, std::string *response_data);
-std::string isJoinCommand(std::string str, std::string channel);
+std::string extractContent(const std::string &);
+size_t WriteCallback(void *, const size_t &, const size_t &, std::string *response_data);
+std::string isJoinCommand(const std::string &, const std::string &);
 std::string responseToJoinCommand(std::string buffer);
 
 

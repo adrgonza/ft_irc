@@ -7,7 +7,7 @@ std::string firstMessageForSetup = "{"
 		"\"max_tokens\": 256"
 "}";
 
-int checkArgs(int argc)
+int checkArgs(const int &argc)
 {
 	if (argc != 3)
 	{
@@ -88,14 +88,14 @@ std::string extractContent(const std::string &jsonResponse)
 	return content;
 }
 
-size_t WriteCallback(void *data, size_t size, size_t nmemb, std::string *response_data)
+size_t WriteCallback(void *data, const size_t &size, const size_t &nmemb, std::string *response_data)
 {
 	size_t total_size = size * nmemb;
 	response_data->append(static_cast<char *>(data), total_size);
 	return total_size;
 }
 
-bool endsWith(std::string fullString, std::string channel) {
+bool endsWith(const std::string &fullString, const std::string &channel) {
 	std::string expectedEnding = "JOIN " + channel;
 
 	std::string modifiedString = fullString;
@@ -104,9 +104,9 @@ bool endsWith(std::string fullString, std::string channel) {
 	if (newlinePos != std::string::npos) {
 		modifiedString.erase(newlinePos);
 	}
-	
+
 	std::cout << "comparing: " << modifiedString << " = " << expectedEnding << "." << std::endl;
-	
+
 	if (modifiedString.length() >= expectedEnding.length() &&
 		std::strcmp(modifiedString.c_str() + modifiedString.length() - expectedEnding.length(), expectedEnding.c_str()) == 0) {
 		return true;
@@ -114,7 +114,7 @@ bool endsWith(std::string fullString, std::string channel) {
 	return false;
 }
 
-std::string isJoinCommand(std::string input, std::string channel)
+std::string isJoinCommand(const std::string &input, const std::string &channel)
 {
 	std::string response;
 	if (endsWith(input, channel))
@@ -122,7 +122,7 @@ std::string isJoinCommand(std::string input, std::string channel)
 		std::cout << "inside" << std::endl;
 		std::string::size_type pos1 = input.find('!');
 		std::string::size_type pos2 = input.find('@');
-		
+
 		if (pos1 != std::string::npos && pos2 != std::string::npos) {
 			std::cout << "-inside" << std::endl;
 			std::string name = input.substr(1, pos1 - 1);
@@ -132,7 +132,7 @@ std::string isJoinCommand(std::string input, std::string channel)
 			std::cout << name << sameName << localhost << std::endl;
 			return name;
 		}
-	}	
+	}
 	return response;
 }
 

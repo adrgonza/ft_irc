@@ -1,11 +1,11 @@
 #include "Bot.hpp"
 
-Bot::Bot(std::string server, int port, std::string channel, std::string nick, std::string user, std::string password)
-    : _server(server), _port(port), _channel(channel), _nick(nick), _userCmd(user), _password(password) {}
+Bot::Bot(const std::string &server, const int &port, const std::string &channel, const std::string &nick, const std::string &user, const std::string &password)
+	: _server(server), _port(port), _channel(channel), _nick(nick), _userCmd(user), _password(password) {}
 
 Bot::~Bot(){}
 
-void Bot::setSocket(int sock)
+void Bot::setSocket(const int &sock)
 {
 	this->_sock = sock;
 }
