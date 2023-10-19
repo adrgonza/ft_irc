@@ -9,7 +9,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-#define OPENAI_API_KEY "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"
+#define OPENAI_API_KEY "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"
 
 class Bot {
     private:
