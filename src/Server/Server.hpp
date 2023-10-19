@@ -2,8 +2,8 @@
 #define SERVER_HPP_
 
 #include <libraries.hpp>
-#include "../Client/Client.hpp"
-#include "../Channel/Channel.hpp"
+#include <poll.h>
+
 
 #define BACKLOG 10		// Nº of clients pending to connect w/ server
 #define BUFFER_SIZE 512 // Max size of each message (Docs: https://modern.ircdocs.horse/#message-format)
@@ -22,11 +22,10 @@ class Server {
 		int _port;
 		int _socketFd;
 		int _connectionFd;
-
 		std::vector<pollfd> _pollFds;
-		std::vector<Client> _clients;
-		std::vector<Client> _disconnectedClients;
-		std::map<std::string, Channel> _channels;
+		std::vector<Client*> _clients;
+		std::vector<Client*> _disconnectedClients;
+		std::map<std::string, Channel*> _channels;
 
 		bool handleClientConnections();
 		bool handleClientCommunications(const size_t &);
@@ -34,7 +33,7 @@ class Server {
 		void checkPassword(const std::string &, Client &);
 
 		/* utils */
-		std::vector<Client>::iterator getClientByFd(const int &);
+		std::vector<Client*>::iterator getClientByFd(const int &fd);
 		void disconnectClient(const int &);
 		void handleCommand(Client &caller, std::string command, std::string body);
 		bool	userExists(std::string nickname);

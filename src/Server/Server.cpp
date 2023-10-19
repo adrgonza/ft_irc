@@ -1,4 +1,7 @@
+
 #include "Server.hpp"
+#include <libraries.hpp>
+
 
 Server::Server(const int &port, const std::string &password) : _password(password), _port(port), _pollFds(BACKLOG + 1) {}
 
@@ -52,9 +55,9 @@ bool Server::handleClientConnections()
 
 		std::cout << "[SERVER]: A new connection has been made." << std::endl;
 
-		Client newClient(_connectionFd);
+		Client *newClient = new Client(_connectionFd);
 
-		newClient.sendMessage("NOTICE AUTH :*** Checking Ident... -> Please Introduce Nick, User and Password");
+		newClient->sendMessage("NOTICE AUTH :*** Checking Ident");
 
 		_clients.push_back(newClient);
 
@@ -87,13 +90,14 @@ bool Server::handleClientCommunications(const size_t &i)
 		disconnectClient(i);
 	else
 	{
-		std::vector<Client>::iterator caller = getClientByFd(_pollFds[i].fd);
+		std::vector<Client*>::iterator caller = getClientByFd(_pollFds[i].fd);
 		if (caller == _clients.end())
 		{
 			std::cout << "[SERVER :: WARNING]: getClientByFd() failed before executing a command" << std::endl;
 			return (false);
 		}
-		handleClientInput(*caller, buffer);
+		Client &toPass = *(*caller);
+		handleClientInput(toPass, buffer);
 	}
 	return (true);
 }
@@ -147,7 +151,7 @@ bool Server::handleClientInput(Client &caller, std::string message)
 	else if (command == "PASS")
 		checkPassword(body, caller);
 	else if (command == "NICK")
-		caller.changeNickname(_clients, body);
+		caller.changeNickname(_clients, _channels, body, caller);
 	else if (command == "USER")
 		caller.changeUserName(body);
 	else
@@ -182,3 +186,4 @@ void Server::checkPassword(const std::string &body, Client &caller)
 		caller.giveKey(false);
 	}
 }
+

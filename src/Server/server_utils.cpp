@@ -1,31 +1,53 @@
+
 #include <libraries.hpp>
-#include "../src/Client/Client.hpp"
-#include "../src/Server/Server.hpp"
+#include "Server.hpp"
 
 e_command parseCommandCode(std::string command)
 {
-	if (command == "NICK") return CMD_NICK;
-	if (command == "USER") return CMD_USER;
-	if (command == "PING") return CMD_PING;
-	if (command == "PONG") return CMD_PONG;
-	if (command == "QUIT") return CMD_QUIT;
-	if (command == "JOIN") return CMD_JOIN;
-	if (command == "PART") return CMD_PART;
-	if (command == "TOPIC") return CMD_TOPIC;
-	if (command == "NAMES") return CMD_NAMES;
-	if (command == "LIST") return CMD_LIST;
-	if (command == "KICK") return CMD_KICK;
-	if (command == "PRIVMSG") return CMD_PRIVMSG;
-	if (command == "SAY") return CMD_SAY;
-	if (command == "NOTICE") return CMD_NOTICE;
-	if (command == "PASS") return CMD_PASS;
-	if (command == "INVITE") return CMD_INVITE;
-	if (command == "MODE") return CMD_MODE;
-	if (command == "WHO") return CMD_WHO;
-	if (command == "WHOIS") return CMD_WHOIS;
-	if (command == "WHOWAS") return CMD_WHOWAS;
-	if (command == "BAN") return CMD_BAN;
-	if (command == "UNBAN") return CMD_UNBAN;
+	if (command == "NICK")
+		return CMD_NICK;
+	if (command == "USER")
+		return CMD_USER;
+	if (command == "PING")
+		return CMD_PING;
+	if (command == "PONG")
+		return CMD_PONG;
+	if (command == "QUIT")
+		return CMD_QUIT;
+	if (command == "JOIN")
+		return CMD_JOIN;
+	if (command == "PART")
+		return CMD_PART;
+	if (command == "TOPIC")
+		return CMD_TOPIC;
+	if (command == "NAMES")
+		return CMD_NAMES;
+	if (command == "LIST")
+		return CMD_LIST;
+	if (command == "KICK")
+		return CMD_KICK;
+	if (command == "PRIVMSG")
+		return CMD_PRIVMSG;
+	if (command == "SAY")
+		return CMD_SAY;
+	if (command == "NOTICE")
+		return CMD_NOTICE;
+	if (command == "PASS")
+		return CMD_PASS;
+	if (command == "INVITE")
+		return CMD_INVITE;
+	if (command == "MODE")
+		return CMD_MODE;
+	if (command == "WHO")
+		return CMD_WHO;
+	if (command == "WHOIS")
+		return CMD_WHOIS;
+	if (command == "WHOWAS")
+		return CMD_WHOWAS;
+	if (command == "BAN")
+		return CMD_BAN;
+	if (command == "UNBAN")
+		return CMD_UNBAN;
 
 	return CMD_UNKNOWN;
 }
@@ -37,36 +59,78 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 	switch (commandCode)
 	{
 
-		// Client commands
-		case CMD_NICK: caller.changeNickname(_clients, body); break;
-		case CMD_USER: caller.changeUserName(body);
-		case CMD_PASS: break;
-		case CMD_PRIVMSG: privMessage(body, caller); break;
-		case CMD_SAY: sayMsg(body, caller); break;
+	// Client commands
+	case CMD_NICK:
+		caller.changeNickname(_clients, _channels, body, caller);
+		break;
+	case CMD_USER:
+		caller.changeUserName(body);
+	case CMD_PASS:
+		break;
+	case CMD_PRIVMSG:
+		privMessage(body, caller);
+		break;
+	case CMD_SAY:
+		sayMsg(body, caller);
+		break;
 
-		// Channel commands
-		case CMD_JOIN: handleJoin(body, caller); break;
-		case CMD_LIST: listChannels(body, caller); break;
-		case CMD_PART: partChannel(body, caller); break;
-		case CMD_NAMES: getNamesInChannel(body, caller); break;
-		case CMD_INVITE: inviteNick(body, caller); break;
-		case CMD_TOPIC: topicChannel(body, caller); break;
-		case CMD_NOTICE: noticeMessage(body, caller); break;
-		case CMD_BAN: banUser(body, caller); break;
-		case CMD_UNBAN: unbanUser(body, caller); break;
-		case CMD_MODE: modeHandler(body, caller); break;
-		case CMD_QUIT: quitServ(body, caller); break;
+	// Channel commands
+	case CMD_JOIN:
+		handleJoin(body, caller);
+		break;
+	case CMD_LIST:
+		listChannels(body, caller);
+		break;
+	case CMD_PART:
+		partChannel(body, caller);
+		break;
+	case CMD_NAMES:
+		getNamesInChannel(body, caller);
+		break;
+	case CMD_INVITE:
+		inviteNick(body, caller);
+		break;
+	case CMD_TOPIC:
+		topicChannel(body, caller);
+		break;
+	case CMD_NOTICE:
+		noticeMessage(body, caller);
+		break;
+	case CMD_BAN:
+		banUser(body, caller);
+		break;
+	case CMD_UNBAN:
+		unbanUser(body, caller);
+		break;
+	case CMD_MODE:
+		modeHandler(body, caller);
+		break;
+	case CMD_QUIT:
+		quitServ(body, caller);
+		break;
 
-		// Server commands
-		case CMD_PING: pingCheck(body, caller); break;
-		case CMD_PONG: pongCheck(body, caller); break;
-		case CMD_WHO: usersOnNetwork(body, caller); break;
-		case CMD_WHOIS: getUserInfo(body, caller); break;
-		case CMD_WHOWAS: getPreviouslyUsersInfo(body, caller); break;
-		case CMD_KICK: kickUser(body, caller); break;
+	// Server commands
+	case CMD_PING:
+		pingCheck(body, caller);
+		break;
+	case CMD_PONG:
+		pongCheck(body, caller);
+		break;
+	case CMD_WHO:
+		usersOnNetwork(body, caller);
+		break;
+	case CMD_WHOIS:
+		getUserInfo(body, caller);
+		break;
+	case CMD_WHOWAS:
+		getPreviouslyUsersInfo(body, caller);
+		break;
+	case CMD_KICK:
+		kickUser(body, caller);
+		break;
 
-		case CMD_UNKNOWN:
-			caller.sendMessage(ERR_UNKNOWNCOMMAND_421(caller.getNickname(), command));
+	case CMD_UNKNOWN:
+		caller.sendMessage(ERR_UNKNOWNCOMMAND_421(caller.getNickname(), command));
 		break;
 	}
 }
@@ -80,9 +144,9 @@ bool Server::userExists(std::string nickname)
 	{
 		nickname[i] = std::tolower(nickname[i]);
 	}
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+	for (std::vector<Client *>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
-		lclient = it->getNickname();
+		lclient = (*it)->getNickname();
 		aux = lclient.length();
 		for (std::string::size_type i = 0; i < aux; i++)
 			lclient[i] = std::tolower(lclient[i]);
@@ -100,10 +164,10 @@ bool Server::channelExists(std::string channelName)
 
 Client *Server::findClientByFd(int fd)
 {
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+	for (std::vector<Client *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 	{
-		if (it->getFd() == fd)
-			return &(*it);
+		if ((*it)->getFd() == fd)
+			return (*it);
 	}
 	return NULL;
 }
@@ -115,33 +179,33 @@ int Server::getClientSocketFdByNickname(const std::string &nickname)
 	std::string::size_type aux;
 	aux = lnickname.length();
 	for (std::string::size_type i = 0; i < aux; i++)
-			lnickname[i] = std::tolower(nickname[i]);
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+		lnickname[i] = std::tolower(nickname[i]);
+	for (std::vector<Client *>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
-		lclient = it->getNickname();
+		lclient = (*it)->getNickname();
 		aux = lclient.length();
 		for (std::string::size_type i = 0; i < aux; i++)
 			lclient[i] = std::tolower(lclient[i]);
 		if (lclient == lnickname)
-			return it->getFd();
+			return (*it)->getFd();
 	}
 	return -1;
 }
 
 Channel *Server::getChannelByName(std::string channelName)
 {
-	std::map<std::string, Channel>::iterator it = _channels.find(channelName);
+	std::map<std::string, Channel *>::iterator it = _channels.find(channelName);
 	if (it != _channels.end())
-		return &(it->second);
+		return (it->second);
 	else
 		return NULL;
 }
 
-std::vector<Client>::iterator Server::getClientByFd(const int &fd)
+std::vector<Client*>::iterator Server::getClientByFd(const int &fd)
 {
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+	for (std::vector<Client*>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
-		if (it->getFd() == fd)
+		if ((*it)->getFd() == fd)
 			return it;
 	}
 	return _clients.end();
@@ -154,16 +218,16 @@ Client *Server::findClientByNickname(std::string targetNickname)
 	std::string::size_type aux;
 	aux = lnickname.length();
 	for (std::string::size_type i = 0; i < aux; i++)
-			lnickname[i] = std::tolower(targetNickname[i]);
+		lnickname[i] = std::tolower(targetNickname[i]);
 
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+	for (std::vector<Client *>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
-		lclient = it->getNickname();
+		lclient = (*it)->getNickname();
 		aux = lclient.length();
 		for (std::string::size_type i = 0; i < aux; i++)
 			lclient[i] = std::tolower(lclient[i]);
 		if (lclient == lnickname)
-			return &(*it);
+			return (*it);
 	}
 	return NULL;
 }
@@ -198,11 +262,11 @@ void Server::disconnectClient(const int &i)
 	if (deletedClient)
 	{
 		close(deletedClient->getFd());
-		for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+		for (std::vector<Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 		{
-			if (it->getFd() == deletedClient->getFd())
+			if ((*it)->getFd() == deletedClient->getFd())
 			{
-				_disconnectedClients.push_back(*deletedClient);
+				_disconnectedClients.push_back(deletedClient);
 				_clients.erase(it);
 				break;
 			}

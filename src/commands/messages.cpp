@@ -26,10 +26,10 @@ void Server::sayMsg(std::string body, Client &user)
 	else
 		sendMessage = "PRIVMSG " + toChannel + " :" + body + " " + nickname + "\r\n";
 
-	std::vector<Client>::iterator it;
+	std::vector<Client *>::iterator it;
 	for (it = _clients.begin(); it != _clients.end(); ++it)
 	{
-		if (it->getChannel() == toChannel)
+		if ((*it)->getChannel() == toChannel)
 			user.sendMessage(sendMessage);
 	}
 }
@@ -47,40 +47,38 @@ void Server::privMessage(std::string body, Client user)
 	if (spacePos != std::string::npos)
 		body = body.substr(spacePos);
 
-	std::string lowerTarget = target;
-	for (std::string::size_type i = 0; i < target.length(); i++)
-		lowerTarget[i] = std::tolower(target[i]);
+	// std::string lowerTarget = target;
+	// for (std::string::size_type i = 0; i < target.length(); i++)
+	// 	lowerTarget[i] = std::tolower(target[i]);
 
-	if (!channelExists(lowerTarget) && !userExists(lowerTarget))
+	if (!channelExists(target) && !userExists(target))
 		user.sendMessage(ERR_NOSUCHNICK(user.getNickname(), target));
 
 	std::string sendMessage;
-	if (channelExists(lowerTarget))
+	if (channelExists(target))
 	{
-		Channel *chanObj = getChannelByName(lowerTarget);
-		std::vector<Client> clientVec = chanObj->getParticipants();
-		std::vector<Client>::iterator it;
-		it = find(clientVec.begin(), clientVec.end(), user); 
-		if (it == clientVec.end())
+		Channel *chanObj = getChannelByName(target);
+		if (!chanObj->hasParticipant(user))
 		{
-			user.sendMessage(ERR_NOTONCHANNEL(user.getNickname(), lowerTarget));
+			user.sendMessage(ERR_NOTONCHANNEL(user.getNickname(), target));
 			return;
 		}
 
 		if (!target.empty() && target[0] != '#')
 			target = "#" + target;
-		for (it = _clients.begin(); it != _clients.end(); ++it)
+
+		for (std::vector<Client *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 		{
-			if (it->getChannel() == target && it->getNickname() != user.getNickname())
-				it->sendMessage(PRIVMSG_CMD(user.getNickname(), target, body));
+			if ((*it)->getChannel() == target && (*it)->getNickname() != user.getNickname())
+				(*it)->sendMessage(PRIVMSG_CMD(user.getNickname(), target, body));
 		}
 	}
 	else
 	{
-		int targetSocket = getClientSocketFdByNickname(lowerTarget);
+		int targetSocket = getClientSocketFdByNickname(target);
 		if (targetSocket == -1)
 			return;
-		Client *receiver = findClientByNickname(lowerTarget);
+		Client *receiver = findClientByNickname(target);
 		receiver->sendMessage(PRIVMSG_RECEIVER_CMD(user.getNickname(), user.getNickname(), target, body));
 	}
 }

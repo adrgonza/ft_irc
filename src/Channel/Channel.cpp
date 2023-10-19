@@ -1,16 +1,17 @@
 #include "Channel.hpp"
 
-Channel::Channel() : topic("") {}
+Channel::Channel(std::vector<Client *> clients) : participants(clients), topic("") {}
+
 Channel::~Channel() {}
 
-Channel::Channel(const Channel &obj)
+Channel::Channel(const Channel &obj) : participants(obj.participants), topic(obj.topic)
 {
-	this->participants = obj.participants;
 	this->operators = obj.operators;
-	this->topic = obj.topic;
+	this->_name = obj._name;
+	this->bannedParticipants = obj.bannedParticipants;
 }
 
-std::vector<Client> Channel::getParticipants() const
+const std::vector<Client *> Channel::getParticipants() const
 {
 	return this->participants;
 }
@@ -25,51 +26,67 @@ void Channel::setTopic(std::string newTopic)
 	this->topic = newTopic;
 }
 
-void Channel::addParticipant(Client newParticipant)
+void Channel::addParticipant(Client &newParticipant)
 {
-	participants.push_back(newParticipant);
+	participants.push_back(&newParticipant);
 }
 
 void Channel::removeParticipant(Client participant)
 {
-	std::vector<Client>::iterator userIt = std::find(participants.begin(), participants.end(), participant);
-	if (userIt != participants.end())
-		participants.erase(userIt);
+	std::vector<Client *>::iterator userIt;
+	for (userIt = participants.begin(); userIt != participants.end(); ++userIt)
+	{
+		if ((*userIt)->getNickname() == participant.getNickname())
+		{
+			participants.erase(userIt);
+			return ;
+		}
+	}
 }
 
 bool Channel::hasParticipant(Client participant)
 {
-	std::vector<Client>::iterator userIt = std::find(participants.begin(), participants.end(), participant);
-	if (userIt != participants.end())
-		return true;
-	else
-		return false;
+	std::vector<Client *>::iterator userIt;
+	for (userIt = participants.begin(); userIt != participants.end(); ++userIt)
+	{
+		if ((*userIt)->getNickname() == participant.getNickname())
+			return true;
+	}
+	return false;
 }
 
-std::vector<Client> Channel::getOperators() const
+std::vector<Client*> Channel::getOperators() const
 {
 	return this->operators;
 }
 
-void Channel::addOperator(Client newOper)
+void Channel::addOperator(Client &newOper)
 {
-	operators.push_back(newOper);
+	operators.push_back(&newOper);
 }
 
 void Channel::removeOperator(Client oper)
 {
-	std::vector<Client>::iterator userIt = std::find(operators.begin(), operators.end(), oper);
-	if (userIt != operators.end())
-		operators.erase(userIt);
+	std::vector<Client *>::iterator userIt;
+	for (userIt = operators.begin(); userIt != operators.end(); ++userIt)
+	{
+		if ((*userIt)->getNickname() == oper.getNickname())
+		{
+			operators.erase(userIt);
+			return ;
+		}
+	}
 }
 
 bool Channel::isOperator(Client user)
 {
-	std::vector<Client>::iterator userIt = std::find(operators.begin(), operators.end(), user);
-	if (userIt != operators.end())
-		return true;
-	else
-		return false;
+	std::vector<Client *>::iterator userIt;
+	for (userIt = operators.begin(); userIt != operators.end(); ++userIt)
+	{
+		if ((*userIt)->getNickname() == user.getNickname())
+			return true;
+	}
+	return false;
 }
 
 std::string Channel::getName() const

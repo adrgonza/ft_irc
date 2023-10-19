@@ -1,5 +1,9 @@
 #ifndef LIBRARIES_HPP
-#define LIBRARIES_HPP
+# define LIBRARIES_HPP
+
+#include "../src/Channel/Channel.hpp"
+#include "../src/Client/Client.hpp"
+#include "../src/Server/Server.hpp"
 
 // c++
 #include <cstdlib>

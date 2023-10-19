@@ -19,11 +19,11 @@ void Server::noticeMessage(std::string body, Client &user)
 
     if (lowerTarget[0] == '#')
     {
-        std::vector<Client>::iterator it;
+        std::vector<Client*>::iterator it;
         for (it = _clients.begin(); it != _clients.end(); ++it)
         {
-            if (it->getChannel() == lowerTarget && it->getNickname() != user.getNickname())
-                it->sendMessage(NOTICE_CMD(user.getNickname(), target, message));
+            if ((*it)->getChannel() == lowerTarget && (*it)->getNickname() != user.getNickname())
+                (*it)->sendMessage(NOTICE_CMD(user.getNickname(), target, message));
         }
     }
     else

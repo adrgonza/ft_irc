@@ -14,11 +14,11 @@ void Server::usersOnNetwork(std::string body, Client &user)
 	if (channelExists(target))
 	{
 		Channel *targetChannel = getChannelByName(target);
-		std::vector<Client> channelMembers = targetChannel->getParticipants();
-		for (std::vector<Client>::iterator it = channelMembers.begin(); it != channelMembers.end(); ++it)
+		std::vector<Client*> channelMembers = targetChannel->getParticipants();
+		for (std::vector<Client*>::iterator it = channelMembers.begin(); it != channelMembers.end(); ++it)
 		{
 			std::string username = "username";
-			std::string nickname = it->getNickname();
+			std::string nickname = (*it)->getNickname();
 			std::string host = nickname + "!user@host";
 			user.sendMessage(RPL_WHOREPLY(serverName, nickname, target, username, host, serverName, user.getNickname(), "H", "1", user.getNickname()));
 		}
@@ -66,11 +66,11 @@ void Server::getPreviouslyUsersInfo(std::string body, Client &user)
 	std::string target = getWord(body, 2);
 
 	Client *oldClientTarget = NULL;
-	for (std::vector<Client>::iterator it = _disconnectedClients.begin(); it != _disconnectedClients.end(); ++it)
+	for (std::vector<Client*>::iterator it = _disconnectedClients.begin(); it != _disconnectedClients.end(); ++it)
 	{
-		std::cout << "nick: " << it->getNickname() << std::endl;
-		if (it->getNickname() == target)
-			oldClientTarget = &(*it);
+		std::cout << "nick: " << (*it)->getNickname() << std::endl;
+		if ((*it)->getNickname() == target)
+			oldClientTarget = (*it);
 	}
 
 	std::string host = target + "!user@host";
