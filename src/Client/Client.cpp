@@ -125,7 +125,7 @@ void Client::giveKey(const bool &key) { _passwordkey = key; }
 
 bool Client::getFirsTime() const { return(_firstTime); }
 
-void Client::sendMessage(std::string message)
+void Client::sendMessage(std::string message) const
 {
 	std::cout << "Sending: " << message << std::endl;
 	message = message + IRC_ENDLINE;

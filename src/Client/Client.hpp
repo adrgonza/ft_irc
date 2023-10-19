@@ -8,7 +8,6 @@
 
 class Channel;
 
-
 # define RESET "\e[0m"
 # define RED "\e[1;91m"
 # define BLUE "\e[1;34m"
@@ -36,9 +35,8 @@ class Client {
 		const std::string getSource() const;
 		const std::string getWord(const std::string &, const int &) const;
 
-
-		// Commands
-		void sendMessage(std::string);
+		/* commands */
+		void sendMessage(std::string) const;
 		void changeNickname(std::vector<Client*> &, std::map<std::string, Channel*> &, const std::string &, Client &);
 		void changeChannel(const std::string &);
 		void changeUserName(const std::string &);
