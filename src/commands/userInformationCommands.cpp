@@ -1,6 +1,6 @@
 #include "../Server/Server.hpp"
 
-void Server::usersOnNetwork(std::string body, Client &user)
+void Server::usersOnNetwork(const std::string &body, const Client &user)
 {
 	std::string target = getWord(body, 1);
 	if (target.empty() || (!channelExists(target) && !userExists(target)))
@@ -37,7 +37,7 @@ void Server::usersOnNetwork(std::string body, Client &user)
 	user.sendMessage(RPL_ENDOFWHO(serverName, user.getNickname(), target));
 }
 
-void Server::getUserInfo(std::string body, Client &user)
+void Server::getUserInfo(const std::string &body, const Client &user)
 {
 	std::string target = getWord(body, 1);
 	if (!userExists(target))
@@ -59,7 +59,7 @@ void Server::getUserInfo(std::string body, Client &user)
 
 }
 
-void Server::getPreviouslyUsersInfo(std::string body, Client &user)
+void Server::getPreviouslyUsersInfo(const std::string &body, const Client &user)
 {
 
 	std::string serverName = "ToniWarrior's";

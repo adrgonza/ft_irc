@@ -1,8 +1,7 @@
-
 #include <libraries.hpp>
 #include "Server.hpp"
 
-e_command parseCommandCode(std::string command)
+e_command parseCommandCode(const std::string &command)
 {
 	if (command == "NICK") return CMD_NICK;
 	if (command == "USER") return CMD_USER;
@@ -29,7 +28,7 @@ e_command parseCommandCode(std::string command)
 	return CMD_UNKNOWN;
 }
 
-void Server::handleCommand(Client &caller, std::string command, std::string body)
+void Server::handleCommand(Client &caller, const std::string &command, std::string &body)
 {
 	std::cout << "cmd: " << command << ", " << body << std::endl;
 	e_command commandCode = parseCommandCode(command);
@@ -112,7 +111,7 @@ void Server::handleCommand(Client &caller, std::string command, std::string body
 	}
 }
 
-bool Server::userExists(std::string nickname)
+bool Server::userExists(std::string &nickname)
 {
 	std::string lclient;
 	std::string::size_type aux = lclient.length();
@@ -132,14 +131,14 @@ bool Server::userExists(std::string nickname)
 	}
 	return false;
 }
-bool Server::channelExists(std::string channelName)
+bool Server::channelExists(const std::string &channelName)
 {
 	if (_channels.find(channelName) != _channels.end())
 		return true;
 	return false;
 }
 
-Client *Server::findClientByFd(int fd)
+Client *Server::findClientByFd(const int &fd)
 {
 	for (std::vector<Client *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 	{
@@ -169,7 +168,7 @@ int Server::getClientSocketFdByNickname(const std::string &nickname)
 	return -1;
 }
 
-Channel *Server::getChannelByName(std::string channelName)
+Channel *Server::getChannelByName(const std::string &channelName)
 {
 	std::map<std::string, Channel *>::iterator it = _channels.find(channelName);
 	if (it != _channels.end())
@@ -188,7 +187,7 @@ std::vector<Client*>::iterator Server::getClientByFd(const int &fd)
 	return _clients.end();
 }
 
-Client *Server::findClientByNickname(std::string targetNickname)
+Client *Server::findClientByNickname(const std::string &targetNickname)
 {
 	std::string lclient;
 	std::string lnickname = targetNickname;
@@ -209,7 +208,7 @@ Client *Server::findClientByNickname(std::string targetNickname)
 	return NULL;
 }
 
-std::string Server::getWord(const std::string &str, int wordNumber)
+std::string Server::getWord(const std::string &str, const int &wordNumber)
 {
 	if (str.empty())
 		return "";

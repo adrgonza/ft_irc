@@ -57,7 +57,7 @@ typedef enum
 	CMD_UNBAN,
 } e_command;
 
-e_command parseCommandCode(std::string command);
+e_command parseCommandCode(const std::string &command);
 
 #define IRC_ENDLINE "\r\n"
 

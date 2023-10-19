@@ -1,6 +1,6 @@
 #include "../Server/Server.hpp"
 
-void Server::listChannels(std::string body, Client &user)
+void Server::listChannels(std::string &body, const Client &user)
 {
 	body = "";
 	std::string channelListMsg = "Channel List:\r\n";
@@ -32,7 +32,7 @@ void Server::listChannels(std::string body, Client &user)
 	user.sendMessage(channelListMsg);
 }
 
-void Server::partChannel(std::string body, Client &user)
+void Server::partChannel(const std::string &body, Client &user)
 {
 	std::string channel = getWord(body, 1);
 	if (!channel.empty() && channel[0] != '#')
@@ -59,14 +59,14 @@ void Server::partChannel(std::string body, Client &user)
 	user.changeChannel("");
 	if (channelObj->getParticipants().empty())
 	{
-		
+
 		std::map<std::string, Channel *>::iterator it = _channels.find(channel);
 		if (it != _channels.end())
 			_channels.erase(it);
 	}
 }
 
-void Server::handleJoin(std::string body, Client &user)
+void Server::handleJoin(const std::string &body, Client &user)
 {
 	std::string channel = getWord(body, 1);
 	std::string lChannel = channel;
@@ -152,7 +152,7 @@ void Server::handleJoin(std::string body, Client &user)
 	}
 }
 
-void Server::topicChannel(std::string body, Client &user)
+void Server::topicChannel(const std::string &body, const Client &user)
 {
 	std::istringstream iss(body);
 	std::string channel;
@@ -188,7 +188,7 @@ void Server::topicChannel(std::string body, Client &user)
 	user.sendMessage(TOPIC_CMD(channel, newTopic));
 }
 
-void Server::getNamesInChannel(std::string body, Client &user)
+void Server::getNamesInChannel(const std::string &body, const Client &user)
 {
 	std::string channel = getWord(body, 1);
 	if (!channel.empty() && channel[0] != '#')
@@ -222,7 +222,7 @@ void Server::getNamesInChannel(std::string body, Client &user)
 	user.sendMessage(endOfNamesMessage);
 }
 
-void Server::inviteNick(std::string body, Client &user)
+void Server::inviteNick(const std::string &body, const Client &user)
 {
 	std::string network = "";
 	std::string targetUser = getWord(body, 1);

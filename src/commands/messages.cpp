@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 
-void Server::sayMsg(std::string body, Client &user)
+void Server::sayMsg(std::string &body, const Client &user)
 {
 	if (user.getChannel() == "")
 		return;
@@ -34,7 +34,7 @@ void Server::sayMsg(std::string body, Client &user)
 	}
 }
 
-void Server::privMessage(std::string body, Client user)
+void Server::privMessage(std::string &body, const Client &user)
 {
 	std::size_t newlinePos = body.find('\n');
 	body = body.substr(0, newlinePos);

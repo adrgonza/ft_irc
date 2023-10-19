@@ -4,7 +4,6 @@
 #include <libraries.hpp>
 #include <poll.h>
 
-
 #define BACKLOG 10		// Nº of clients pending to connect w/ server
 #define BUFFER_SIZE 512 // Max size of each message (Docs: https://modern.ircdocs.horse/#message-format)
 #define PING_INTERVAL 30
@@ -17,7 +16,7 @@ class Server {
 		bool run();
 
 	private:
-		std::string	_network;
+		std::string _network;
 		std::string _password;
 		int _port;
 		int _socketFd;
@@ -33,37 +32,37 @@ class Server {
 		void checkPassword(const std::string &, Client &);
 
 		/* utils */
-		std::vector<Client*>::iterator getClientByFd(const int &fd);
+		std::vector<Client*>::iterator getClientByFd(const int &);
 		void disconnectClient(const int &);
-		void handleCommand(Client &caller, std::string command, std::string body);
-		bool	userExists(std::string nickname);
-		bool	channelExists(std::string channelName);
-		Client* findClientByFd(int fd);
-		int		getClientSocketFdByNickname(const std::string &nickname);
-		Channel* getChannelByName(std::string channelName);
-		Client* findClientByNickname(std::string targetNickname);
-		std::string getWord(const std::string &str, int wordNumber);
+		void handleCommand(Client &, const std::string &, std::string &);
+		bool userExists(std::string &);
+		bool channelExists(const std::string &);
+		Client* findClientByFd(const int &);
+		int getClientSocketFdByNickname(const std::string &);
+		Channel* getChannelByName(const std::string &);
+		Client* findClientByNickname(const std::string &);
+		std::string getWord(const std::string &, const int &);
 
 		/* commands */
-		void privMessage(std::string body, Client user);
-		void sayMsg(std::string body, Client &user);
-		void listChannels(std::string body, Client &user);
-		void partChannel(std::string body, Client &user);
-		void handleJoin(std::string body, Client &user);
-		void getNamesInChannel(std::string body, Client &user);
-		void topicChannel(std::string body, Client &user);
-		void inviteNick(std::string body, Client &user);
-		void kickUser(std::string body, Client &user);
-		void pongCheck(std::string body, Client &user);
-		void pingCheck(std::string body, Client &user);
-		void noticeMessage(std::string body, Client &user);
-		void usersOnNetwork(std::string body, Client &user);
-		void getUserInfo(std::string body, Client &user);
-		void getPreviouslyUsersInfo(std::string body, Client &user);
-		void modeHandler(std::string body, Client &user);
-		void banUser(std::string body, Client &user);
-		void unbanUser(std::string body, Client &user);
-		void quitServ(std::string body, Client &user);
+		void privMessage(std::string &, const Client &);
+		void sayMsg(std::string &, const Client &);
+		void listChannels(std::string &, const Client &);
+		void partChannel(const std::string &, Client &);
+		void handleJoin(const std::string &, Client &);
+		void getNamesInChannel(const std::string &, const Client &);
+		void topicChannel(const std::string &, const Client &);
+		void inviteNick(const std::string &, const Client &);
+		void kickUser(const std::string &, const Client &);
+		void pongCheck(const std::string &, const Client &);
+		void pingCheck(const std::string &, const Client &);
+		void noticeMessage(const std::string &, const Client &);
+		void usersOnNetwork(const std::string &, const Client &);
+		void getUserInfo(const std::string &, const Client &);
+		void getPreviouslyUsersInfo(const std::string &, const Client &);
+		void modeHandler(const std::string &, const Client &);
+		void banUser(const std::string &, const Client &);
+		void unbanUser(const std::string &, const Client &);
+		void quitServ(std::string &, const Client &);
 };
 
 #endif
