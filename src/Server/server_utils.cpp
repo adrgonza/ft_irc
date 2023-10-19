@@ -4,51 +4,28 @@
 
 e_command parseCommandCode(std::string command)
 {
-	if (command == "NICK")
-		return CMD_NICK;
-	if (command == "USER")
-		return CMD_USER;
-	if (command == "PING")
-		return CMD_PING;
-	if (command == "PONG")
-		return CMD_PONG;
-	if (command == "QUIT")
-		return CMD_QUIT;
-	if (command == "JOIN")
-		return CMD_JOIN;
-	if (command == "PART")
-		return CMD_PART;
-	if (command == "TOPIC")
-		return CMD_TOPIC;
-	if (command == "NAMES")
-		return CMD_NAMES;
-	if (command == "LIST")
-		return CMD_LIST;
-	if (command == "KICK")
-		return CMD_KICK;
-	if (command == "PRIVMSG")
-		return CMD_PRIVMSG;
-	if (command == "SAY")
-		return CMD_SAY;
-	if (command == "NOTICE")
-		return CMD_NOTICE;
-	if (command == "PASS")
-		return CMD_PASS;
-	if (command == "INVITE")
-		return CMD_INVITE;
-	if (command == "MODE")
-		return CMD_MODE;
-	if (command == "WHO")
-		return CMD_WHO;
-	if (command == "WHOIS")
-		return CMD_WHOIS;
-	if (command == "WHOWAS")
-		return CMD_WHOWAS;
-	if (command == "BAN")
-		return CMD_BAN;
-	if (command == "UNBAN")
-		return CMD_UNBAN;
-
+	if (command == "NICK") return CMD_NICK;
+	if (command == "USER") return CMD_USER;
+	if (command == "PING") return CMD_PING;
+	if (command == "PONG") return CMD_PONG;
+	if (command == "QUIT") return CMD_QUIT;
+	if (command == "JOIN") return CMD_JOIN;
+	if (command == "PART") return CMD_PART;
+	if (command == "TOPIC") return CMD_TOPIC;
+	if (command == "NAMES") return CMD_NAMES;
+	if (command == "LIST") return CMD_LIST;
+	if (command == "KICK") return CMD_KICK;
+	if (command == "PRIVMSG") return CMD_PRIVMSG;
+	if (command == "SAY") return CMD_SAY;
+	if (command == "NOTICE") return CMD_NOTICE;
+	if (command == "PASS") return CMD_PASS;
+	if (command == "INVITE") return CMD_INVITE;
+	if (command == "MODE") return CMD_MODE;
+	if (command == "WHO") return CMD_WHO;
+	if (command == "WHOIS") return CMD_WHOIS;
+	if (command == "WHOWAS") return CMD_WHOWAS;
+	if (command == "BAN") return CMD_BAN;
+	if (command == "UNBAN") return CMD_UNBAN;
 	return CMD_UNKNOWN;
 }
 
