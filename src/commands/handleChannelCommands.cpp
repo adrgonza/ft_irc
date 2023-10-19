@@ -78,9 +78,7 @@ void Server::handleJoin(std::string body, Client &user)
 	{
 		std::string aux = chanIt->first;
 		for (size_t i = 0; i < aux.length(); i++)
-		{
 			aux[i] = tolower(aux[i]);
-		}
 		if (aux == lChannel)
 			channel = chanIt->first;
 	}
