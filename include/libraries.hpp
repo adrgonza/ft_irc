@@ -101,7 +101,7 @@ e_command parseCommandCode(const std::string &command);
 #define KICK_CMD(nickname, username, channel, kicked, message) (":" + nickname + "!~" + username + "@localhost KICK " + channel + " " + kicked + " " + message)
 #define QUIT_CMD(nickname, username, message) (":" + nickname + "!~" + username + "@localhost QUIT :Quit: " + message)
 #define RPL_MOTD(server, client, text) (":localhost 372 " + (client) + " :" + (text))
-#define RPL_MOTDSTART(client, text) (":localhost 375 " + (client) + " : " + (text))
+#define RPL_MOTDSTART(client, text) (":localhost 001 " + (client) + " :" + (text))
 #define RPL_ENDOFMOTD(server, client) (":localhost 376 " + (client) + " :End of welcome msg")
 #define RPL_WHOREPLY(server, client, channel, username, host, serverName, nick, flags, hopcount, realname) (":localhost 352 " + (client) + " " + (channel) + " " + (username) + " " + (host) + " " + (serverName) + " " + (nick) + " " + (flags) + " :" + (hopcount) + " " + (realname))
 #define RPL_ENDOFWHO(server, client, mask) (":localhost 315 " + (client) + " " + (mask) + " :End of WHO list")
