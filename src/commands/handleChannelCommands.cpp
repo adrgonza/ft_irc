@@ -144,11 +144,12 @@ void Server::handleJoin(const std::string &body, Client &user)
 		{
 			Client *client = *it;
 			client->sendMessage(JOIN_CMD(nick, nick, channel));
-			if (!toChan->getTopic().empty() && toChan->getTopic() != "")
+			client->sendMessage(RPL_NAMREPLY(nick, "=", channel, listNames));
+			client->sendMessage(RPL_ENDOFNAMES(nick, channel));
+			if (!toChan->getTopic().empty() && toChan->getTopic() != "") {
 				client->sendMessage(TOPIC_CMD(channel, toChan->getTopic()));
+			}
 		}
-		user.sendMessage(RPL_NAMREPLY(nick, "=", channel, listNames));
-		user.sendMessage(RPL_ENDOFNAMES(nick, channel));
 	}
 }
 

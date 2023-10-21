@@ -251,3 +251,9 @@ void Server::disconnectClient(const int &i)
 	_pollFds[i].fd = -1;
 	_pollFds[i].revents = 0;
 }
+
+void Server::handleCap(const Client & user)
+{
+	user.sendMessage(RPL_CAP());
+}
+

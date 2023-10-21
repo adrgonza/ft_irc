@@ -97,12 +97,23 @@ void Client::changeNickname(std::vector<Client*> &clients, std::map<std::string,
 
 void Client::changeUserName(const std::string &user)
 {
+	std::cout << "New User: " << user << std::endl;
 	if (!_username.empty())
 	{
 		this->sendMessage(ERR_ALREADYREGISTERED(_nickname));
 		return ;
 	}
-	std::string username = getWord(user, 1);
+	
+	std::string username;
+	// fijarse si limechat tambien lo manda asi
+	size_t colonPos = user.find(':');
+	if (colonPos != std::string::npos)
+		username = user.substr(colonPos + 1);
+	else
+		username = getWord(user, 1);
+	std::cout << "username: " << username << std::endl;
+	_username = username;
+
 	std::string shouldBeZero = getWord(user, 2);
 	std::string shouldBeAsteric = getWord(user, 3);
 	std::string realname;

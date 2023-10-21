@@ -89,7 +89,7 @@ e_command parseCommandCode(const std::string &command);
 #define USER_CMD(username, realname) ("USER " + (username) + " 0 * " + (realname))
 #define NICK_CMD(nickname, username, newNickname) (":" + nickname + "!~" + username + "@localhost NICK :" + newNickname)
 #define PRIVMSG_CMD(nickname, target, text) (":" + (nickname) + " PRIVMSG " + (target) + " " + (text))
-#define PRIVMSG_RECEIVER_CMD(nickname, username, recipient, message) (":" + nickname + "!~" + username + "@localhost PRIVMSG " + recipient + " :" + message)
+#define PRIVMSG_RECEIVER_CMD(nickname, username, recipient, message) (":" + nickname + "!~" + username + "@localhost PRIVMSG " + recipient + " " + message)
 #define NOTICE_CMD(nickname, target, text) (":" + (nickname) + " NOTICE " + (target) + " " + (text))
 #define NOTICE_RECEIVER_CMD(sender, username, target, text) (":" + sender + "!~" + username + "@localhost NOTICE " + target + " :" + text)
 #define JOIN_CMD(nickname, username, channel) (":" + nickname + "!~" + username + "@localhost JOIN " + channel)
@@ -117,5 +117,7 @@ e_command parseCommandCode(const std::string &command);
 #define UNBAN_CMD(server, channel, host) (":localhost MODE " + (channel) + " -b " + (host))
 #define RPL_NAMREPLY(client, symbol, channel, list) (":localhost 353 " + client + " " + symbol + " " + channel + " :" + list)
 #define RPL_ENDOFNAMES(client, channel) (":localhost 366 " + client + " " + channel + " :End of /NAMES list.\r\n")
+
+#define RPL_CAP()("CAP * LS :")
 
 #endif
