@@ -14,6 +14,7 @@ class Server {
 		~Server();
 
 		bool run();
+		int  terminate_program();
 
 	private:
 		std::string _network;

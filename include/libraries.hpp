@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <arpa/inet.h>
+#include <csignal>
 
 typedef enum
 {

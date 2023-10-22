@@ -62,7 +62,10 @@ void Server::partChannel(const std::string &body, Client &user)
 
 		std::map<std::string, Channel *>::iterator it = _channels.find(channel);
 		if (it != _channels.end())
+		{
+			delete it->second;
 			_channels.erase(it);
+		}
 	}
 }
 

@@ -1,6 +1,15 @@
 #include "Server.hpp"
 #include <libraries.hpp>
 
+bool _stopServer = false;
+
+void stopServerSignal(int signal)
+{
+	if (signal == SIGINT) {
+		std::cout << "CTRL+C received" << std::endl;
+		_stopServer = true;
+	}
+}
 
 Server::Server(const int &port, const std::string &password) : _password(password), _port(port), _pollFds(BACKLOG + 1) {}
 
@@ -32,9 +41,12 @@ bool Server::run()
 	for (int i = 1; i <= BACKLOG; i++)
 		_pollFds[i].fd = -1;
 
-	while (true)
+	signal(SIGINT, stopServerSignal);
+
+	while (!_stopServer)
 		if (handleClientConnections() == false)
 			return (false);
+	return (false);
 }
 
 bool Server::handleClientConnections()
@@ -104,12 +116,12 @@ bool Server::handleClientCommunications(const size_t &i)
 bool Server::handleClientInput(Client &caller, std::string message)
 {
 	std::cout << "msg: " << message << std::endl << "End of msg" << std::endl;
-    
-    std::istringstream stream(message);
-    std::string line;
+	
+	std::istringstream stream(message);
+	std::string line;
 
-    while (std::getline(stream, line, '\n')) {
-        std::cout << "line: " << line << std::endl;
+	while (std::getline(stream, line, '\n')) {
+		std::cout << "line: " << line << std::endl;
 		message = line;
 		if (message.find("\r") == message.npos)
 		{
@@ -207,3 +219,34 @@ void Server::checkPassword(const std::string &body, Client &caller)
 		caller.giveKey(false);
 	}
 }
+
+int Server::terminate_program()
+{
+	std::cout << "Freeing memory" << std::endl;
+
+	std::vector<Client*>::iterator clientIt;
+	for (clientIt = _clients.begin(); clientIt != _clients.end(); ++clientIt)
+		delete *clientIt;
+	_clients.clear();
+
+	std::vector<Client*>::iterator disconnectedClientIt;
+	for (disconnectedClientIt = _disconnectedClients.begin(); disconnectedClientIt != _disconnectedClients.end(); ++disconnectedClientIt)
+		delete *disconnectedClientIt;
+	_disconnectedClients.clear();
+
+	std::map<std::string, Channel*>::iterator channelIt;
+	for (channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
+		delete channelIt->second;
+	_channels.clear();
+
+	// Additional cleanup code and program termination tasks
+	std::cout << "Exiting the program" << std::endl;
+
+	return 0;
+}
+
+
+
+
+
+
