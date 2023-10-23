@@ -59,10 +59,13 @@ class Server {
 		void usersOnNetwork(const std::string &, const Client &);
 		void getUserInfo(const std::string &, const Client &);
 		void getPreviouslyUsersInfo(const std::string &, const Client &);
-		void modeHandler(const std::string &, const Client &);
-		void banUser(const std::string &, const Client &);
-		void unbanUser(const std::string &, const Client &);
 		void quitServ(std::string &, const Client &);
+		void modeHandler(const std::string &, const Client &);
+		void banUser(Channel *, std::string &, const std::string &, const Client &);
+		void unbanUser(Channel *, std::string &, const std::string &, const Client &);
+		void adminOnlyChan(Channel *, const std::string &, const Client &, bool);
+		void setSecretChannel(Channel *chan, const std::string & host, const Client &user, bool);
+		void setExternalMsgsChannel(Channel *chan, const std::string & host, const Client &user, bool);
 };
 
 #endif

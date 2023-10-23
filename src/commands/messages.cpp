@@ -58,10 +58,19 @@ void Server::privMessage(std::string &body, const Client &user)
 	if (channelExists(target))
 	{
 		Channel *chanObj = getChannelByName(target);
-		if (!chanObj->hasParticipant(user))
+		if (!chanObj->getAcceptExternalMsgs() && !chanObj->hasParticipant(user))
 		{
 			user.sendMessage(ERR_NOTONCHANNEL(user.getNickname(), target));
 			return;
+		}
+
+		if (chanObj->isAdminOnly())
+		{
+			if (chanObj->isOperator(user) == false)
+			{
+				user.sendMessage(ERR_CHANOPRIVSNEEDED(user.getNickname(), target));
+				return;
+			}
 		}
 
 		if (!target.empty() && target[0] != '#')
