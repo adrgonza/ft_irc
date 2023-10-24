@@ -80,11 +80,14 @@ void Server::modeHandler(const std::string &body, const Client &user)
 	if (body.empty())
 		return;
 
+	std::string bodyCopy = body;
+
 	if (notSupportedModes((std::string &)body))
 		return;
 	
-	std::string channel = getWord(body, 1);
-	std::string bodyCopy = body;
+	std::string channel = getWord(bodyCopy, 1);
+	if (!channel.empty() && channel[0] != '#')
+		channel = '#' + channel;
 
 	std::vector<char> modesToAdd;
 	std::vector<char> modesToRemove;
