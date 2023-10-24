@@ -14,6 +14,7 @@ class Server {
 		~Server();
 
 		bool run();
+		int  terminate_program();
 
 	private:
 		std::string _network;
@@ -42,6 +43,7 @@ class Server {
 		Channel* getChannelByName(const std::string &);
 		Client* findClientByNickname(const std::string &);
 		std::string getWord(const std::string &, const int &);
+		void handleCap(const Client &);
 
 		/* commands */
 		void privMessage(std::string &, const Client &);

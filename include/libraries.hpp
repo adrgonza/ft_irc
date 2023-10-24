@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <arpa/inet.h>
+#include <csignal>
 
 typedef enum
 {
@@ -87,7 +88,7 @@ e_command parseCommandCode(const std::string &command);
 #define USER_CMD(username, realname) ("USER " + (username) + " 0 * " + (realname))
 #define NICK_CMD(nickname, username, newNickname) (":" + nickname + "!~" + username + "@localhost NICK :" + newNickname)
 #define PRIVMSG_CMD(nickname, target, text) (":" + (nickname) + " PRIVMSG " + (target) + " " + (text))
-#define PRIVMSG_RECEIVER_CMD(nickname, username, recipient, message) (":" + nickname + "!~" + username + "@localhost PRIVMSG " + recipient + " :" + message)
+#define PRIVMSG_RECEIVER_CMD(nickname, username, recipient, message) (":" + nickname + "!~" + username + "@localhost PRIVMSG " + recipient + " " + message)
 #define NOTICE_CMD(nickname, target, text) (":" + (nickname) + " NOTICE " + (target) + " " + (text))
 #define NOTICE_RECEIVER_CMD(sender, username, target, text) (":" + sender + "!~" + username + "@localhost NOTICE " + target + " :" + text)
 #define JOIN_CMD(nickname, username, channel) (":" + nickname + "!~" + username + "@localhost JOIN " + channel)
@@ -117,5 +118,7 @@ e_command parseCommandCode(const std::string &command);
 // #define BAN_CMD(server, channel, host) (":localhost MODE " + (channel) + " +b " + (host))
 // #define UNBAN_CMD(server, channel, host) (":localhost MODE " + (channel) + " -b " + (host))
 #define RPL_CHANNELMODEIS(client, channel, modestring)(":localhost 324 " + client + " " + channel + " " + modestring)
+
+#define RPL_CAP()("CAP * LS :")
 
 #endif
