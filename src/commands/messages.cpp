@@ -46,30 +46,57 @@ void Server::privMessage(std::string &body, const Client &user)
 	std::size_t spacePos = body.find(' ') + 1;
 	if (spacePos != std::string::npos)
 		body = body.substr(spacePos);
+	
+	std::string isDcc;
+	spacePos = body.find(':') + 1;
+	if (spacePos != std::string::npos)
+		isDcc = body.substr(spacePos);
 
-	// std::string lowerTarget = target;
-	// for (std::string::size_type i = 0; i < target.length(); i++)
-	// 	lowerTarget[i] = std::tolower(target[i]);
+	if (isDcc.length() >= 3) {
+		isDcc = isDcc.substr(0, 3);
+		if (isDcc.find("DCC") == 0) {
+			int targetSocket = getClientSocketFdByNickname(target);
+			if (targetSocket == -1)
+				return;
+			Client *receiver = findClientByNickname(target);
+			receiver->sendMessage(PRIVMSG_RECEIVER_CMD(user.getNickname(), user.getNickname(), target, body));
+			return;
+		}
+	}
 
 	if (!channelExists(target) && !userExists(target))
 		user.sendMessage(ERR_NOSUCHNICK(user.getNickname(), target));
 
 	std::string sendMessage;
+	std::cout << "targ: " << target << std::endl;
 	if (channelExists(target))
 	{
+		std::cout << "inside" << std::endl;
 		Channel *chanObj = getChannelByName(target);
-		if (!chanObj->hasParticipant(user))
+		if (!chanObj->getAcceptExternalMsgs() && !chanObj->hasParticipant(user))
 		{
 			user.sendMessage(ERR_NOTONCHANNEL(user.getNickname(), target));
 			return;
 		}
 
+		if (chanObj->isAdminOnly())
+		{
+			if (chanObj->isOperator(user) == false)
+			{
+				user.sendMessage(ERR_CHANOPRIVSNEEDED(user.getNickname(), target));
+				return;
+			}
+		}
+
 		if (!target.empty() && target[0] != '#')
 			target = "#" + target;
 
-		for (std::vector<Client *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+		std::vector<Client *> participants = chanObj->getParticipants();
+		std::cout << "Nicks: ";
+		for (std::vector<Client *>::iterator it = participants.begin(); it != participants.end(); ++it)
 		{
-			if ((*it)->getChannel() == target && (*it)->getNickname() != user.getNickname())
+			std::cout << " " << (*it)->getNickname() << " ";
+			if ((*it)->getNickname() != user.getNickname())
 				(*it)->sendMessage(PRIVMSG_CMD(user.getNickname(), target, body));
 		}
 	}

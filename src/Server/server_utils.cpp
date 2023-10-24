@@ -19,12 +19,10 @@ e_command parseCommandCode(const std::string &command)
 	if (command == "NOTICE") return CMD_NOTICE;
 	if (command == "PASS") return CMD_PASS;
 	if (command == "INVITE") return CMD_INVITE;
-	if (command == "MODE") return CMD_MODE;
 	if (command == "WHO") return CMD_WHO;
 	if (command == "WHOIS") return CMD_WHOIS;
 	if (command == "WHOWAS") return CMD_WHOWAS;
-	if (command == "BAN") return CMD_BAN;
-	if (command == "UNBAN") return CMD_UNBAN;
+	if (command == "MODE") return CMD_MODE;
 	return CMD_UNKNOWN;
 }
 
@@ -72,18 +70,12 @@ void Server::handleCommand(Client &caller, const std::string &command, std::stri
 	case CMD_NOTICE:
 		noticeMessage(body, caller);
 		break;
-	case CMD_BAN:
-		banUser(body, caller);
-		break;
-	case CMD_UNBAN:
-		unbanUser(body, caller);
-		break;
-	case CMD_MODE:
-		modeHandler(body, caller);
-		break;
 	case CMD_QUIT:
 		quitServ(body, caller);
 		break;
+
+	case CMD_MODE:
+		modeHandler(body, caller);
 
 	// Server commands
 	case CMD_PING:
@@ -251,3 +243,9 @@ void Server::disconnectClient(const int &i)
 	_pollFds[i].fd = -1;
 	_pollFds[i].revents = 0;
 }
+
+void Server::handleCap(const Client & user)
+{
+	user.sendMessage(RPL_CAP());
+}
+

@@ -14,15 +14,18 @@ int main(int argc, char **argv)
 		return (std::cout << "\033[0;31mERROR: Invalid Port.." << std::endl, 1);
 		
 	std::string password = argv[2];
-	if (password.length() < 4)
-		return (std::cout << "\033[0;31mERROR: Password too short.." << std::endl, 1);
+	
+	// Server *pepe = new Server(std::atoi(port.c_str()), "");
+	// pepe = pepe;
+	// if (password.length() < 4)
+	// 	return (std::cout << "\033[0;31mERROR: Password too short.." << std::endl, 1);
 
 	try
 	{
 		Server IRC = Server(std::atoi(port.c_str()), password);
 
 		if (IRC.run() == false)
-			return (1);
+			return (IRC.terminate_program());
 	}
 	catch(const std::exception& e)
 	{

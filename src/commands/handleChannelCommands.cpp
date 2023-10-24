@@ -62,7 +62,10 @@ void Server::partChannel(const std::string &body, Client &user)
 
 		std::map<std::string, Channel *>::iterator it = _channels.find(channel);
 		if (it != _channels.end())
+		{
+			delete it->second;
 			_channels.erase(it);
+		}
 	}
 }
 
@@ -89,9 +92,9 @@ void Server::handleJoin(const std::string &body, Client &user)
 	if (_channels.find(channel) != _channels.end())
 	{
 		Channel *targetChannel = getChannelByName(channel);
-		if (targetChannel->isBanned(user))
+		if (targetChannel->isBanned(user) && !targetChannel->isInvited(user))
 		{
-			user.sendMessage(ERR_YOUREBANNEDCREEP(user.getNickname()));
+			user.sendMessage(ERR_BANNEDFROMCHAN(user.getNickname(), channel));
 			return;
 		}
 		targetChannel->addParticipant(user);
@@ -144,11 +147,12 @@ void Server::handleJoin(const std::string &body, Client &user)
 		{
 			Client *client = *it;
 			client->sendMessage(JOIN_CMD(nick, nick, channel));
-			if (!toChan->getTopic().empty() && toChan->getTopic() != "")
+			client->sendMessage(RPL_NAMREPLY(nick, "=", channel, listNames));
+			client->sendMessage(RPL_ENDOFNAMES(nick, channel));
+			if (!toChan->getTopic().empty() && toChan->getTopic() != "") {
 				client->sendMessage(TOPIC_CMD(channel, toChan->getTopic()));
+			}
 		}
-		user.sendMessage(RPL_NAMREPLY(nick, "=", channel, listNames));
-		user.sendMessage(RPL_ENDOFNAMES(nick, channel));
 	}
 }
 
@@ -217,7 +221,6 @@ void Server::getNamesInChannel(const std::string &body, const Client &user)
 		std::cout << "names in channel " << namesInChannelMessage << std::endl;
 		user.sendMessage(namesInChannelMessage);
 	}
-	std::cout << "asdas" << std::endl;
 	std::string endOfNamesMessage = ": 366 " + user.getNickname() + " " + channel + " :End of NAMES list\r\n";
 	user.sendMessage(endOfNamesMessage);
 }
@@ -252,5 +255,10 @@ void Server::inviteNick(const std::string &body, const Client &user)
 		user.sendMessage(ERR_USERONCHANNEL(user.getNickname(), targetUser, channel));
 		return;
 	}
-	targetClient->sendMessage(INVITE_CMD(user.getNickname(), targetUser, channel));
+	if (!channelObj->isInvited(*targetClient))
+	{
+		user.sendMessage(RPL_INVITING(user.getNickname(), targetUser, channel));
+		targetClient->sendMessage(INVITE_CMD(user.getNickname(), targetUser, channel));
+		channelObj->addInviteUser(*targetClient);
+	}
 }

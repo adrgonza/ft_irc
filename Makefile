@@ -14,6 +14,7 @@ SRCS	=	main.cpp \
 			src/commands/notice.cpp  \
 			src/commands/handleOperatorChannelCommands.cpp \
 			src/commands/userCommands.cpp  \
+			src/commands/handleMode.cpp
 
 BOTSRCS = src/Bot/Bot.cpp src/Bot/bot_utils.cpp src/Bot/BotClass.cpp
 

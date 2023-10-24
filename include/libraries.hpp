@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <arpa/inet.h>
+#include <csignal>
 
 typedef enum
 {
@@ -53,8 +54,6 @@ typedef enum
 	CMD_WHO,
 	CMD_WHOIS,
 	CMD_WHOWAS,
-	CMD_BAN,
-	CMD_UNBAN,
 } e_command;
 
 e_command parseCommandCode(const std::string &command);
@@ -89,7 +88,7 @@ e_command parseCommandCode(const std::string &command);
 #define USER_CMD(username, realname) ("USER " + (username) + " 0 * " + (realname))
 #define NICK_CMD(nickname, username, newNickname) (":" + nickname + "!~" + username + "@localhost NICK :" + newNickname)
 #define PRIVMSG_CMD(nickname, target, text) (":" + (nickname) + " PRIVMSG " + (target) + " " + (text))
-#define PRIVMSG_RECEIVER_CMD(nickname, username, recipient, message) (":" + nickname + "!~" + username + "@localhost PRIVMSG " + recipient + " :" + message)
+#define PRIVMSG_RECEIVER_CMD(nickname, username, recipient, message) (":" + nickname + "!~" + username + "@localhost PRIVMSG " + recipient + " " + message)
 #define NOTICE_CMD(nickname, target, text) (":" + (nickname) + " NOTICE " + (target) + " " + (text))
 #define NOTICE_RECEIVER_CMD(sender, username, target, text) (":" + sender + "!~" + username + "@localhost NOTICE " + target + " :" + text)
 #define JOIN_CMD(nickname, username, channel) (":" + nickname + "!~" + username + "@localhost JOIN " + channel)
@@ -98,6 +97,7 @@ e_command parseCommandCode(const std::string &command);
 #define NAMES_CMD(channel) ("NAMES " + (channel))
 #define LIST_CMD "LIST"
 #define INVITE_CMD(nickname, targetNick, channel) (":" + (nickname) + "!user@host INVITE " + (targetNick) + " " + (channel))
+#define RPL_INVITING(nick, target, channel) (":localhost 341 " + (nick) + " " + (target) + " " + (channel) + " :Invitation sent")
 #define KICK_CMD(nickname, username, channel, kicked, message) (":" + nickname + "!~" + username + "@localhost KICK " + channel + " " + kicked + " " + message)
 #define QUIT_CMD(nickname, username, message) (":" + nickname + "!~" + username + "@localhost QUIT :Quit: " + message)
 #define RPL_MOTD(server, client, text) (":localhost 372 " + (client) + " :" + (text))
@@ -112,10 +112,13 @@ e_command parseCommandCode(const std::string &command);
 #define PING_CMD(token) ("PING " + (token))
 #define PONG_CMD(token) ("PONG :" + (token))
 #define OPER_CMD(name, password) ("OPER " + (name) + " " + (password))
-#define MODE_CMD(nickname, channel, mode) (":localhost MODE " + channel + " " + mode + " " + nickname)
-#define BAN_CMD(server, channel, host) (":localhost MODE " + (channel) + " +b " + (host))
-#define UNBAN_CMD(server, channel, host) (":localhost MODE " + (channel) + " -b " + (host))
 #define RPL_NAMREPLY(client, symbol, channel, list) (":localhost 353 " + client + " " + symbol + " " + channel + " :" + list)
 #define RPL_ENDOFNAMES(client, channel) (":localhost 366 " + client + " " + channel + " :End of /NAMES list.\r\n")
+#define MODE_CMD(sender, target, mode, param) (":" + sender + " MODE " + target + " " + mode + " " + param)
+// #define BAN_CMD(server, channel, host) (":localhost MODE " + (channel) + " +b " + (host))
+// #define UNBAN_CMD(server, channel, host) (":localhost MODE " + (channel) + " -b " + (host))
+#define RPL_CHANNELMODEIS(client, channel, modestring)(":localhost 324 " + client + " " + channel + " " + modestring)
+
+#define RPL_CAP()("CAP * LS :")
 
 #endif
