@@ -6,6 +6,16 @@
 #include <vector>
 #include <sstream>
 
+void removeFirstWord(std::string &str)
+{
+	size_t pos = str.find(' ');
+
+	if (pos != std::string::npos)
+		str.erase(0, pos + 1);
+	else
+		str.clear();
+}
+
 void parseModes(std::string &modeString, std::vector<char> &modesToAdd, std::vector<char> &modesToRemove, std::vector<std::string> &modeParameters)
 {
 	std::vector<std::string> parameters;
@@ -20,7 +30,6 @@ void parseModes(std::string &modeString, std::vector<char> &modesToAdd, std::vec
 	for (std::vector<std::string>::const_iterator it = parameters.begin(); it != parameters.end(); ++it)
 	{
 		const std::string &parameter = *it;
-		std::cout << "param: " << parameter << std::endl;
 
 		if (parameter[0] == '+')
 		{
@@ -59,7 +68,8 @@ bool notSupportedModes(std::string &body)
 		if (supportedModes.find(modeChar) == std::string::npos)
 		{
 			body.erase(i, 1);
-			std::cout << "Erasing " << modeChar << " from param. That mode is not supported by server" << std::endl;
+			if (isalpha(modeChar))
+				std::cout << "Erasing " << modeChar << " from param. That mode is not supported by server" << std::endl;
 			i--;
 		}
 	}
@@ -76,23 +86,49 @@ bool notSupportedModes(std::string &body)
 
 void Server::modeHandler(const std::string &body, const Client &user)
 {
-	std::cout << "mode body: " << body << std::endl;
 	if (body.empty())
 		return;
 
 	std::string bodyCopy = body;
 
-	if (notSupportedModes((std::string &)body))
-		return;
-	
 	std::string channel = getWord(bodyCopy, 1);
+	if (userExists(channel))
+		return;
+
 	if (!channel.empty() && channel[0] != '#')
 		channel = '#' + channel;
 
+	if (!channelExists(channel))
+	{
+		user.sendMessage(ERR_NOSUCHCHANNEL(user.getNickname(), channel));
+		return;
+	}
+
+	Channel *chan = getChannelByName(channel);
+
+	if (getWord(bodyCopy, 2).empty())
+	{
+		user.sendMessage(RPL_CHANNELMODEIS(user.getNickname(), channel, chan->getModes()));
+		return;
+	}
+
+	removeFirstWord(bodyCopy);
+	if (notSupportedModes((std::string &)bodyCopy))
+		return;
+
+	// check ONLY for all channel commands that the user is operator
+	if (!chan->isOperator(user))
+	{
+		std::string nick = user.getNickname();
+		user.sendMessage(ERR_CHANOPRIVSNEEDED(nick, channel));
+		return;
+	}
+
+	bodyCopy = body;
 	std::vector<char> modesToAdd;
 	std::vector<char> modesToRemove;
 	std::vector<std::string> modeParameters;
-	parseModes((std::string &)body, modesToAdd, modesToRemove, modeParameters);
+	parseModes((std::string &)bodyCopy, modesToAdd, modesToRemove, modeParameters);
 
 	std::string modeToHandleB = getWord(body, 2);
 	std::string modeToHandle = modeToHandleB;
@@ -108,28 +144,6 @@ void Server::modeHandler(const std::string &body, const Client &user)
 
 	channel = modeParameters[modeParamI];
 	modeParamI++;
-
-	if (!channelExists(channel))
-	{
-		user.sendMessage(ERR_NOSUCHCHANNEL(user.getNickname(), channel));
-		return;
-	}
-
-	// check ONLY for all channel commands that the user is operator
-	Channel *chan = getChannelByName(channel);
-
-	if (getWord(bodyCopy, 2).empty())
-	{
-		user.sendMessage(RPL_CHANNELMODEIS(user.getNickname(), channel, chan->getModes()));
-		return;
-	}
-
-	if (!chan->isOperator(user))
-	{
-		std::string nick = user.getNickname();
-		user.sendMessage(ERR_CHANOPRIVSNEEDED(nick, channel));
-		return;
-	}
 
 	for (std::vector<char>::const_iterator it = modesToAdd.begin(); it != modesToAdd.end(); ++it)
 	{
