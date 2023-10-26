@@ -203,7 +203,7 @@ bool Server::handleClientInput(Client &caller, std::string message)
 
 void Server::checkPassword(const std::string &body, Client &caller)
 {
-	if (body.empty())
+	if (body.empty() || _password.empty())
 		caller.giveKey(true);
 	else if (body == _password)
 		caller.giveKey(true);

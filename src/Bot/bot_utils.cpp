@@ -88,11 +88,11 @@ std::string extractContent(const std::string &jsonResponse)
 	return content;
 }
 
-size_t WriteCallback(void *data, const size_t &size, const size_t &nmemb, std::string *response_data)
+size_t WriteCallback(void *data, size_t size, size_t nmemb, std::string *response_data)
 {
-	size_t total_size = size * nmemb;
-	response_data->append(static_cast<char *>(data), total_size);
-	return total_size;
+    size_t total_size = size * nmemb;
+    response_data->append(static_cast<char *>(data), total_size);
+    return total_size;
 }
 
 bool endsWith(const std::string &fullString, const std::string &channel) {

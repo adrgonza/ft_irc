@@ -41,7 +41,7 @@ int checkArgs(const int &);
 void sendConfigOpenAIMessage();
 Bot sendConfigServer(char *argv[]);
 std::string extractContent(const std::string &);
-size_t WriteCallback(void *, const size_t &, const size_t &, std::string *response_data);
+size_t WriteCallback(void *data, size_t size, size_t nmemb, std::string *response_data);
 std::string isJoinCommand(const std::string &, const std::string &);
 std::string responseToJoinCommand(std::string buffer);
 
