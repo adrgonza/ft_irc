@@ -46,32 +46,13 @@ void Server::privMessage(std::string &body, const Client &user)
 	std::size_t spacePos = body.find(' ') + 1;
 	if (spacePos != std::string::npos)
 		body = body.substr(spacePos);
-	
-	std::string isDcc;
-	spacePos = body.find(':') + 1;
-	if (spacePos != std::string::npos)
-		isDcc = body.substr(spacePos);
-
-	if (isDcc.length() >= 3) {
-		isDcc = isDcc.substr(0, 3);
-		if (isDcc.find("DCC") == 0) {
-			int targetSocket = getClientSocketFdByNickname(target);
-			if (targetSocket == -1)
-				return;
-			Client *receiver = findClientByNickname(target);
-			receiver->sendMessage(PRIVMSG_RECEIVER_CMD(user.getNickname(), user.getNickname(), target, body));
-			return;
-		}
-	}
 
 	if (!channelExists(target) && !userExists(target))
 		user.sendMessage(ERR_NOSUCHNICK(user.getNickname(), target));
 
 	std::string sendMessage;
-	std::cout << "targ: " << target << std::endl;
 	if (channelExists(target))
 	{
-		std::cout << "inside" << std::endl;
 		Channel *chanObj = getChannelByName(target);
 		if (!chanObj->getAcceptExternalMsgs() && !chanObj->hasParticipant(user))
 		{
@@ -92,10 +73,8 @@ void Server::privMessage(std::string &body, const Client &user)
 			target = "#" + target;
 
 		std::vector<Client *> participants = chanObj->getParticipants();
-		std::cout << "Nicks: ";
 		for (std::vector<Client *>::iterator it = participants.begin(); it != participants.end(); ++it)
 		{
-			std::cout << " " << (*it)->getNickname() << " ";
 			if ((*it)->getNickname() != user.getNickname())
 				(*it)->sendMessage(PRIVMSG_CMD(user.getNickname(), target, body));
 		}

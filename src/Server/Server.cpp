@@ -121,7 +121,6 @@ bool Server::handleClientInput(Client &caller, std::string message)
 	std::string line;
 
 	while (std::getline(stream, line, '\n')) {
-		std::cout << "line: " << line << std::endl;
 		message = line;
 		if (message.find("\r") == message.npos)
 		{
@@ -203,7 +202,7 @@ bool Server::handleClientInput(Client &caller, std::string message)
 
 void Server::checkPassword(const std::string &body, Client &caller)
 {
-	if (body.empty() || _password.empty())
+	if (body.empty() && _password.empty())
 		caller.giveKey(true);
 	else if (body == _password)
 		caller.giveKey(true);
