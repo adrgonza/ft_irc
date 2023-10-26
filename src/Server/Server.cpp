@@ -107,104 +107,98 @@ bool Server::handleClientCommunications(const size_t &i)
 			std::cout << "[SERVER :: WARNING]: getClientByFd() failed before executing a command" << std::endl;
 			return (false);
 		}
+
 		Client &toPass = *(*caller);
-		handleClientInput(toPass, buffer);
+		std::istringstream stream(buffer);
+		std::string message;
+
+		while (std::getline(stream, message))
+			handleClientInput(toPass, message);
 	}
 	return (true);
 }
 
 bool Server::handleClientInput(Client &caller, std::string message)
 {
-	std::cout << "msg: " << message << std::endl << "End of msg" << std::endl;
-	
-	std::istringstream stream(message);
-	std::string line;
-
-	while (std::getline(stream, line, '\n')) {
-		message = line;
-		if (message.find("\r") == message.npos)
-		{
-			if (message.find("\n") != message.npos)
-			{
-				caller.sendMessage("You are a invalid Client!");
-				return (true);
-			}
-			if (caller.getjoined().empty())
-				caller.setjoined(message);
-			else if (caller.getjoined().length() >= 1024)
-				caller.sendMessage("Msg buffer is full!");
-			else
-				caller.setjoined(caller.getjoined() + message);
-
-			return (true);
-		}
-		if (!caller.getjoined().empty())
-		{
-			message = caller.getjoined() + message;
-			caller.setjoined("");
-		}
-
-		std::istringstream splitted(message);
-		std::string command;
-		splitted >> command;
-
-		for(std::string::iterator it = command.begin(); it != command.end(); ++it)
-			*it = std::toupper(*it);
-
-		std::string body;
-		std::getline(splitted >> std::ws, body);
-		if (body.empty())
-			body = IRC_ENDLINE;
-
-		size_t endlinePosition = body.find("\r");
-		if (endlinePosition != std::string::npos)
-			body = body.substr(0, endlinePosition);
-		else
+	if (message.find("\r") == message.npos)
+	{
+		if (message.find("\n") != message.npos)
 		{
 			caller.sendMessage("You are a invalid Client!");
 			return (true);
 		}
+		if (caller.getjoined().empty())
+			caller.setjoined(message);
+		else if (caller.getjoined().length() >= 1024)
+			caller.sendMessage("Msg buffer is full!");
+		else
+			caller.setjoined(caller.getjoined() + message);
+		return (true);
+	}
+	if (!caller.getjoined().empty())
+	{
+		message = caller.getjoined() + message;
+		caller.setjoined("");
+	}
 
-		if (caller.getKey() == false && _password.empty())
-			checkPassword("", caller);
+	std::istringstream splitted(message);
+	std::string command;
+	splitted >> command;
+
+	for(std::string::iterator it = command.begin(); it != command.end(); ++it)
+		*it = std::toupper(*it);
+
+	std::string body;
+	std::getline(splitted >> std::ws, body);
+	if (body.empty())
+		body = IRC_ENDLINE;
+
+	size_t endlinePosition = body.find("\r");
+	if (endlinePosition != std::string::npos)
+		body = body.substr(0, endlinePosition);
+	else
+	{
+		caller.sendMessage("You are a invalid Client!");
+		return (true);
+	}
+
+	if (caller.getFirsTime())
+		handleCommand(caller, command, body);
+	else
+	{
 		if (command == "CAP")
 			handleCap(caller);
-		else if (command == "PASS")
-			checkPassword(body, caller);
 		else if (caller.getKey() == false)
-			caller.sendMessage("NOTICE AUTH :*** Checking Ident... -> Please Introduce the Server Password");
-		else if (caller.getKey() == true)
 		{
-			if (!caller.getNickname().empty() && !caller.getUsername().empty())
+			if (_password.empty())
+				caller.giveKey(true);
+			else if (command == "PASS")
+				checkPassword(body, caller);
+		}
+		if (caller.getKey() == false)
+			caller.sendMessage("NOTICE AUTH :*** Checking Ident... -> Please Introduce the Server Password");
+		else
+		{
+			if (command == "NICK" || command == "USER")
 				handleCommand(caller, command, body);
-			else if (command == "NICK")
-				caller.changeNickname(_clients, _channels, body, caller);
-			else if (command == "USER")
-				caller.changeUserName(body);
-			else
-			{
-				if (caller.getNickname().empty() || caller.getUsername().empty())
-					caller.sendMessage("NOTICE AUTH :*** Checking Ident... -> Please Introduce Nick and User");
-				else if (caller.getKey() == false)
-					caller.sendMessage(ERR_PASSWDREQUIRED(caller.getNickname()));
-			}
+			if (caller.getNickname().empty() || caller.getUsername().empty())
+				caller.sendMessage("NOTICE AUTH :*** Checking Ident... -> Please Introduce Nick and User");
+			else if (caller.getKey() == false)
+				caller.sendMessage(ERR_PASSWDREQUIRED(caller.getNickname()));
 
-			if (caller.getKey() == true && !caller.getNickname().empty() && !caller.getUsername().empty() && caller.getFirsTime() == false)
+				if (!caller.getNickname().empty() && !caller.getUsername().empty() && caller.getFirsTime() == false)
 			{
 				caller.setFirstTime(true);
 				caller.sendMessage(RPL_MOTDSTART(caller.getNickname(), "Welcome to the TONY_WARRIORS Internet Relay Chat Network"));
 			}
 		}
-
 	}
 	return (true);
 }
 
 void Server::checkPassword(const std::string &body, Client &caller)
 {
-	if (body.empty() && _password.empty())
-		caller.giveKey(true);
-	else if (body == _password)
+	if (body == _password)
 		caller.giveKey(true);
 	else
 	{
