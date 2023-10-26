@@ -1,7 +1,5 @@
 #include "../Server/Server.hpp"
 
-// Falta agregar que maneje varios modos al mismo tiempo +ibght
-
 #include <iostream>
 #include <vector>
 #include <sstream>
@@ -76,7 +74,6 @@ bool notSupportedModes(std::string &body)
 
 	if (body.empty())
 	{
-		// Send a special message
 		std::cout << "No supported modes found in the body" << std::endl;
 		return false;
 	}
@@ -116,7 +113,7 @@ void Server::modeHandler(const std::string &body, const Client &user)
 	if (notSupportedModes((std::string &)bodyCopy))
 		return;
 
-	// check ONLY for all channel commands that the user is operator
+
 	if (!chan->isOperator(user))
 	{
 		std::string nick = user.getNickname();

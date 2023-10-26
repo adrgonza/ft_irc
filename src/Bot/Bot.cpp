@@ -50,24 +50,9 @@ std::string sendMessageToChatbot(std::string userMessage, bool isFirstMsg) {
 	return response_data;
 }
 
-// int checkWhaToSendToChatbot(std::string buffer, Bot *myBot)
-// {
-// 	std::string userJoined = isJoinCommand(buffer, myBot->getChannel());
-// 	if (!userJoined.empty())
-// 	{
-// 		std::string text = responseToJoinCommand(buffer);
-// 		std::string message = PRIVMSG_CMD(myBot->getNick(), myBot->getChannel(), text);
-// 		send(myBot->getSocket(), message.c_str(), message.length(), 0);
-// 		return -1;
-// 	}
-// 	return 1;
-// }
-
 void analyzeMessage(const std::string &buffer, Bot *myBot)
 {
 	std::cout << "buf: " << std::endl << "-" << buffer << "-" << std::endl;
-	// if (checkWhaToSendToChatbot(buffer, myBot) == -1)
-	// 	return;
 	const std::string NICK = "bot";
 	size_t firstSpace = buffer.find(' ');
 	if (firstSpace != std::string::npos)

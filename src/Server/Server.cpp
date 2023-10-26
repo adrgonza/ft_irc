@@ -238,7 +238,6 @@ int Server::terminate_program()
 		delete channelIt->second;
 	_channels.clear();
 
-	// Additional cleanup code and program termination tasks
 	std::cout << "Exiting the program" << std::endl;
 
 	return 0;
