@@ -12,14 +12,9 @@ int main(int argc, char **argv)
 			return (std::cout << "ERROR: invalid port.." << std::endl, 1);
 	if (std::atoi(port.c_str()) > 65535)
 		return (std::cout << "\033[0;31mERROR: Invalid Port.." << std::endl, 1);
-		
+
 	std::string password = argv[2];
 	
-	// Server *pepe = new Server(std::atoi(port.c_str()), "");
-	// pepe = pepe;
-	// if (password.length() < 4)
-	// 	return (std::cout << "\033[0;31mERROR: Password too short.." << std::endl, 1);
-
 	try
 	{
 		Server IRC = Server(std::atoi(port.c_str()), password);
