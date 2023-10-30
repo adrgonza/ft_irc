@@ -3,27 +3,28 @@
 
 e_command parseCommandCode(const std::string &command)
 {
-	if (command == "NICK") return CMD_NICK;
-	if (command == "USER") return CMD_USER;
-	if (command == "PING") return CMD_PING;
-	if (command == "PONG") return CMD_PONG;
-	if (command == "QUIT") return CMD_QUIT;
-	if (command == "JOIN") return CMD_JOIN;
-	if (command == "PART") return CMD_PART;
-	if (command == "TOPIC") return CMD_TOPIC;
-	if (command == "NAMES") return CMD_NAMES;
-	if (command == "LIST") return CMD_LIST;
-	if (command == "KICK") return CMD_KICK;
-	if (command == "PRIVMSG") return CMD_PRIVMSG;
-	if (command == "SAY") return CMD_SAY;
-	if (command == "NOTICE") return CMD_NOTICE;
-	if (command == "PASS") return CMD_PASS;
-	if (command == "INVITE") return CMD_INVITE;
-	if (command == "WHO") return CMD_WHO;
-	if (command == "WHOIS") return CMD_WHOIS;
-	if (command == "WHOWAS") return CMD_WHOWAS;
-	if (command == "MODE") return CMD_MODE;
-	return CMD_UNKNOWN;
+	if (command == "NICK") return (CMD_NICK);
+	if (command == "USER") return (CMD_USER);
+	if (command == "PING") return (CMD_PING);
+	if (command == "PONG") return (CMD_PONG);
+	if (command == "QUIT") return (CMD_QUIT);
+	if (command == "JOIN") return (CMD_JOIN);
+	if (command == "PART") return (CMD_PART);
+	if (command == "TOPIC") return (CMD_TOPIC);
+	if (command == "NAMES") return (CMD_NAMES);
+	if (command == "LIST") return (CMD_LIST);
+	if (command == "KICK") return (CMD_KICK);
+	if (command == "PRIVMSG") return (CMD_PRIVMSG);
+	if (command == "SAY") return (CMD_SAY);
+	if (command == "NOTICE") return (CMD_NOTICE);
+	if (command == "PASS") return (CMD_PASS);
+	if (command == "INVITE") return (CMD_INVITE);
+	if (command == "WHO") return (CMD_WHO);
+	if (command == "WHOIS") return (CMD_WHOIS);
+	if (command == "WHOWAS") return (CMD_WHOWAS);
+	if (command == "MODE") return (CMD_MODE);
+
+	return (CMD_UNKNOWN);
 }
 
 void Server::handleCommand(Client &caller, const std::string &command, std::string &body)
@@ -33,7 +34,7 @@ void Server::handleCommand(Client &caller, const std::string &command, std::stri
 	switch (commandCode)
 	{
 
-	// Client commands
+	/* Client commands */
 	case CMD_NICK:
 		caller.changeNickname(_clients, _channels, body, caller);
 		break;
@@ -48,7 +49,7 @@ void Server::handleCommand(Client &caller, const std::string &command, std::stri
 		sayMsg(body, caller);
 		break;
 
-	// Channel commands
+	/* Channel commands */
 	case CMD_JOIN:
 		handleJoin(body, caller);
 		break;
@@ -73,11 +74,11 @@ void Server::handleCommand(Client &caller, const std::string &command, std::stri
 	case CMD_QUIT:
 		quitServ(body, caller);
 		break;
-
 	case CMD_MODE:
 		modeHandler(body, caller);
+		break;
 
-	// Server commands
+	/* Server commands */
 	case CMD_PING:
 		pingCheck(body, caller);
 		break;
@@ -96,7 +97,6 @@ void Server::handleCommand(Client &caller, const std::string &command, std::stri
 	case CMD_KICK:
 		kickUser(body, caller);
 		break;
-
 	case CMD_UNKNOWN:
 		caller.sendMessage(ERR_UNKNOWNCOMMAND_421(caller.getNickname(), command));
 		break;
@@ -119,25 +119,23 @@ bool Server::userExists(std::string &nickname)
 		for (std::string::size_type i = 0; i < aux; i++)
 			lclient[i] = std::tolower(lclient[i]);
 		if (lclient == nickname)
-			return true;
+			return (true);
 	}
-	return false;
+	return (false);
 }
 bool Server::channelExists(const std::string &channelName)
 {
 	if (_channels.find(channelName) != _channels.end())
-		return true;
-	return false;
+		return (true);
+	return (false);
 }
 
 Client *Server::findClientByFd(const int &fd)
 {
 	for (std::vector<Client *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
-	{
 		if ((*it)->getFd() == fd)
 			return (*it);
-	}
-	return NULL;
+	return (NULL);
 }
 
 int Server::getClientSocketFdByNickname(const std::string &nickname)
@@ -157,7 +155,7 @@ int Server::getClientSocketFdByNickname(const std::string &nickname)
 		if (lclient == lnickname)
 			return (*it)->getFd();
 	}
-	return -1;
+	return (-1);
 }
 
 Channel *Server::getChannelByName(const std::string &channelName)

@@ -6,14 +6,14 @@ SRCS	=	main.cpp \
 			src/Client/Client.cpp \
 			src/Client/client_utils.cpp \
 			src/Channel/Channel.cpp \
-			src/commands/handleChannelCommands.cpp \
-			src/commands/messages.cpp  \
-			src/commands/pingpong.cpp  \
-			src/commands/userInformationCommands.cpp  \
-			src/commands/notice.cpp  \
-			src/commands/handleOperatorChannelCommands.cpp \
-			src/commands/userCommands.cpp  \
-			src/commands/handleMode.cpp
+			src/Commands/handleChannelCommands.cpp \
+			src/Commands/messages.cpp  \
+			src/Commands/pingpong.cpp  \
+			src/Commands/userInformationCommands.cpp  \
+			src/Commands/notice.cpp  \
+			src/Commands/handleOperatorChannelCommands.cpp \
+			src/Commands/userCommands.cpp  \
+			src/Commands/handleMode.cpp
 
 OBJS = $(SRCS:%.cpp=bin/%.o)
 

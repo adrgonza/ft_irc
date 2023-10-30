@@ -75,10 +75,10 @@ bool notSupportedModes(std::string &body)
 	if (body.empty())
 	{
 		std::cout << "No supported modes found in the body" << std::endl;
-		return false;
+		return (false);
 	}
 
-	return false;
+	return (false);
 }
 
 void Server::modeHandler(const std::string &body, const Client &user)
