@@ -3,26 +3,47 @@
 
 e_command parseCommandCode(const std::string &command)
 {
-	if (command == "NICK") return (CMD_NICK);
-	if (command == "USER") return (CMD_USER);
-	if (command == "PING") return (CMD_PING);
-	if (command == "PONG") return (CMD_PONG);
-	if (command == "QUIT") return (CMD_QUIT);
-	if (command == "JOIN") return (CMD_JOIN);
-	if (command == "PART") return (CMD_PART);
-	if (command == "TOPIC") return (CMD_TOPIC);
-	if (command == "NAMES") return (CMD_NAMES);
-	if (command == "LIST") return (CMD_LIST);
-	if (command == "KICK") return (CMD_KICK);
-	if (command == "PRIVMSG") return (CMD_PRIVMSG);
-	if (command == "SAY") return (CMD_SAY);
-	if (command == "NOTICE") return (CMD_NOTICE);
-	if (command == "PASS") return (CMD_PASS);
-	if (command == "INVITE") return (CMD_INVITE);
-	if (command == "WHO") return (CMD_WHO);
-	if (command == "WHOIS") return (CMD_WHOIS);
-	if (command == "WHOWAS") return (CMD_WHOWAS);
-	if (command == "MODE") return (CMD_MODE);
+
+	if (command == "NICK")
+		return (CMD_NICK);
+	if (command == "USER")
+		return (CMD_USER);
+	if (command == "PING")
+		return (CMD_PING);
+	if (command == "PONG")
+		return (CMD_PONG);
+	if (command == "QUIT")
+		return (CMD_QUIT);
+	if (command == "JOIN")
+		return (CMD_JOIN);
+	if (command == "PART")
+		return (CMD_PART);
+	if (command == "TOPIC")
+		return (CMD_TOPIC);
+	if (command == "NAMES")
+		return (CMD_NAMES);
+	if (command == "LIST")
+		return (CMD_LIST);
+	if (command == "KICK")
+		return (CMD_KICK);
+	if (command == "PRIVMSG")
+		return (CMD_PRIVMSG);
+	if (command == "SAY")
+		return (CMD_SAY);
+	if (command == "NOTICE")
+		return (CMD_NOTICE);
+	if (command == "PASS")
+		return (CMD_PASS);
+	if (command == "INVITE")
+		return (CMD_INVITE);
+	if (command == "WHO")
+		return (CMD_WHO);
+	if (command == "WHOIS")
+		return (CMD_WHOIS);
+	if (command == "WHOWAS")
+		return (CMD_WHOWAS);
+	if (command == "MODE")
+		return (CMD_MODE);
 
 	return (CMD_UNKNOWN);
 }
@@ -109,9 +130,7 @@ bool Server::userExists(std::string &nickname)
 	std::string::size_type aux = lclient.length();
 	aux = nickname.length();
 	for (std::string::size_type i = 0; i < aux; i++)
-	{
 		nickname[i] = std::tolower(nickname[i]);
-	}
 	for (std::vector<Client *>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
 		lclient = (*it)->getNickname();
@@ -123,6 +142,7 @@ bool Server::userExists(std::string &nickname)
 	}
 	return (false);
 }
+
 bool Server::channelExists(const std::string &channelName)
 {
 	if (_channels.find(channelName) != _channels.end())
@@ -153,7 +173,7 @@ int Server::getClientSocketFdByNickname(const std::string &nickname)
 		for (std::string::size_type i = 0; i < aux; i++)
 			lclient[i] = std::tolower(lclient[i]);
 		if (lclient == lnickname)
-			return (*it)->getFd();
+			return ((*it)->getFd());
 	}
 	return (-1);
 }
@@ -164,17 +184,15 @@ Channel *Server::getChannelByName(const std::string &channelName)
 	if (it != _channels.end())
 		return (it->second);
 	else
-		return NULL;
+		return (NULL);
 }
 
-std::vector<Client*>::iterator Server::getClientByFd(const int &fd)
+std::vector<Client *>::iterator Server::getClientByFd(const int &fd)
 {
-	for (std::vector<Client*>::iterator it = _clients.begin(); it != _clients.end(); it++)
-	{
+	for (std::vector<Client *>::iterator it = _clients.begin(); it != _clients.end(); it++)
 		if ((*it)->getFd() == fd)
-			return it;
-	}
-	return _clients.end();
+			return (it);
+	return (_clients.end());
 }
 
 Client *Server::findClientByNickname(const std::string &targetNickname)
@@ -195,13 +213,13 @@ Client *Server::findClientByNickname(const std::string &targetNickname)
 		if (lclient == lnickname)
 			return (*it);
 	}
-	return NULL;
+	return (NULL);
 }
 
 std::string Server::getWord(const std::string &str, const int &wordNumber)
 {
 	if (str.empty())
-		return "";
+		return ("");
 
 	std::string::size_type startPos = 0;
 	std::string::size_type endPos = 0;
@@ -218,17 +236,17 @@ std::string Server::getWord(const std::string &str, const int &wordNumber)
 		currentWord++;
 	}
 
-	return str.substr(startPos, endPos - startPos);
+	return (str.substr(startPos, endPos - startPos));
 }
 
 void Server::disconnectClient(const int &i)
 {
 	std::cout << "[SERVER]: A Client was disconnected from the server" << std::endl;
-	Client* deletedClient = findClientByFd(_pollFds[i].fd);
+	Client *deletedClient = findClientByFd(_pollFds[i].fd);
 	if (deletedClient)
 	{
 		close(deletedClient->getFd());
-		for (std::vector<Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+		for (std::vector<Client *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 		{
 			if ((*it)->getFd() == deletedClient->getFd())
 			{
@@ -242,8 +260,7 @@ void Server::disconnectClient(const int &i)
 	_pollFds[i].revents = 0;
 }
 
-void Server::handleCap(const Client & user)
+void Server::handleCap(const Client &user)
 {
 	user.sendMessage(RPL_CAP());
 }
-

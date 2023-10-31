@@ -19,7 +19,7 @@ void Server::noticeMessage(const std::string &body, const Client &user)
 
 	if (lowerTarget[0] == '#')
 	{
-		std::vector<Client*>::iterator it;
+		std::vector<Client *>::iterator it;
 		for (it = _clients.begin(); it != _clients.end(); ++it)
 		{
 			if ((*it)->getChannel() == lowerTarget && (*it)->getNickname() != user.getNickname())

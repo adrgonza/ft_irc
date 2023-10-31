@@ -1,5 +1,5 @@
 #ifndef LIBRARIES_HPP
-# define LIBRARIES_HPP
+#define LIBRARIES_HPP
 
 #include "../src/Channel/Channel.hpp"
 #include "../src/Client/Client.hpp"
@@ -117,8 +117,8 @@ e_command parseCommandCode(const std::string &command);
 #define MODE_CMD(sender, target, mode, param) (":" + sender + " MODE " + target + " " + mode + " " + param)
 // #define BAN_CMD(server, channel, host) (":localhost MODE " + (channel) + " +b " + (host))
 // #define UNBAN_CMD(server, channel, host) (":localhost MODE " + (channel) + " -b " + (host))
-#define RPL_CHANNELMODEIS(client, channel, modestring)(":localhost 324 " + client + " " + channel + " " + modestring)
+#define RPL_CHANNELMODEIS(client, channel, modestring) (":localhost 324 " + client + " " + channel + " " + modestring)
 
-#define RPL_CAP()("CAP * LS :")
+#define RPL_CAP() ("CAP * LS :")
 
 #endif

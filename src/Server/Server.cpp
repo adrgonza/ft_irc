@@ -5,7 +5,8 @@ bool _stopServer = false;
 
 void stopServerSignal(int signal)
 {
-	if (signal == SIGINT) {
+	if (signal == SIGINT)
+	{
 		std::cout << "CTRL+C received" << std::endl;
 		_stopServer = true;
 	}
@@ -22,9 +23,9 @@ bool Server::run()
 
 	struct sockaddr_in serverAddress;
 	bzero(&serverAddress, sizeof(serverAddress));
-	serverAddress.sin_family = AF_INET;					// specing the family, interenet (address)
-	serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);	// responding to anything
-	serverAddress.sin_port = htons(_port);				// convert server port nb to network standart byte order (to avoid to conections use different byte order)
+	serverAddress.sin_family = AF_INET;				   // specing the family, interenet (address)
+	serverAddress.sin_addr.s_addr = htonl(INADDR_ANY); // responding to anything
+	serverAddress.sin_port = htons(_port);			   // convert server port nb to network standart byte order (to avoid to conections use different byte order)
 
 	if (bind(_socketFd, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) // set the address wher is gonna be listening
 		return (std::cout << "Error: could not bind.." << std::endl, false);
@@ -72,8 +73,8 @@ bool Server::handleClientConnections()
 
 		_clients.push_back(newClient);
 
-		for (size_t i = 1; i <= _clients.size(); i++) // Saves the new connection
-		{
+		for (size_t i = 1; i <= _clients.size(); i++)
+		{ // Saves the new connection
 			if (_pollFds[i].fd == -1)
 			{
 				_pollFds[i].fd = _connectionFd;
@@ -101,7 +102,7 @@ bool Server::handleClientCommunications(const size_t &i)
 		disconnectClient(i);
 	else
 	{
-		std::vector<Client*>::iterator caller = getClientByFd(_pollFds[i].fd);
+		std::vector<Client *>::iterator caller = getClientByFd(_pollFds[i].fd);
 		if (caller == _clients.end())
 		{
 			std::cout << "[SERVER :: WARNING]: getClientByFd() failed before executing a command" << std::endl;
@@ -145,7 +146,7 @@ bool Server::handleClientInput(Client &caller, std::string message)
 	std::string command;
 	splitted >> command;
 
-	for(std::string::iterator it = command.begin(); it != command.end(); ++it)
+	for (std::string::iterator it = command.begin(); it != command.end(); ++it)
 		*it = std::toupper(*it);
 
 	std::string body;
@@ -186,7 +187,7 @@ bool Server::handleClientInput(Client &caller, std::string message)
 			else if (caller.getKey() == false)
 				caller.sendMessage(ERR_PASSWDREQUIRED(caller.getNickname()));
 
-				if (!caller.getNickname().empty() && !caller.getUsername().empty() && caller.getFirsTime() == false)
+			if (!caller.getNickname().empty() && !caller.getUsername().empty() && caller.getFirsTime() == false)
 			{
 				caller.setFirstTime(true);
 				caller.sendMessage(RPL_MOTDSTART(caller.getNickname(), "Welcome to the TONY_WARRIORS Internet Relay Chat Network"));
@@ -217,28 +218,22 @@ int Server::terminate_program()
 {
 	std::cout << "Freeing memory" << std::endl;
 
-	std::vector<Client*>::iterator clientIt;
+	std::vector<Client *>::iterator clientIt;
 	for (clientIt = _clients.begin(); clientIt != _clients.end(); ++clientIt)
 		delete *clientIt;
 	_clients.clear();
 
-	std::vector<Client*>::iterator disconnectedClientIt;
+	std::vector<Client *>::iterator disconnectedClientIt;
 	for (disconnectedClientIt = _disconnectedClients.begin(); disconnectedClientIt != _disconnectedClients.end(); ++disconnectedClientIt)
 		delete *disconnectedClientIt;
 	_disconnectedClients.clear();
 
-	std::map<std::string, Channel*>::iterator channelIt;
+	std::map<std::string, Channel *>::iterator channelIt;
 	for (channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
 		delete channelIt->second;
 	_channels.clear();
 
 	std::cout << "Exiting the program" << std::endl;
 
-	return 0;
+	return (0);
 }
-
-
-
-
-
-

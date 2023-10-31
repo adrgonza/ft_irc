@@ -96,7 +96,6 @@ void Server::adminOnlyChan(Channel *chan, const std::string &host, const Client 
 	}
 }
 
-
 void Server::setSecretChannel(Channel *chan, const std::string &host, const Client &user, bool to)
 {
 	std::string channel = chan->getName();
@@ -126,11 +125,3 @@ void Server::setExternalMsgsChannel(Channel *chan, const std::string &host, cons
 	else
 		user.sendMessage(MODE_CMD(host, channel, "-n", ""));
 }
-
-
-
-
-
-
-
-

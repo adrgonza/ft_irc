@@ -26,7 +26,7 @@ int main(int argc, char **argv)
 		if (IRC.run() == false)
 			return (IRC.terminate_program());
 	}
-	catch(const std::exception& e)
+	catch (const std::exception &e)
 	{
 		std::cerr << e.what() << '\n';
 	}

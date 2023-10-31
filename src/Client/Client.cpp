@@ -42,7 +42,7 @@ const std::string Client::getNickname() const { return this->_nickname; }
 const std::string Client::getChannel() const { return this->_channel; }
 const std::string Client::getUsername() const { return this->_username; }
 const std::string Client::getRealName() const { return this->_realname; }
-const std::string Client::getjoined() const{ return _joined; }
+const std::string Client::getjoined() const { return _joined; }
 void Client::setjoined(const std::string &str) { _joined = str; }
 const std::string Client::getHost() const { return this->_host; }
 bool Client::getKey() const { return this->_passwordkey; }
@@ -63,7 +63,7 @@ const std::string Client::getSource() const
 	return (source);
 }
 
-void Client::changeNickname(std::vector<Client*> &clients, std::map<std::string, Channel*> &channels, const std::string &newNickname, Client &user)
+void Client::changeNickname(std::vector<Client *> &clients, std::map<std::string, Channel *> &channels, const std::string &newNickname, Client &user)
 {
 	if (newNickname.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_") != std::string::npos)
 	{
@@ -76,7 +76,7 @@ void Client::changeNickname(std::vector<Client*> &clients, std::map<std::string,
 	aux = newNickname.length();
 	for (std::string::size_type i = 0; i < aux; i++)
 		lower_nick[i] = std::tolower(newNickname[i]);
-	for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); it++)
+	for (std::vector<Client *>::iterator it = clients.begin(); it != clients.end(); it++)
 	{
 		lower_target_client = (*it)->getNickname();
 		aux = lower_target_client.length();
@@ -84,8 +84,8 @@ void Client::changeNickname(std::vector<Client*> &clients, std::map<std::string,
 			lower_target_client[i] = std::tolower(lower_target_client[i]);
 		if (lower_target_client == lower_nick)
 		{
-			if (lower_target_client != newNickname )
-				break ;
+			if (lower_target_client != newNickname)
+				break;
 			std::string oneS = "";
 			this->sendMessage(ERR_NICKNAMEINUSE(oneS, newNickname));
 			return;
@@ -101,9 +101,9 @@ void Client::changeUserName(const std::string &user)
 	if (!_username.empty())
 	{
 		this->sendMessage(ERR_ALREADYREGISTERED(_nickname));
-		return ;
+		return;
 	}
-	
+
 	std::string username;
 	// fijarse si limechat tambien lo manda asi
 	size_t colonPos = user.find(':');
@@ -123,7 +123,7 @@ void Client::changeUserName(const std::string &user)
 	if (username.empty())
 	{
 		this->sendMessage(ERR_NEEDMOREPARAMS(_nickname, "USER"));
-		return ;
+		return;
 	}
 	_username = username;
 	if (!realname.empty())
@@ -134,7 +134,7 @@ void Client::changeChannel(const std::string &channel) { this->_channel = channe
 
 void Client::giveKey(const bool &key) { _passwordkey = key; }
 
-bool Client::getFirsTime() const { return(_firstTime); }
+bool Client::getFirsTime() const { return (_firstTime); }
 
 void Client::sendMessage(std::string message) const
 {

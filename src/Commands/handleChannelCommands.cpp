@@ -19,7 +19,7 @@ void Server::listChannels(std::string &body, const Client &user)
 		participantCount << it->second->getParticipants().size();
 
 		channelListMsg += ":" + user.getNickname() + "!user@host 322 * " + channelName + " " + participantCount.str() + " :";
-		const std::vector<Client*> participants = it->second->getParticipants();
+		const std::vector<Client *> participants = it->second->getParticipants();
 		for (size_t i = 0; i < participants.size(); ++i)
 		{
 			channelListMsg += participants[i]->getNickname();
@@ -48,14 +48,14 @@ void Server::partChannel(const std::string &body, Client &user)
 		user.sendMessage(ERR_NOTONCHANNEL(user.getNickname(), channel));
 		return;
 	}
-	const std::vector<Client*> clientsInChannel = channelObj->getParticipants();
+	const std::vector<Client *> clientsInChannel = channelObj->getParticipants();
 	for (size_t i = 0; i < clientsInChannel.size(); ++i)
 	{
 		Client *client = clientsInChannel[i];
 		client->sendMessage(PART_CMD(user.getNickname(), channel));
 	}
 	channelObj->removeParticipant(user);
-	const std::vector<Client*> clientsInChannell = channelObj->getParticipants();
+	const std::vector<Client *> clientsInChannell = channelObj->getParticipants();
 	user.changeChannel("");
 	if (channelObj->getParticipants().empty())
 	{
@@ -76,7 +76,7 @@ void Server::handleJoin(const std::string &body, Client &user)
 	for (size_t i = 0; i < lChannel.length(); i++)
 		lChannel[i] = tolower(lChannel[i]);
 	std::string aux;
-	std::map<std::string, Channel*>::iterator chanIt;
+	std::map<std::string, Channel *>::iterator chanIt;
 	for (chanIt = _channels.begin(); chanIt != _channels.end(); ++chanIt)
 	{
 		std::string aux = chanIt->first;
@@ -124,14 +124,14 @@ void Server::handleJoin(const std::string &body, Client &user)
 	{
 		std::vector<Client *> clientsInChannel = toChan->getParticipants();
 		std::string nick = user.getNickname();
-		std::vector<Client*> clientOperatorsInChan = toChan->getOperators();
+		std::vector<Client *> clientOperatorsInChan = toChan->getOperators();
 		std::string listNames = "";
-		for (std::vector<Client*>::iterator it = clientOperatorsInChan.begin(); it != clientOperatorsInChan.end(); ++it)
+		for (std::vector<Client *>::iterator it = clientOperatorsInChan.begin(); it != clientOperatorsInChan.end(); ++it)
 			listNames += "@" + (*it)->getNickname() + " ";
 		for (std::vector<Client *>::const_iterator it = clientsInChannel.begin(); it != clientsInChannel.end(); ++it)
 		{
 			bool addClient = true;
-			for (std::vector<Client*>::iterator operatorIt = clientOperatorsInChan.begin(); operatorIt != clientOperatorsInChan.end(); ++operatorIt)
+			for (std::vector<Client *>::iterator operatorIt = clientOperatorsInChan.begin(); operatorIt != clientOperatorsInChan.end(); ++operatorIt)
 			{
 				if ((*operatorIt)->getNickname() == (*(*it)).getNickname())
 				{
@@ -143,13 +143,14 @@ void Server::handleJoin(const std::string &body, Client &user)
 				listNames += (*(*it)).getNickname() + " ";
 		}
 
-		for (std::vector<Client*>::const_iterator it = clientsInChannel.begin(); it != clientsInChannel.end(); ++it)
+		for (std::vector<Client *>::const_iterator it = clientsInChannel.begin(); it != clientsInChannel.end(); ++it)
 		{
 			Client *client = *it;
 			client->sendMessage(JOIN_CMD(nick, nick, channel));
 			client->sendMessage(RPL_NAMREPLY(nick, "=", channel, listNames));
 			client->sendMessage(RPL_ENDOFNAMES(nick, channel));
-			if (!toChan->getTopic().empty() && toChan->getTopic() != "") {
+			if (!toChan->getTopic().empty() && toChan->getTopic() != "")
+			{
 				client->sendMessage(TOPIC_CMD(channel, toChan->getTopic()));
 			}
 		}
@@ -208,10 +209,10 @@ void Server::getNamesInChannel(const std::string &body, const Client &user)
 	std::map<std::string, Channel *>::iterator channelIt = _channels.find(channel);
 	if (channelIt != _channels.end())
 	{
-		std::vector<Client*> clientsInChannel = channelIt->second->getParticipants();
+		std::vector<Client *> clientsInChannel = channelIt->second->getParticipants();
 		std::string namesInChannelMessage;
 		std::cout << channelIt->first << " size: " << clientsInChannel.size() << std::endl;
-		std::vector<Client*>::iterator it;
+		std::vector<Client *>::iterator it;
 		for (it = clientsInChannel.begin(); it != clientsInChannel.end(); ++it)
 		{
 			const Client *client = *it;

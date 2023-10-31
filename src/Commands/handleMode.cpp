@@ -113,7 +113,6 @@ void Server::modeHandler(const std::string &body, const Client &user)
 	if (notSupportedModes((std::string &)bodyCopy))
 		return;
 
-
 	if (!chan->isOperator(user))
 	{
 		std::string nick = user.getNickname();
