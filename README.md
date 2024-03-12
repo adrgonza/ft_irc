@@ -22,7 +22,7 @@ To use FT_IRC, follow these steps:
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/yourusername/ft_irc.git
+    git clone https://github.com/adrgonza/ft_irc.git
     ```
 
 2. Build the server and client executables:
